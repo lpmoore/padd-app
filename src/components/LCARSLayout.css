@@ -1,0 +1,128 @@
+.lcars-grid {
+  display: grid;
+  grid-template-columns: var(--elbow-width) 1fr;
+  grid-template-rows: var(--elbow-radius) 1fr;
+  height: 100vh;
+  width: 100vw;
+  background-color: var(--lcars-bg);
+  padding: 5px;
+  gap: 5px;
+}
+
+/* 1. Elbow (Top Left) */
+.lcars-elbow {
+  background-color: var(--lcars-tan);
+  grid-column: 1;
+  grid-row: 1;
+  border-top-left-radius: 30px;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding-right: 10px;
+  padding-bottom: 5px;
+}
+
+/* The Magic Inner Curve:
+   We make the elbow square-ish on the bottom right,
+   but the Content Area will overlap or we use a pseudo element.
+   Actually, the classic look: The content area has a rounded top-left corner.
+   So the Elbow can be a simple block.
+*/
+
+.elbow-text {
+  font-size: 1.2rem;
+  font-weight: bold;
+  opacity: 0.8;
+  color: #000;
+  text-align: right;
+  width: 100%;
+  margin-bottom: 5px;
+}
+
+
+/* 2. Top Bar (Top Right) */
+.lcars-top-bar {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  align-items: center;
+  background-color: var(--lcars-bg); /* The bar itself is segmented pieces */
+}
+
+.top-bar-fill {
+  height: 100%;
+  flex: 1;
+  background-color: var(--lcars-tan);
+  border-top-right-radius: 15px;
+  border-bottom-right-radius: 15px;
+  margin-right: 5px;
+}
+.top-bar-text {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    font-size: 2rem;
+    color: var(--lcars-orange);
+    text-transform: uppercase;
+}
+
+
+/* 3. Sidebar (Bottom Left) */
+.lcars-sidebar {
+  grid-column: 1;
+  grid-row: 2;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--lcars-bg); /* Gap between elbow and sidebar is common */
+  padding-top: 5px; 
+}
+
+.sidebar-fill {
+  flex: 1;
+  background-color: var(--lcars-tan);
+  border-bottom-left-radius: 30px;
+  margin-bottom: 20px;
+}
+
+
+/* 4. Main Content (Bottom Right) */
+.lcars-content {
+  grid-column: 2;
+  grid-row: 2;
+  position: relative;
+  /* This creates the inner curve illusion against the Elbow's solid color if we had one.
+     But since we have a gap, it's just a grid.
+     To get the true "Elbow" curve:
+     We need the Elbow and Top Bar to be visually continuous.
+     We need the Content to have a border-top-left-radius and black background.
+  */
+  background-color: var(--lcars-bg);
+  padding: 20px;
+  overflow-y: auto;
+  
+  /* Create the visual border */
+  border-top: 5px solid var(--lcars-tan);
+  border-left: 5px solid var(--lcars-tan);
+  border-top-left-radius: 30px;
+  
+  /* Wait, borders? No. 
+     If we want the "Frame", we can just use the grid gaps and blocks.
+     With `gap: 5px`, we get black lines.
+  */
+  border: none;
+}
+
+.content-inner {
+    height: 100%;
+    overflow-y: auto;
+    color: var(--lcars-blue);
+    font-size: 1.5rem;
+}
+
+/* Fix for the Elbow Connect */
+/* We want the Elbow and Top Bar to look connected.
+   But there is a gap. 
+   LCARS usually has gaps.
+   Lets keep the gaps for now (TNG style often had gaps separating modules).
+*/

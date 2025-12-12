@@ -1,0 +1,49 @@
+.lcars-button {
+  height: 40px; /* Standard bar height + padding? roughly */
+  border: none;
+  font-family: var(--font-main);
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #000;
+  text-align: right; /* Text usually right aligned on sidebar buttons */
+  padding: 0 10px;
+  margin-bottom: 5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  transition: filter 0.2s;
+}
+
+.lcars-button:hover {
+  filter: brightness(1.2);
+}
+
+.lcars-button:active {
+  filter: brightness(0.8);
+}
+
+.lcars-button.block {
+  width: 100%;
+}
+
+/* Rounded variants */
+.rounded-left {
+  border-top-left-radius: 20px;
+  border-bottom-left-radius: 20px;
+}
+
+.rounded-right {
+  border-top-right-radius: 20px;
+  border-bottom-right-radius: 20px;
+}
+
+.rounded-both {
+  border-radius: 20px;
+  text-align: center;
+  justify-content: center;
+}
+
+.rounded-none {
+  border-radius: 0;
+}

@@ -1,0 +1,60 @@
+@import url('https://fonts.googleapis.com/css2?family=Antonio:wght@400;700&display=swap');
+
+:root {
+  /* LCARS Palette */
+  --lcars-orange: #ff9900;
+  --lcars-pale-orange: #ffcc99;
+  --lcars-purple: #cc99cc;
+  --lcars-blue: #99ccff;
+  --lcars-red: #cc6666;
+  --lcars-tan: #ffcc66;
+  --lcars-gray: #999999;
+  --lcars-black: #000000;
+  --lcars-bg: #000000;
+  
+  /* Dimensions */
+  --elbow-width: 150px;
+  --elbow-radius: 60px;
+  --bar-height: 30px;
+  --gap: 5px;
+  
+  /* Typography */
+  --font-main: 'Antonio', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--lcars-bg);
+  color: var(--lcars-orange);
+  font-family: var(--font-main);
+  font-weight: 400;
+  overflow: hidden; /* App-like feel */
+  user-select: none;
+}
+
+#root {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+button {
+  border: none;
+  font-family: var(--font-main);
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--lcars-orange);
+  border-radius: 5px;
+}

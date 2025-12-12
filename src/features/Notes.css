@@ -1,0 +1,99 @@
+.notes-container {
+  display: grid;
+  grid-template-columns: 250px 1fr;
+  gap: 20px;
+  height: 60vh; /* Fixed height for scrollable areas within */
+}
+
+.notes-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-right: 5px solid var(--lcars-tan);
+  padding-right: 10px;
+}
+
+.notes-list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.note-item {
+  background-color: var(--lcars-blue);
+  color: #000; /* LCARS buttons are often black text on color */
+  padding: 10px;
+  border-bottom-left-radius: 20px;
+  border-top-left-radius: 20px;
+  cursor: pointer;
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: width 0.2s, background-color 0.2s;
+}
+
+.note-item:hover {
+  background-color: var(--lcars-pale-orange);
+}
+
+.note-item.active {
+  background-color: var(--lcars-orange);
+  width: 100%; /* Can animate width for effect */
+}
+
+.note-delete {
+  font-size: 0.8rem;
+  opacity: 0.5;
+}
+.note-delete:hover {
+  opacity: 1;
+  color: white;
+}
+
+.notes-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background-color: rgba(0,0,0,0.5);
+  border: 1px solid var(--lcars-gray);
+  padding: 20px;
+  border-radius: 20px;
+}
+
+.note-title-input {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid var(--lcars-orange);
+  color: var(--lcars-orange);
+  font-family: var(--font-main);
+  font-size: 2rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  padding: 5px;
+  outline: none;
+}
+
+.note-content-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--lcars-blue);
+  font-family: var(--font-main);
+  font-size: 1.5rem;
+  resize: none;
+  outline: none;
+  line-height: 1.5;
+}
+
+.no-note-selected {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--lcars-gray);
+  font-size: 2rem;
+  opacity: 0.5;
+}
