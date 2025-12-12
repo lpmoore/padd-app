@@ -1,13 +1,21 @@
 @import url('https://fonts.googleapis.com/css2?family=Antonio:wght@400;700&display=swap');
 
 :root {
-  /* LCARS Palette */
-  --lcars-orange: #ff9900;
-  --lcars-pale-orange: #ffcc99;
-  --lcars-purple: #cc99cc;
-  --lcars-blue: #99ccff;
-  --lcars-red: #cc6666;
-  --lcars-tan: #ffcc66;
+  /* LCARS Lower Decks Palette (Cool Tones) */
+  /* Primary accents */
+  --lcars-cyan: #59c3ea;       /* Top bars, bright text */
+  --lcars-teal: #2d818f;       /* Sidebar fills */
+  --lcars-ice-blue: #99d9ea;   /* Highlight segments */
+  --lcars-periwinkle: #a7a3d4; /* Specialized buttons */
+  
+  /* Mappings to original generic names to maintain component compatibility */
+  --lcars-orange: var(--lcars-cyan);        /* Was primary orange, now primary cyan */
+  --lcars-pale-orange: var(--lcars-ice-blue); /* Was secondary, now light blue */
+  --lcars-tan: var(--lcars-teal);           /* Was sidebar tan, now teal */
+  --lcars-red: #d15c5c;                    /* Keep red for alerts but maybe cooler? Standard red is fine */
+  --lcars-purple: var(--lcars-periwinkle);  /* Was classic purple */
+  
+  --lcars-blue: #4982cf;       /* Standard blue */
   --lcars-gray: #999999;
   --lcars-black: #000000;
   --lcars-bg: #000000;
@@ -20,6 +28,7 @@
   
   /* Typography */
   --font-main: 'Antonio', sans-serif;
+  --lcars-text-color: var(--lcars-cyan);
 }
 
 * {
