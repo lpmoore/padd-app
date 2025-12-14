@@ -3,6 +3,7 @@
   flex-direction: column;
   gap: 20px;
   max-width: 800px;
+  height: 100%;
 }
 
 .lcars-header {
@@ -28,12 +29,41 @@
   padding: 10px;
   text-transform: uppercase;
   outline: none;
-  border-radius: 10px;
+  border-radius: 10px; /* Non-standard LCARS but friendly */
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
 }
 
 .lcars-input:focus {
-  background-color: #1a1a1a;
+  background-color: rgba(255, 153, 0, 0.1);
   border-color: var(--lcars-orange);
+}
+
+/* Placeholders */
+.lcars-placeholder {
+    color: var(--lcars-tan);
+    font-size: 0.8rem;
+    padding: 10px;
+    border: 1px dashed var(--lcars-tan);
+    margin-left: 20px;
+    text-align: center;
+    border-radius: 5px;
+    opacity: 0.5;
+    transition: opacity 0.2s, background-color 0.2s;
+}
+
+.lcars-placeholder.over {
+    opacity: 1;
+    background-color: rgba(255, 153, 102, 0.2);
+    border-style: solid;
+    cursor: copy;
+}
+
+.tasks-scroll-area {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 10px;
+    min-height: 100px; /* Ensure drop zone exists even if empty */
 }
 
 .tasks-list {
@@ -42,50 +72,227 @@
   gap: 10px;
 }
 
+.task-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
 .task-item {
   display: flex;
-  align-items: center;
+  align-items: flex-start; /* Changed to top align for multiline content */
   justify-content: space-between;
   background-color: rgba(153, 204, 255, 0.1);
-  padding: 10px;
+  padding: 8px;
   border-left: 10px solid var(--lcars-tan);
   border-radius: 0 10px 10px 0;
-  cursor: pointer;
-  transition: background-color 0.2s;
+  cursor: default; /* Drag handle handles cursor */
+  transition: all 0.2s;
+  position: relative;
 }
 
-.task-item:hover {
-  background-color: rgba(153, 204, 255, 0.2);
+.task-item.dragging {
+    opacity: 0.5;
+    background-color: rgba(255, 153, 0, 0.2);
+    border-left-color: var(--lcars-orange);
+    z-index: 100;
 }
 
-.task-content {
+.task-drag-handle {
+    cursor: grab;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    color: var(--lcars-orange);
+}
+
+.task-drag-handle:active {
+    cursor: grabbing;
+}
+
+.task-main-content {
   flex: 1;
-  font-size: 1.4rem;
   display: flex;
-  align-items: center;
-  gap: 10px;
+  flex-direction: column;
+  gap: 5px;
+  padding-right: 10px;
 }
 
-.task-marker {
-  color: var(--lcars-orange);
+.task-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
-.completed .task-content {
-  text-decoration: line-through;
-  opacity: 0.5;
+.expand-btn {
+    background: none;
+    border: none;
+    color: var(--lcars-blue);
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
 }
 
-.completed .task-marker {
-  color: var(--lcars-gray);
+.task-checkbox {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
 }
 
-.delete-btn {
-  height: 30px;
-  font-size: 1rem;
-  margin: 0;
+.task-text {
+    font-size: 1.3rem;
+    color: var(--lcars-text-main);
+    word-break: break-word;
+}
+
+.lcars-edit-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid var(--lcars-orange);
+    color: var(--lcars-orange);
+    font-size: 1.3rem;
+    font-family: inherit;
+    outline: none;
+    text-transform: uppercase;
+}
+
+.task-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: 28px; /* Align under text */
+}
+
+.date-picker-container {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background-color: rgba(0,0,0,0.5); /* Darker for visibility */
+    border: 1px solid var(--lcars-tan); /* Border for visibility */
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.lcars-date-input {
+    background: transparent;
+    border: none;
+    color: var(--lcars-tan);
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: bold;
+    outline: none;
+    cursor: pointer;
+}
+
+/* Main Input Date Picker */
+.lcars-date-wrapper {
+    background-color: var(--lcars-bg);
+    border: 2px solid var(--lcars-blue);
+    border-radius: 10px;
+    padding: 0 10px;
+    display: flex;
+    align-items: center;
+    height: 100%; /* Match height of other inputs if possible, or fixed height */
+    height: 54px; /* Approximate height of lcars-input including padding/border */
+}
+
+.lcars-input-date-main {
+    background: transparent;
+    border: none;
+    color: var(--lcars-blue);
+    font-family: var(--font-main);
+    font-size: 1.2rem;
+    outline: none;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+
+.task-actions {
+    display: flex;
+    flex-direction: column; /* Stack actions vertically */
+    gap: 5px;
+    align-items: flex-end;
+}
+
+.icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.icon-btn:hover {
+    opacity: 1;
+}
+
+.subtask-input-area {
+    margin-top: 5px;
+    display: flex;
+}
+
+.lcars-sub-input {
+    width: 100%;
+    background-color: var(--lcars-bg);
+    border: 1px solid var(--lcars-blue);
+    color: var(--lcars-blue);
+    font-family: var(--font-main);
+    padding: 5px 10px;
+    text-transform: uppercase;
+    outline: none;
+    border-radius: 5px;
+}
+
+.subtasks-list {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-top: 5px;
+    margin-left: 40px; /* Indent subtasks */
+    padding-left: 10px;
+    border-left: 2px solid var(--lcars-blue); /* Visual indicator */
+}
+
+/* Completion States */
+.task-item.completed {
+    border-left-color: var(--lcars-gray);
+    opacity: 0.8;
+}
+
+.task-item.completed .task-text {
+    text-decoration: line-through;
+    opacity: 0.6;
 }
 
 .no-tasks {
   font-style: italic;
   opacity: 0.5;
+  margin-top: 20px;
+  text-align: center;
+}
+
+/* Root drop zone for un-nesting */
+.root-drop-zone {
+    margin-top: 20px;
+    padding: 20px;
+    border: 2px dashed var(--lcars-tan);
+    border-radius: 10px;
+    text-align: center;
+    color: var(--lcars-tan);
+    font-size: 0.9rem;
+    opacity: 0.4;
+    transition: all 0.3s;
+}
+
+.root-drop-zone.over {
+    opacity: 1;
+    background-color: rgba(255, 153, 102, 0.2);
+    border-style: solid;
+    border-color: var(--lcars-orange);
+    color: var(--lcars-orange);
+    transform: scale(1.02);
 }

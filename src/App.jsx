@@ -6,36 +6,47 @@ import Calendar from './features/Calendar';
 import Notes from './features/Notes';
 import Library from './features/Library';
 
+const INITIAL_NAV_ITEMS = [
+  { id: 'TASKS', label: 'TASKS', color: 'var(--lcars-cyan)' }, // Primary Light Blue
+  { id: 'CALENDAR', label: 'CALENDAR', color: 'var(--lcars-teal)' }, // Teal
+  { id: 'NOTES', label: 'NOTES', color: 'var(--lcars-ice-blue)' }, // Ice Blue
+  { id: 'LIBRARY', label: 'LIBRARY', color: 'var(--lcars-periwinkle)' }, // Periwinkle
+];
+
 function App() {
-  const [activeTab, setActiveTab] = useState('MAIN');
+  const [activeTab, setActiveTab] = useState('TASKS');
+  const [navItems, setNavItems] = useState(INITIAL_NAV_ITEMS);
+
+  const handleNavClick = (id) => {
+    setActiveTab(id);
+    
+    // Reorder items: move active item to the top (index 0)
+    // This creates the slide-to-top effect when rendered
+    setNavItems(prevItems => {
+      const activeItem = prevItems.find(item => item.id === id);
+      const otherItems = prevItems.filter(item => item.id !== id);
+      return [activeItem, ...otherItems];
+    });
+  };
 
   return (
-    <LCARSLayout title="PADD 4755">
+    <LCARSLayout 
+      title="PADD 4755"
+      activeTab={activeTab}
+      navItems={navItems}
+      onNavClick={handleNavClick}
+    >
       <div style={{ padding: '20px' }}>
         
-        {/* Navigation - Technically could be in the sidebar, but for now putting controls here for testing */}
-        <h2>SYSTEM READY.</h2>
-        <p>Current Mode: {activeTab}</p>
-
+        {/* Helper text if needed, or remove completely */}
+        {/* <h2>SYSTEM READY.</h2> */}
+        
         {activeTab === 'TASKS' && <Tasks />}
         {activeTab === 'CALENDAR' && <Calendar />}
         {activeTab === 'NOTES' && <Notes />}
         {activeTab === 'LIBRARY' && <Library />}
         
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px', marginTop: '50px' }}>
-             <LCARSButton color="var(--lcars-blue)" rounded="both" onClick={() => setActiveTab('TASKS')}>
-               TASKS
-             </LCARSButton>
-             <LCARSButton color="var(--lcars-purple)" rounded="both" onClick={() => setActiveTab('CALENDAR')}>
-               CALENDAR
-             </LCARSButton>
-             <LCARSButton color="var(--lcars-red)" rounded="both" onClick={() => setActiveTab('NOTES')}>
-               NOTES
-             </LCARSButton>
-             <LCARSButton color="var(--lcars-tan)" rounded="both" onClick={() => setActiveTab('LIBRARY')}>
-               LIBRARY
-             </LCARSButton>
-        </div>
+        {/* Old buttons removed - now in sidebar */}
 
       </div>
     </LCARSLayout>
