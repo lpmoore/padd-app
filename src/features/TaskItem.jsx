@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { SortableContext } from '@dnd-kit/sortable';
@@ -13,6 +13,17 @@ const TaskItem = ({ task, onDelete, onToggle, onAddSubtask, onUpdate, depth = 0,
   const [subtaskDate, setSubtaskDate] = useState('');
   const [showSubInput, setShowSubInput] = useState(false);
   const [subtaskInput, setSubtaskInput] = useState('');
+
+  const dateInputRef = useRef(null);
+  const subDateInputRef = useRef(null);
+
+  const openDatePicker = (ref) => {
+    try {
+      ref.current?.showPicker();
+    } catch (e) {
+      console.log('DatePicker error:', e);
+    }
+  };
 
   // Drag and Drop - Sortable for dragging and reordering
   const {
@@ -84,6 +95,7 @@ const TaskItem = ({ task, onDelete, onToggle, onAddSubtask, onUpdate, depth = 0,
     // Existing: onAddSubtask(task.id, subtaskInput);
     
     // We'll pass an object or 3rd arg. Let's assume onAddSubtask can take 3rd arg `dueDate`.
+    console.log('TaskItem calling onAddSubtask with:', { id: task.id, subtaskInput, subtaskDate });
     onAddSubtask(task.id, subtaskInput, subtaskDate);
     
     setSubtaskInput('');
@@ -137,9 +149,10 @@ const TaskItem = ({ task, onDelete, onToggle, onAddSubtask, onUpdate, depth = 0,
           </div>
 
           <div className="task-meta">
-             <div className="date-picker-container">
+             <div className="date-picker-container" onClick={() => openDatePicker(dateInputRef)}>
                 <Calendar size={14} color="var(--lcars-tan)" />
                 <input 
+                  ref={dateInputRef}
                   type="datetime-local" 
                   className="lcars-date-input"
                   value={task.dueDate || ''}
@@ -176,9 +189,10 @@ const TaskItem = ({ task, onDelete, onToggle, onAddSubtask, onUpdate, depth = 0,
                 onKeyDown={(e) => e.key === 'Enter' && handleAddSub()}
                 autoFocus
               />
-               <div className="date-picker-container">
+               <div className="date-picker-container" onClick={() => openDatePicker(subDateInputRef)}>
                     <Calendar size={14} color="var(--lcars-tan)" />
                     <input 
+                      ref={subDateInputRef}
                       type="datetime-local" 
                       className="lcars-date-input"
                       value={subtaskDate}
