@@ -74,3 +74,123 @@
 .today .day-number {
     color: var(--lcars-orange);
 }
+
+.day-content {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 25px;
+    justify-content: flex-end;
+    align-content: flex-start;
+}
+
+.task-marker {
+    width: 10px;
+    height: 10px;
+    background-color: var(--lcars-tan);
+    border-radius: 2px; /* LCARS style usually involves rounded rectangles */
+}
+
+.task-marker-more {
+    font-size: 0.8rem;
+    color: var(--lcars-tan);
+    font-weight: bold;
+    line-height: 10px;
+}
+
+.has-tasks {
+    border-top-color: var(--lcars-tan);
+    background-color: rgba(255, 204, 153, 0.1);
+}
+
+.has-tasks:hover {
+    background-color: rgba(255, 204, 153, 0.2);
+    cursor: pointer;
+}
+
+/* OVERLAY Styles */
+.calendar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.calendar-detail-panel {
+    width: 400px;
+    background-color: black;
+    border: 2px solid var(--lcars-orange);
+    border-radius: 20px;
+    border-top-right-radius: 0; /* LCARS asymmetry */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.detail-header {
+    background-color: var(--lcars-orange);
+    color: black;
+    padding: 10px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.detail-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-weight: bold;
+    font-size: 1.2rem;
+    cursor: pointer;
+}
+
+.detail-content {
+    padding: 20px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.detail-task-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.detail-task-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-bottom: 5px;
+    border-bottom: 1px dashed var(--lcars-gray);
+}
+
+.task-time {
+    color: var(--lcars-tan);
+    font-family: monospace;
+}
+
+.task-text {
+    flex: 1;
+    color: var(--lcars-ice-blue);
+    font-weight: bold;
+}
+
+.no-tasks-msg {
+    text-align: center;
+    color: var(--lcars-gray);
+    font-style: italic;
+}

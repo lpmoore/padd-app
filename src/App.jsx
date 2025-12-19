@@ -17,6 +17,16 @@ function App() {
   const [activeTab, setActiveTab] = useState('TASKS');
   const [navItems, setNavItems] = useState(INITIAL_NAV_ITEMS);
 
+  // Lifted State for Tasks
+  const [tasks, setTasks] = useState(() => {
+    const saved = localStorage.getItem('padd-tasks-v2');
+    return saved ? JSON.parse(saved) : []; 
+  });
+
+  React.useEffect(() => {
+    localStorage.setItem('padd-tasks-v2', JSON.stringify(tasks));
+  }, [tasks]);
+
   const handleNavClick = (id) => {
     setActiveTab(id);
     
@@ -41,8 +51,8 @@ function App() {
         {/* Helper text if needed, or remove completely */}
         {/* <h2>SYSTEM READY.</h2> */}
         
-        {activeTab === 'TASKS' && <Tasks />}
-        {activeTab === 'CALENDAR' && <Calendar />}
+        {activeTab === 'TASKS' && <Tasks tasks={tasks} setTasks={setTasks} />}
+        {activeTab === 'CALENDAR' && <Calendar tasks={tasks} />}
         {activeTab === 'NOTES' && <Notes />}
         {activeTab === 'LIBRARY' && <Library />}
         

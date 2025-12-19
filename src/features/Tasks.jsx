@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   DndContext, 
   closestCenter,
@@ -34,13 +34,13 @@ const RootDroppable = ({ children }) => {
   );
 };
 
-const Tasks = () => {
-  const [tasks, setTasks] = useState(() => {
-    const saved = localStorage.getItem('padd-tasks-v2');
-    return saved ? JSON.parse(saved) : []; 
-  });
+const Tasks = ({ tasks, setTasks }) => {
+  // tasks and setTasks are now passed as props
+  // const [tasks, setTasks] = useState(...) removed
+  
   const [inputValue, setInputValue] = useState('');
   const [inputDate, setInputDate] = useState('');
+  const mainInputDateRef = useRef(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -69,9 +69,7 @@ const Tasks = () => {
     };
   }, []);
 
-  useEffect(() => {
-    localStorage.setItem('padd-tasks-v2', JSON.stringify(tasks));
-  }, [tasks]);
+  // Persistence effect removed (handled in App.jsx)
 
   const handleAdd = () => {
     if (!inputValue.trim()) return;
@@ -88,6 +86,7 @@ const Tasks = () => {
   };
 
   const handleAddSubtask = (parentId, text, dueDate) => {
+    console.log('handleAddSubtask called with:', { parentId, text, dueDate });
     const newSub = { 
         id: `sub-${Date.now()}`, 
         text, 
@@ -418,8 +417,9 @@ const Tasks = () => {
           placeholder="ENTER MAIN TASK SPECIFICATION..."
           onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
         />
-        <div className="lcars-date-wrapper">
+        <div className="lcars-date-wrapper" onClick={() => mainInputDateRef.current?.showPicker()}>
              <input 
+              ref={mainInputDateRef}
               type="datetime-local"
               className="lcars-input-date-main"
               value={inputDate}

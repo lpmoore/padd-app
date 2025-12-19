@@ -13,6 +13,62 @@
   padding-right: 10px;
 }
 
+.notes-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.search-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.notes-search-input {
+    background-color: var(--lcars-bg);
+    border: 2px solid var(--lcars-red);
+    color: var(--lcars-red);
+    font-family: var(--font-main);
+    padding: 10px;
+    padding-right: 60px; /* Make room for count */
+    text-transform: uppercase;
+    outline: none;
+    border-radius: 15px;
+    border-bottom-right-radius: 0;
+    width: 100%;
+}
+
+.notes-search-input:focus {
+    background-color: rgba(255, 0, 0, 0.1);
+}
+
+.search-count-display {
+    position: absolute;
+    right: 10px;
+    color: var(--lcars-red);
+    font-size: 0.8rem;
+    font-weight: bold;
+    pointer-events: none;
+}
+
+.note-item-header {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.note-match-count {
+    font-size: 0.7rem;
+    color: var(--lcars-bg);
+    background-color: var(--lcars-ice-blue);
+    padding: 2px 6px;
+    border-radius: 10px;
+    align-self: flex-start;
+    font-weight: bold;
+}
+
 .notes-list {
   flex: 1;
   overflow-y: auto;
@@ -61,19 +117,114 @@
   border: 1px solid var(--lcars-gray);
   padding: 20px;
   border-radius: 20px;
+  overflow: hidden; /* Ensure content doesn't spill out */
+  transition: opacity 0.3s, filter 0.3s;
+}
+
+.notes-editor.dimmed {
+    opacity: 0.4;
+    filter: grayscale(80%);
+    pointer-events: none; /* Prevent editing while viewing search results logic? Or just visual? */
+    /* Let's keep it interactive but visually pushed back */
+    pointer-events: auto;
+}
+
+.note-editor-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid var(--lcars-orange);
+    padding-bottom: 5px;
+    margin-bottom: 10px;
+}
+
+.note-editor-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.match-navigation {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: rgba(255, 153, 0, 0.2);
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+.match-counter {
+    color: var(--lcars-orange);
+    font-size: 0.9rem;
+    min-width: 40px;
+    text-align: center;
+}
+
+.nav-btn {
+    background: none;
+    border: 1px solid var(--lcars-orange);
+    color: var(--lcars-orange);
+    font-size: 0.7rem;
+    padding: 2px 5px;
+    cursor: pointer;
+    border-radius: 5px;
+    text-transform: uppercase;
+}
+.nav-btn:hover {
+    background-color: var(--lcars-orange);
+    color: black;
+}
+
+.mode-toggle-btn {
+    background-color: var(--lcars-blue);
+    color: black;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 10px;
+    font-weight: bold;
+    cursor: pointer;
+    text-transform: uppercase;
+    font-size: 0.8rem;
 }
 
 .note-title-input {
-  background: transparent;
-  border: none;
-  border-bottom: 2px solid var(--lcars-orange);
-  color: var(--lcars-orange);
-  font-family: var(--font-main);
-  font-size: 2rem;
+  /* Existing style override/adjustments if needed contextually */
+  flex: 1;
+  border-bottom: none !important; /* Managed by header container now */
+  margin-right: 20px;
+  color: var(--lcars-ice-blue); /* Distinct color for title */
   font-weight: bold;
-  text-transform: uppercase;
-  padding: 5px;
-  outline: none;
+}
+
+.note-title-input::placeholder {
+    color: var(--lcars-gray);
+    opacity: 0.5;
+}
+
+.note-content-read {
+    flex: 1;
+    color: var(--lcars-blue);
+    font-family: var(--font-main);
+    font-size: 1.5rem;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+/* Highlighting */
+.search-highlight {
+    background-color: rgba(255, 153, 0, 0.3);
+    color: inherit;
+    padding: 0 2px;
+    border-radius: 2px;
+}
+
+.search-highlight.current {
+    background-color: var(--lcars-orange);
+    color: black;
+    font-weight: bold;
+    box-shadow: 0 0 10px var(--lcars-orange);
 }
 
 .note-content-input {

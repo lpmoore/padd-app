@@ -19,6 +19,7 @@
 - Fixed tasks disappearing during rapid dragging (added backup/restore).
 
 ## Upcoming / Backlog
-- [ ] **Subtask Dates**: `onAddSubtask` currently doesn't support dates, though the UI accepts them. Needs wiring up.
+- [x] **Subtask Dates**: Wired up `onAddSubtask` to accept `dueDate`. Verified persistence.
+- [x] **Date Picker UX**: Improved hit areas to automatically open the date picker on click for better usability (Tasks and Subtasks).
 - [ ] **Sound Effects**: Add LCARS interface sounds for interactions (clicks, drag releases).
 - [ ] **Mobile Responsiveness**: Verify drag and drop behavior on touch devices.
