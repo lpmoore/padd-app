@@ -6,7 +6,7 @@ import { useDroppable } from '@dnd-kit/core';
 import { ChevronRight, ChevronDown, GripVertical, Calendar, Trash2, CheckSquare, Square } from 'lucide-react';
 import LCARSButton from '../components/LCARSButton';
 
-const TaskItem = ({ task, onDelete, onToggle, onAddSubtask, onUpdate, depth = 0, isShiftHeld }) => {
+const TaskItem = ({ task, onDelete, onToggle, onAddSubtask, onUpdate, depth = 0, isShiftHeld, onOpenDossier }) => {
   const [isExpanded, setIsExpanded] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(task.text);
@@ -164,10 +164,18 @@ const TaskItem = ({ task, onDelete, onToggle, onAddSubtask, onUpdate, depth = 0,
 
         <div className="task-actions">
            <LCARSButton 
+            onClick={() => onOpenDossier(task.id)}
+            color="var(--lcars-tan)"
+            scale={0.7}
+            rounded="left"
+           >
+             INFO
+           </LCARSButton>
+           <LCARSButton 
             onClick={() => setShowSubInput(!showSubInput)}
             color="var(--lcars-blue)"
             scale={0.7}
-            rounded="both"
+            rounded="none"
            >
              +SUB
            </LCARSButton>
@@ -222,6 +230,7 @@ const TaskItem = ({ task, onDelete, onToggle, onAddSubtask, onUpdate, depth = 0,
                     onUpdate={onUpdate}
                     depth={depth + 1}
                     isShiftHeld={isShiftHeld}
+                    onOpenDossier={onOpenDossier}
                 />
                 ))}
             </SortableContext>

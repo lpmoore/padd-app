@@ -13,6 +13,8 @@ const INITIAL_NAV_ITEMS = [
   { id: 'LIBRARY', label: 'LIBRARY', color: 'var(--lcars-periwinkle)' }, // Periwinkle
 ];
 
+import TaskDossier from './features/TaskDossier';
+
 function App() {
   const [activeTab, setActiveTab] = useState('TASKS');
   const [navItems, setNavItems] = useState(INITIAL_NAV_ITEMS);
@@ -23,21 +25,51 @@ function App() {
     return saved ? JSON.parse(saved) : []; 
   });
 
+  // Dossier State
+  const [activeDossierTaskId, setActiveDossierTaskId] = useState(null);
+
   React.useEffect(() => {
     localStorage.setItem('padd-tasks-v2', JSON.stringify(tasks));
   }, [tasks]);
 
   const handleNavClick = (id) => {
     setActiveTab(id);
-    
-    // Reorder items: move active item to the top (index 0)
-    // This creates the slide-to-top effect when rendered
     setNavItems(prevItems => {
       const activeItem = prevItems.find(item => item.id === id);
       const otherItems = prevItems.filter(item => item.id !== id);
       return [activeItem, ...otherItems];
     });
   };
+
+  // Helper to update a single task (deep update)
+  const updateTask = (id, updates) => {
+      const updateRecursively = (list) => {
+      return list.map(t => {
+        if (t.id === id) {
+          return { ...t, ...updates };
+        }
+        if (t.subtasks && t.subtasks.length > 0) {
+            return { ...t, subtasks: updateRecursively(t.subtasks) };
+        }
+        return t;
+      });
+    };
+    setTasks(updateRecursively(tasks));
+  };
+  
+  // Helper to find a task object by ID
+  const findTask = (id, list) => {
+      for (const t of list) {
+          if (t.id === id) return t;
+          if (t.subtasks) {
+              const f = findTask(id, t.subtasks);
+              if (f) return f;
+          }
+      }
+      return null;
+  };
+
+  const activeDossierTask = activeDossierTaskId ? findTask(activeDossierTaskId, tasks) : null;
 
   return (
     <LCARSLayout 
@@ -48,15 +80,30 @@ function App() {
     >
       <div style={{ padding: '20px' }}>
         
-        {/* Helper text if needed, or remove completely */}
-        {/* <h2>SYSTEM READY.</h2> */}
-        
-        {activeTab === 'TASKS' && <Tasks tasks={tasks} setTasks={setTasks} />}
-        {activeTab === 'CALENDAR' && <Calendar tasks={tasks} />}
+        {activeTab === 'TASKS' && (
+            <Tasks 
+                tasks={tasks} 
+                setTasks={setTasks} 
+                onOpenDossier={setActiveDossierTaskId} 
+            />
+        )}
+        {activeTab === 'CALENDAR' && (
+            <Calendar 
+                tasks={tasks} 
+                onOpenDossier={setActiveDossierTaskId}
+            />
+        )}
         {activeTab === 'NOTES' && <Notes />}
         {activeTab === 'LIBRARY' && <Library />}
         
-        {/* Old buttons removed - now in sidebar */}
+        {/* Render Dossier Modal if active */}
+        {activeDossierTask && (
+            <TaskDossier 
+                task={activeDossierTask}
+                onClose={() => setActiveDossierTaskId(null)}
+                onUpdate={updateTask}
+            />
+        )}
 
       </div>
     </LCARSLayout>

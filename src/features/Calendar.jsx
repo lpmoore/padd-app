@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './Calendar.css';
 
-const Calendar = ({ tasks = [] }) => {
+const Calendar = ({ tasks = [], onOpenDossier }) => {
     const [date, setDate] = useState(new Date());
     const [selectedDate, setSelectedDate] = useState(null); 
 
@@ -98,7 +98,15 @@ const Calendar = ({ tasks = [] }) => {
                             {selectedDate.tasks.length > 0 ? (
                                 <ul className="detail-task-list">
                                     {selectedDate.tasks.map(task => (
-                                        <li key={task.id} className="detail-task-item">
+                                        <li 
+                                            key={task.id} 
+                                            className="detail-task-item"
+                                            onClick={() => {
+                                                onOpenDossier(task.id);
+                                                closeDetail(); // Close detail to show Dossier
+                                            }}
+                                            style={{ cursor: 'pointer' }}
+                                        >
                                             <span className="task-time">{task.dueDate ? task.dueDate.split('T')[1] : '--:--'}</span>
                                             <span className="task-text">{task.text}</span>
                                         </li>

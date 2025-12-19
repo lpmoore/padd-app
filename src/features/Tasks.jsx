@@ -34,7 +34,7 @@ const RootDroppable = ({ children }) => {
   );
 };
 
-const Tasks = ({ tasks, setTasks }) => {
+const Tasks = ({ tasks, setTasks, onOpenDossier }) => {
   // tasks and setTasks are now passed as props
   // const [tasks, setTasks] = useState(...) removed
   
@@ -453,6 +453,7 @@ const Tasks = ({ tasks, setTasks }) => {
                             onAddSubtask={handleAddSubtask}
                             onUpdate={handleUpdate}
                             isShiftHeld={isShiftHeld}
+                            onOpenDossier={onOpenDossier}
                         />
                     ))}
                     {tasks.length === 0 && <p className="no-tasks">NO ACTIVE TASKS RECORDED.</p>}

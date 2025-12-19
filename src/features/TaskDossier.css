@@ -1,0 +1,195 @@
+/* Task Dossier Modal Styles */
+.dossier-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.85);
+    z-index: 2000; /* Higher than calendar overlay */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(5px);
+}
+
+.dossier-panel {
+    width: 800px;
+    height: 600px;
+    background-color: black;
+    border: 4px solid var(--lcars-tan);
+    border-radius: 30px;
+    border-bottom-left-radius: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
+}
+
+/* Header */
+.dossier-header {
+    background-color: var(--lcars-tan);
+    color: black;
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dossier-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.dossier-close-btn {
+    background: none;
+    border: 2px solid black;
+    color: black;
+    font-weight: bold;
+    padding: 5px 15px;
+    border-radius: 15px;
+    cursor: pointer;
+    text-transform: uppercase;
+    font-size: 1rem;
+}
+.dossier-close-btn:hover {
+    background-color: black;
+    color: var(--lcars-tan);
+}
+
+/* Tabs */
+.dossier-tabs {
+    display: flex;
+    gap: 10px;
+    padding: 20px 30px 0 30px;
+    border-bottom: 2px solid var(--lcars-gray);
+}
+
+.dossier-tab-btn {
+    background: none;
+    border: none;
+    color: var(--lcars-orange);
+    padding: 10px 20px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    transition: background-color 0.2s;
+}
+
+.dossier-tab-btn.active {
+    background-color: var(--lcars-orange);
+    color: black;
+}
+
+.dossier-tab-btn:hover:not(.active) {
+    background-color: rgba(255, 153, 0, 0.2);
+}
+
+/* Content Area */
+.dossier-content {
+    flex: 1;
+    padding: 30px;
+    overflow-y: auto;
+    color: var(--lcars-blue);
+    font-family: var(--font-main);
+}
+
+/* Section: Protocol / Steps */
+.protocol-editor {
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 20, 40, 0.5);
+    border: 1px solid var(--lcars-blue);
+    color: var(--lcars-ice-blue);
+    font-family: monospace;
+    font-size: 1.1rem;
+    padding: 15px;
+    resize: none;
+    outline: none;
+    line-height: 1.6;
+}
+
+/* Section: Personnel */
+.personnel-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.personnel-item {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    background-color: rgba(153, 204, 255, 0.1);
+    padding: 10px;
+    border-radius: 10px;
+}
+
+.personnel-input {
+    background: transparent;
+    border: 1px solid var(--lcars-gray);
+    color: var(--lcars-orange);
+    padding: 5px 10px;
+    border-radius: 5px;
+    flex: 1;
+}
+
+.personnel-role-input {
+    background: transparent;
+    border: 1px solid var(--lcars-gray);
+    color: var(--lcars-ice-blue);
+    padding: 5px 10px;
+    border-radius: 5px;
+    width: 150px;
+}
+
+/* Section: Visuals */
+.visuals-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 15px;
+}
+
+.visual-item {
+    height: 150px;
+    border: 2px solid var(--lcars-purple);
+    border-radius: 10px;
+    position: relative;
+    overflow: hidden;
+    background-size: cover;
+    background-position: center;
+}
+
+.visual-add-btn {
+    height: 150px;
+    border: 2px dashed var(--lcars-purple);
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    color: var(--lcars-purple);
+}
+.visual-add-btn:hover {
+    background-color: rgba(204, 153, 255, 0.1);
+}
+
+.url-input-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: black;
+    border: 2px solid var(--lcars-red);
+    padding: 20px;
+    z-index: 2500;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
