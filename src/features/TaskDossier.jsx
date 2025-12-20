@@ -252,7 +252,7 @@ const TaskDossier = ({ task, onClose, onUpdate }) => {
                                 </div>
                              </div>
                              <div style={{marginTop:'20px', textAlign:'right'}}>
-                                 <LCARSButton onClick={() => setActivePerson(null)} color="var(--lcars-orange)">CLOSE RECORD</LCARSButton>
+                                 <LCARSButton onClick={() => setActivePerson(null)} color="var(--lcars-orange)" className="close-record-btn">CLOSE RECORD</LCARSButton>
                              </div>
                         </div>
                     </div>
