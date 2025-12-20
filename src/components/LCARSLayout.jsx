@@ -37,8 +37,11 @@ const LCARSLayout = ({
                 style={{ 
                   backgroundColor: item.color,
                   color: 'var(--lcars-black)',
-                  borderTop: isActive ? '4px solid var(--lcars-bg)' : 'none',
-                  borderBottom: isActive ? '4px solid var(--lcars-bg)' : 'none'
+                  // Constant 4px border to prevent layout shift.
+                  // Inactive: Border matches button color (invisible).
+                  // Active: Border matches BG color (creates "break").
+                  borderTop: `4px solid ${isActive ? 'var(--lcars-bg)' : item.color}`,
+                  borderBottom: `4px solid ${isActive ? 'var(--lcars-bg)' : item.color}`
                 }}
                 onClick={() => onNavClick && onNavClick(item.id)}
               >

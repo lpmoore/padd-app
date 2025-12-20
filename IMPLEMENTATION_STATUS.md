@@ -18,7 +18,7 @@
 - **UI/Visuals**:
     - [x] **Task Indicators**: Added icons (Protocol, Personnel, Visuals) to task items. (Pending refinement).
     - [x] **LCARS Layout**: Implemented dynamic color theming.
-    - [x] **Sidebar**: Added "active break" styling.
+    - [x] **Sidebar**: Added "active break" styling and ensured buttons remain static (fixed height/borders).
     - [x] **Custom Date Picker**: Implemented `LCARSDatePicker` with embedded "ENGAGE" button for explicit saving.
 
 ## Critical Issues
