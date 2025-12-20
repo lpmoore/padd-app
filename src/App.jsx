@@ -10,17 +10,18 @@ import Library from './features/Library';
 import TaskDossier from './features/TaskDossier';
 import { formatDateForStorage } from './utils/dateUtils';
 
+// 1. Reordered as requested: Calendar, Tasks, Library, Notes
+// 2. Removed Logout (to be handled separately)
 const INITIAL_NAV_ITEMS = [
-  { id: 'TASKS', label: 'TASKS', color: 'var(--lcars-cyan)' }, 
   { id: 'CALENDAR', label: 'CALENDAR', color: 'var(--lcars-teal)' }, 
-  { id: 'NOTES', label: 'NOTES', color: 'var(--lcars-ice-blue)' }, 
+  { id: 'TASKS', label: 'TASKS', color: 'var(--lcars-cyan)' }, 
   { id: 'LIBRARY', label: 'LIBRARY', color: 'var(--lcars-periwinkle)' }, 
-  { id: 'LOGOUT', label: 'LOGOUT', color: 'var(--lcars-red)' }, // Added Logout
+  { id: 'NOTES', label: 'NOTES', color: 'var(--lcars-ice-blue)' }, 
 ];
 
 function App() {
   const [session, setSession] = useState(null);
-  const [activeTab, setActiveTab] = useState('TASKS');
+  const [activeTab, setActiveTab] = useState('CALENDAR'); // Default to top item? Or Keep Tasks? User put Calendar top.
   const [navItems, setNavItems] = useState(INITIAL_NAV_ITEMS);
 
   // Auth Session Management
@@ -104,13 +105,12 @@ function App() {
   const [activeDossierTaskId, setActiveDossierTaskId] = useState(null);
 
   const handleNavClick = async (id) => {
-    if (id === 'LOGOUT') {
-        await supabase.auth.signOut();
-        return;
-    }
-
     setActiveTab(id);
-    // Removed reordering logic to keep sidebar buttons static
+    // No reordering
+  };
+
+  const handleLogout = async () => {
+      await supabase.auth.signOut();
   };
 
   // CRUD Operations
@@ -183,6 +183,7 @@ function App() {
       activeTab={activeTab}
       navItems={navItems}
       onNavClick={handleNavClick}
+      onLogout={handleLogout} // Pass logout handler
     >
       <div style={{ padding: '20px' }}>
         

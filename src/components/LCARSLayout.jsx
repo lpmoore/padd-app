@@ -6,7 +6,8 @@ const LCARSLayout = ({
   title = "LCARS 4755",
   activeTab,
   navItems = [],
-  onNavClick
+  onNavClick,
+  onLogout
 }) => {
   // Find the color of the active item to tint the top bar/elbow
   const activeColor = navItems.find(item => item.id === activeTab)?.color || 'var(--lcars-cyan)';
@@ -38,8 +39,6 @@ const LCARSLayout = ({
                   backgroundColor: item.color,
                   color: 'var(--lcars-black)',
                   // Constant 4px border to prevent layout shift.
-                  // Inactive: Border matches button color (invisible).
-                  // Active: Border matches BG color (creates "break").
                   borderTop: `4px solid ${isActive ? 'var(--lcars-bg)' : item.color}`,
                   borderBottom: `4px solid ${isActive ? 'var(--lcars-bg)' : item.color}`
                 }}
@@ -49,8 +48,48 @@ const LCARSLayout = ({
               </button>
             );
           })}
-          {/* Fill the rest of the sidebar */}
-          <div className="sidebar-fill" style={{ backgroundColor: activeColor, flexGrow: 1 }}></div>
+          
+          {/* Spacer: Grows to push content down */}
+          <div 
+            className="lcars-sidebar-spacer" 
+            style={{ 
+                flexGrow: 1, 
+                backgroundColor: activeColor, 
+                width: 'var(--elbow-width)',
+                borderTopRightRadius: '30px',
+                borderBottomRightRadius: '30px'
+            }}
+          ></div>
+
+          {/* Logout Button (Pinned Bottom) */}
+          {onLogout && (
+             <button
+                className="lcars-sidebar-button"
+                style={{ 
+                  backgroundColor: 'var(--lcars-red)',
+                  color: 'var(--lcars-black)',
+                  borderTop: `4px solid var(--lcars-red)`, 
+                  borderBottom: `4px solid var(--lcars-red)`, // Keep solid look
+                  marginTop: '0px' 
+                }}
+                onClick={onLogout}
+              >
+                LOGOUT
+              </button>
+          )}
+
+          {/* Bottom Cap: Ends the column with the curve */}
+          <div 
+             className="lcars-sidebar-bottom"
+             style={{
+                 height: '60px', // Substantial anchor
+                 width: 'var(--elbow-width)',
+                 backgroundColor: activeColor,
+                 borderTopRightRadius: '30px',
+                 borderBottomLeftRadius: 'var(--elbow-radius)' // The classic LCARS curve
+             }}
+          ></div>
+
         </div>
       </div>
 
