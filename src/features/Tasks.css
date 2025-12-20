@@ -104,6 +104,7 @@
     display: flex;
     align-items: center;
     color: var(--lcars-orange);
+    touch-action: none;
 }
 
 .task-drag-handle:active {

@@ -3,7 +3,8 @@ import {
   DndContext, 
   closestCenter,
   KeyboardSensor, 
-  PointerSensor, 
+  MouseSensor,
+  TouchSensor, 
   useSensor, 
   useSensors,
   useDroppable
@@ -37,7 +38,17 @@ const Tasks = ({ tasks, onAddTask, onUpdateTask, onDeleteTask, onMoveTask, onOpe
   const mainInputDateRef = useRef(null);
 
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(MouseSensor, {
+        activationConstraint: {
+            distance: 10,
+        },
+    }),
+    useSensor(TouchSensor, {
+        activationConstraint: {
+            delay: 150,
+            tolerance: 5,
+        },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
