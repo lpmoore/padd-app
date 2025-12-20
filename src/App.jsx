@@ -117,12 +117,16 @@ function App() {
   };
 
   // CRUD Operations
-  const addTask = async (text, parentId = null) => {
-      const { data, error } = await supabase.from('tasks').insert({
+  const addTask = async (text, parentId = null, dueDate = null) => {
+      const insertPayload = {
           user_id: session.user.id,
           text,
           parent_id: parentId
-      });
+      };
+      // Only add due_date if it is provided and not empty string
+      if (dueDate) insertPayload.due_date = dueDate;
+
+      const { data, error } = await supabase.from('tasks').insert(insertPayload);
       if (error) console.error('Error adding task:', error);
       else fetchTasks();
   };

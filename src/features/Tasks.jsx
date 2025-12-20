@@ -68,14 +68,15 @@ const Tasks = ({ tasks, onAddTask, onUpdateTask, onDeleteTask, onMoveTask, onOpe
   const handleAdd = () => {
     if (!inputValue.trim()) return;
     // Call parent handler (Supabase)
-    onAddTask(inputValue, null); // null = root task
+    // Pass inputDate to root task creation
+    onAddTask(inputValue, null, inputDate); 
     setInputValue('');
     setInputDate('');
   };
 
   const handleAddSubtask = (parentId, text, dueDate) => {
     // Call parent handler (Supabase)
-    onAddTask(text, parentId);
+    onAddTask(text, parentId, dueDate);
   };
 
   const handleDelete = (id) => {

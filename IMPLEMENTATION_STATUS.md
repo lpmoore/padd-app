@@ -21,7 +21,7 @@
     - [x] **Sidebar**: Added "active break" styling.
 
 ## Critical Issues
-- [ ] **Task Due Dates**: Dates are not persisting when creating subtasks or updating existing tasks. Requires immediate fix.
+- [x] **Task Due Dates**: Fixed `addTask` to accept due dates and verified `updateTask` mapping.
 
 ## Historical Fixes
 - Fixed screen blackout when clicking "Tasks" (missing `useSortable`).
