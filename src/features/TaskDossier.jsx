@@ -11,39 +11,99 @@ const TaskDossier = ({ task, onClose, onUpdate }) => {
     const [personnel, setPersonnel] = useState(task.personnel || []);
     const [images, setImages] = useState(task.images || []);
     
-    // Helper state for image URL input
-    const [showUrlInput, setShowUrlInput] = useState(false);
-    const [tempUrl, setTempUrl] = useState('');
+    const [activePerson, setActivePerson] = useState(null);
+    const personImageInputRef = React.useRef(null);
 
-    // Auto-save effect or explicit save? 
-    // Let's do auto-save on unmount or specific actions to keep it snappy
-    // For now, simpler: Update parent object whenever local state changes
+    // Use a ref for the hidden file input
+    const fileInputRef = React.useRef(null);
+
+    // Auto-save effect logic
     useEffect(() => {
         onUpdate(task.id, {
             details: protocol,
             personnel: personnel,
             images: images
         });
-    }, [protocol, personnel, images]); // Warning: this might be too frequent. Debounce in real app.
+    }, [protocol, personnel, images]); 
 
     const handleAddPerson = () => {
-        setPersonnel([...personnel, { id: Date.now(), name: '', role: '' }]);
+        const newPerson = { 
+            id: Date.now(), 
+            name: '', 
+            rank: '', 
+            image: null, 
+            stats: { birthplace: '', education: '', expertise: '', otherFacts: '' } 
+        };
+        setPersonnel([...personnel, newPerson]);
+        setActivePerson(newPerson); // Open immediately
     };
 
-    const updatePerson = (id, field, value) => {
-        setPersonnel(personnel.map(p => p.id === id ? { ...p, [field]: value } : p));
+    // Update the local state for the currently open person, AND the main list
+    const updateActivePerson = (field, value) => {
+        if (!activePerson) return;
+        const updated = { ...activePerson, [field]: value };
+        setActivePerson(updated);
+        setPersonnel(personnel.map(p => p.id === activePerson.id ? updated : p));
     };
 
-    const removePerson = (id) => {
+    const updateActivePersonStats = (statField, value) => {
+        if (!activePerson) return;
+        const updatedStats = { ...activePerson.stats, [statField]: value };
+        const updated = { ...activePerson, stats: updatedStats };
+        setActivePerson(updated);
+        setPersonnel(personnel.map(p => p.id === activePerson.id ? updated : p));
+    };
+
+    const handleDeletePerson = (id) => {
         setPersonnel(personnel.filter(p => p.id !== id));
+        setActivePerson(null);
     };
 
-    const handleAddImage = () => {
-        if (tempUrl) {
-            setImages([...images, tempUrl]);
-            setTempUrl('');
-            setShowUrlInput(false);
+    const handlePersonImageSelect = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            updateActivePerson('image', reader.result);
+        };
+        reader.readAsDataURL(file);
+    };
+
+    const handleFileSelect = (e) => {
+        if (e.target.files && e.target.files.length > 0) {
+            processFiles(Array.from(e.target.files));
         }
+    };
+
+    const processFiles = (files) => {
+        files.forEach(file => {
+            if (!file.type.startsWith('image/')) return;
+            
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImages(prev => [...prev, reader.result]);
+            };
+            reader.readAsDataURL(file);
+        });
+    };
+
+    const handleDragOver = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+    };
+
+    const handleDrop = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+            processFiles(Array.from(e.dataTransfer.files));
+        }
+    };
+
+    const handleAddImageClick = () => {
+        fileInputRef.current?.click();
     };
 
     return (
@@ -87,63 +147,143 @@ const TaskDossier = ({ task, onClose, onUpdate }) => {
 
                     {activeTab === 'PERSONNEL' && (
                         <div className="personnel-container">
-                            <div className="personnel-list">
+                             {/* Personnel Grid */}
+                             <div className="personnel-grid">
                                 {personnel.map(p => (
-                                    <div key={p.id} className="personnel-item">
-                                        <input 
-                                            className="personnel-input" 
-                                            placeholder="NAME / RANK"
-                                            value={p.name}
-                                            onChange={(e) => updatePerson(p.id, 'name', e.target.value)}
-                                        />
-                                        <input 
-                                            className="personnel-role-input" 
-                                            placeholder="ROLE"
-                                            value={p.role}
-                                            onChange={(e) => updatePerson(p.id, 'role', e.target.value)}
-                                        />
-                                        <LCARSButton onClick={() => removePerson(p.id)} color="var(--lcars-red)" scale={0.5}>X</LCARSButton>
+                                    <div key={p.id} className="personnel-card" onClick={() => setActivePerson(p)}>
+                                        <div 
+                                            className="personnel-avatar-placeholder"
+                                            style={p.image ? { backgroundImage: `url(${p.image})` } : {}}
+                                        >
+                                            {!p.image && <span style={{fontSize: '3rem'}}>?</span>}
+                                        </div>
+                                        <div className="personnel-card-info">
+                                            <div className="personnel-name">{p.name || 'UNKNOWN'}</div>
+                                            <div className="personnel-role">{p.rank || p.role || 'UNASSIGNED'}</div>
+                                        </div>
                                     </div>
                                 ))}
-                            </div>
-                            <div style={{ marginTop: '20px' }}>
-                                <LCARSButton onClick={handleAddPerson} color="var(--lcars-ice-blue)" rounded="both">ADD PERSONNEL</LCARSButton>
-                            </div>
+                                <div className="personnel-card personnel-add-card" onClick={handleAddPerson}>
+                                    <span style={{fontSize: '2rem'}}>+</span>
+                                    <span>ADD CREW</span>
+                                </div>
+                             </div>
                         </div>
                     )}
 
                     {activeTab === 'VISUALS' && (
                         <>
-                            <div className="visuals-grid">
+                            <div 
+                                className="visuals-grid" 
+                                onDragOver={handleDragOver} 
+                                onDrop={handleDrop}
+                                style={{ minHeight: '200px' }} // Ensure hit area is large enough
+                            >
                                 {images.map((img, idx) => (
                                     <div key={idx} className="visual-item" style={{ backgroundImage: `url(${img})` }}>
-                                         <div style={{ position: 'absolute', top: 0, right: 0, background: 'black', cursor: 'pointer' }} onClick={() => setImages(images.filter((_, i) => i !== idx))}>X</div>
+                                         <div style={{ position: 'absolute', top: 0, right: 0, background: 'black', cursor: 'pointer', padding: '5px' }} onClick={() => setImages(images.filter((_, i) => i !== idx))}>X</div>
                                     </div>
                                 ))}
-                                <div className="visual-add-btn" onClick={() => setShowUrlInput(true)}>
-                                    <span>+ ADD VISUAL</span>
+                                <div className="visual-add-btn" onClick={handleAddImageClick}>
+                                    <span>+ UPLOAD VISUAL</span>
                                 </div>
                             </div>
                             
-                            {/* Simple URL Input Modal for MVP */}
-                            {showUrlInput && (
-                                <div className="url-input-modal">
-                                    <h4 style={{ color: 'var(--lcars-red)', margin: 0 }}>ENTER IMAGE URL</h4>
-                                    <input 
-                                        style={{ background: '#333', color: 'white', border: 'none', padding: '10px', width: '300px' }}
-                                        value={tempUrl}
-                                        onChange={(e) => setTempUrl(e.target.value)}
-                                        placeholder="https://..."
-                                    />
-                                    <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-                                        <LCARSButton onClick={handleAddImage} color="var(--lcars-orange)">ADD</LCARSButton>
-                                        <LCARSButton onClick={() => setShowUrlInput(false)} color="var(--lcars-gray)">CANCEL</LCARSButton>
-                                    </div>
-                                </div>
-                            )}
+                            <input 
+                                type="file" 
+                                ref={fileInputRef} 
+                                style={{ display: 'none' }} 
+                                accept="image/*" 
+                                multiple
+                                onChange={handleFileSelect}
+                            />
                         </>
                     )}
                 </div>
+
+                {/* Personnel Detail Overlay (Bio-bed style) */}
+                {activePerson && (
+                    <div className="personnel-detail-overlay">
+                        <div className="detail-bio-header">
+                            <h3 style={{margin:0}}>PERSONNEL RECORD: {activePerson.name.toUpperCase() || 'NEW ENTRY'}</h3>
+                            <div style={{display:'flex', gap:'10px'}}>
+                                <LCARSButton onClick={() => handleDeletePerson(activePerson.id)} color="var(--lcars-red)">DELETE RECORD</LCARSButton>
+                                <LCARSButton onClick={() => setActivePerson(null)} color="white">CLOSE</LCARSButton>
+                            </div>
+                        </div>
+                        <div className="detail-bio-content">
+                            <div className="bio-left">
+                                <div 
+                                    className="bio-image-preview" 
+                                    onClick={() => personImageInputRef.current?.click()}
+                                    style={activePerson.image ? { backgroundImage: `url(${activePerson.image})` } : {}}
+                                >
+                                    {!activePerson.image && <span>NO PHOTO</span>}
+                                </div>
+                                <input 
+                                    type="file" 
+                                    ref={personImageInputRef} 
+                                    style={{display:'none'}} 
+                                    accept="image/*"
+                                    onChange={handlePersonImageSelect}
+                                />
+                                <div className="bio-input-group">
+                                    <label className="bio-label">NAME</label>
+                                    <input 
+                                        className="bio-input" 
+                                        value={activePerson.name} 
+                                        onChange={(e) => updateActivePerson('name', e.target.value)}
+                                        placeholder="Full Name"
+                                    />
+                                </div>
+                                <div className="bio-input-group">
+                                    <label className="bio-label">RANK / TITLE</label>
+                                    <input 
+                                        className="bio-input" 
+                                        value={activePerson.rank} 
+                                        onChange={(e) => updateActivePerson('rank', e.target.value)}
+                                        placeholder="Lieutentant, etc."
+                                    />
+                                </div>
+                            </div>
+                            <div className="bio-right">
+                                <div className="bio-input-group">
+                                    <label className="bio-label">BIRTHPLACE / ORIGIN</label>
+                                    <input 
+                                        className="bio-input" 
+                                        value={activePerson.stats?.birthplace || ''} 
+                                        onChange={(e) => updateActivePersonStats('birthplace', e.target.value)}
+                                    />
+                                </div>
+                                 <div className="bio-input-group">
+                                    <label className="bio-label">EDUCATION / ACADEMY</label>
+                                    <input 
+                                        className="bio-input" 
+                                        value={activePerson.stats?.education || ''} 
+                                        onChange={(e) => updateActivePersonStats('education', e.target.value)}
+                                    />
+                                </div>
+                                 <div className="bio-input-group">
+                                    <label className="bio-label">EXPERTISE (Comma Seps)</label>
+                                    <input 
+                                        className="bio-input" 
+                                        value={activePerson.stats?.expertise || ''} 
+                                        onChange={(e) => updateActivePersonStats('expertise', e.target.value)}
+                                    />
+                                </div>
+                                <div className="bio-input-group" style={{flex:1}}>
+                                    <label className="bio-label">SERVICE RECORD / BIO / FACTS</label>
+                                    <textarea 
+                                        className="bio-textarea" 
+                                        style={{height: '100%'}}
+                                        value={activePerson.stats?.otherFacts || ''}
+                                        onChange={(e) => updateActivePersonStats('otherFacts', e.target.value)}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );
