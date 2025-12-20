@@ -220,13 +220,22 @@ const TaskDossier = ({ task, onClose, onUpdate }) => {
                 {/* READ ONLY Personnel Modal */}
                 {activePerson && (
                     <div className="personnel-detail-overlay" onClick={() => setActivePerson(null)}>
-                        <div className="detail-bio-content" style={{maxWidth:'600px', margin:'auto', background:'black', border:'2px solid var(--lcars-orange)', padding:'20px', borderRadius:'20px'}} onClick={e => e.stopPropagation()}>
-                             <h3 style={{color:'var(--lcars-orange)',  marginTop:0}}>{activePerson.name}</h3>
-                             <p style={{color:'var(--lcars-blue)'}}>{activePerson.rank}</p>
+                        <div className="detail-bio-content" style={{maxWidth:'900px', width: '90%', margin:'auto', background:'black', border:'2px solid var(--lcars-orange)', padding:'20px', borderRadius:'20px'}} onClick={e => e.stopPropagation()}>
+                             <h3 style={{color:'var(--lcars-orange)',  marginTop:0, fontSize: '2rem'}}>{activePerson.name}</h3>
+                             <p style={{color:'var(--lcars-blue)', fontSize: '1.5rem'}}>{activePerson.rank}</p>
                              <hr style={{borderColor:'var(--lcars-tan)'}}/>
-                             <div style={{display:'flex', gap:'20px', marginTop:'20px'}}>
-                                <div style={{width:'150px', height:'180px', background:'#222', backgroundImage: `url(${activePerson.image_url})`, backgroundSize:'cover'}}></div>
-                                <div style={{flex:1, color:'var(--lcars-tan)'}}>
+                             <div style={{display:'flex', gap:'30px', marginTop:'20px', alignItems: 'flex-start'}}>
+                                <div style={{
+                                    width:'300px', 
+                                    height:'400px', 
+                                    background:'#111', 
+                                    backgroundImage: `url(${activePerson.image_url})`, 
+                                    backgroundSize:'contain', 
+                                    backgroundRepeat: 'no-repeat',
+                                    backgroundPosition: 'center',
+                                    border: '1px solid var(--lcars-blue)'
+                                }}></div>
+                                <div style={{flex:1, color:'var(--lcars-tan)', fontSize: '1.2rem', lineHeight: '1.6'}}>
                                     <p><strong>BIRTHPLACE:</strong> {activePerson.birthplace}</p>
                                     <p><strong>EDUCATION:</strong> {activePerson.education}</p>
                                     <p><strong>EXPERTISE:</strong> {activePerson.expertise}</p>
@@ -243,22 +252,22 @@ const TaskDossier = ({ task, onClose, onUpdate }) => {
                 {/* Assignment Selector Modal */}
                 {isAssigning && (
                     <div className="personnel-detail-overlay" onClick={() => setIsAssigning(false)}>
-                         <div className="detail-bio-content" style={{maxWidth:'500px', maxHeight:'80vh', overflowY:'auto', margin:'auto', background:'black', border:'2px solid var(--lcars-blue)', padding:'20px', borderRadius:'20px'}} onClick={e => e.stopPropagation()}>
+                         <div className="detail-bio-content" style={{maxWidth:'600px', width: '90%', maxHeight:'80vh', overflowY:'auto', margin:'auto', background:'black', border:'2px solid var(--lcars-blue)', padding:'20px', borderRadius:'20px'}} onClick={e => e.stopPropagation()}>
                              <h3 style={{color:'var(--lcars-blue)', marginTop:0}}>ASSIGN PERSONNEL</h3>
                              <div style={{display:'flex', flexDirection:'column', gap:'10px'}}>
                                  {allPersonnel.length === 0 && <p>NO PERSONNEL IN DATABASE. ADD VIA ADMIN.</p>}
                                  {allPersonnel.map(person => {
                                      const isAssigned = assignedPersonnel.some(p => p.id === person.id);
                                      return (
-                                         <div key={person.id} className="assignment-row" style={{display:'flex', alignItems:'center', gap:'10px', padding:'10px', background:'rgba(255,255,255,0.05)'}}>
+                                         <div key={person.id} className="assignment-row" style={{display:'flex', alignItems:'center', gap:'15px', padding:'15px', background:'rgba(255,255,255,0.05)', fontSize: '1.2rem'}}>
                                              <input 
                                                 type="checkbox" 
                                                 checked={isAssigned}
                                                 onChange={() => toggleAssignment(person.id, isAssigned)}
-                                                style={{width:'20px', height:'20px'}}
+                                                style={{width:'25px', height:'25px', flexShrink: 0, cursor: 'pointer'}}
                                              />
-                                             <div style={{fontWeight:'bold', color: isAssigned ? 'var(--lcars-orange)' : 'var(--lcars-gray)'}}>
-                                                 {person.name} <span style={{fontWeight:'normal', fontSize:'0.8em'}}>({person.rank})</span>
+                                             <div style={{fontWeight:'bold', color: isAssigned ? 'var(--lcars-orange)' : 'var(--lcars-gray)', flex: 1}}>
+                                                 {person.name} <span style={{fontWeight:'normal', fontSize:'0.8em', color: 'var(--lcars-blue)'}}>({person.rank})</span>
                                              </div>
                                          </div>
                                      );
@@ -272,7 +281,6 @@ const TaskDossier = ({ task, onClose, onUpdate }) => {
                 )}
 
                 {/* Lightbox Reuse */}
-                {/* ... (omitted for brevity, same as before) ... */}
                  {activeImageIndex !== null && (
                     <div className="lightbox-overlay" onClick={() => setActiveImageIndex(null)}>
                         <div className="lightbox-content" onClick={e => e.stopPropagation()}>
