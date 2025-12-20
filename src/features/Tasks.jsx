@@ -55,6 +55,9 @@ const Tasks = ({ tasks, onAddTask, onUpdateTask, onDeleteTask, onMoveTask, onOpe
   );
 
   const [isShiftHeld, setIsShiftHeld] = useState(false);
+  const [isNestingLocked, setIsNestingLocked] = useState(false);
+
+  const isNestingActive = isShiftHeld || isNestingLocked;
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -131,7 +134,7 @@ const Tasks = ({ tasks, onAddTask, onUpdateTask, onDeleteTask, onMoveTask, onOpe
         return;
     }
 
-    if (isShiftHeld) {
+    if (isNestingActive) {
         // Nesting into the hovered task
         onMoveTask(active.id, over.id);
         return;
@@ -148,10 +151,28 @@ const Tasks = ({ tasks, onAddTask, onUpdateTask, onDeleteTask, onMoveTask, onOpe
 
   return (
     <div className="tasks-container">
-      <h2 className="lcars-header">TASK LOG</h2>
-      <p className="lcars-instruction" style={{ color: 'var(--lcars-tan)', fontSize: '0.8rem', textAlign: 'right', marginBottom: '10px', marginTop: '-5px' }}>
-          HOLD SHIFT TO NEST TASKS
-      </p>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: '2px solid var(--lcars-orange)', marginBottom: '10px', paddingBottom: '5px' }}>
+         <h2 style={{ margin: 0, color: 'var(--lcars-orange)' }}>TASK LOG</h2>
+         <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+            <span style={{ color: 'var(--lcars-tan)', fontSize: '0.8rem', display: 'none' }}>HOLD SHIFT TO NEST</span>
+            <button 
+                onClick={() => setIsNestingLocked(!isNestingLocked)}
+                style={{
+                    background: isNestingActive ? 'var(--lcars-orange)' : 'rgba(255, 153, 0, 0.2)',
+                    border: '1px solid var(--lcars-orange)',
+                    color: isNestingActive ? 'black' : 'var(--lcars-orange)',
+                    padding: '2px 10px',
+                    borderRadius: '10px',
+                    fontSize: '0.7rem',
+                    fontWeight: 'bold',
+                    cursor: 'pointer',
+                    textTransform: 'uppercase'
+                }}
+            >
+                NEST MODE: {isNestingActive ? 'ON' : 'OFF'}
+            </button>
+         </div>
+      </div>
 
       <div className="tasks-input-area">
         <input
@@ -196,7 +217,7 @@ const Tasks = ({ tasks, onAddTask, onUpdateTask, onDeleteTask, onMoveTask, onOpe
                             onToggle={handleToggle}
                             onAddSubtask={handleAddSubtask}
                             onUpdate={handleUpdate}
-                            isShiftHeld={isShiftHeld}
+                            isShiftHeld={isNestingActive} 
                             onOpenDossier={onOpenDossier}
                         />
                     ))}
