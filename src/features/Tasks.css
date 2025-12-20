@@ -217,6 +217,19 @@
     align-items: flex-end;
 }
 
+/* Group for Info button and icons */
+.task-info-group {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Space between icons and button */
+}
+
+.task-content-icons {
+    display: flex;
+    gap: 4px;
+    opacity: 0.9;
+}
+
 .icon-btn {
     background: none;
     border: none;
@@ -269,10 +282,10 @@
 }
 
 .no-tasks {
-  font-style: italic;
-  opacity: 0.5;
-  margin-top: 20px;
-  text-align: center;
+    font-style: italic;
+    opacity: 0.5;
+    margin-top: 20px;
+    text-align: center;
 }
 
 /* Root drop zone for un-nesting */

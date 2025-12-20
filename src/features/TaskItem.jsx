@@ -3,7 +3,7 @@ import { useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { SortableContext } from '@dnd-kit/sortable';
 import { useDroppable } from '@dnd-kit/core';
-import { ChevronRight, ChevronDown, GripVertical, Calendar, Trash2, CheckSquare, Square } from 'lucide-react';
+import { ChevronRight, ChevronDown, GripVertical, Calendar, Trash2, CheckSquare, Square, FileText, Users, Image as ImageIcon } from 'lucide-react';
 import LCARSButton from '../components/LCARSButton';
 
 const TaskItem = ({ task, onDelete, onToggle, onAddSubtask, onUpdate, depth = 0, isShiftHeld, onOpenDossier }) => {
@@ -24,6 +24,11 @@ const TaskItem = ({ task, onDelete, onToggle, onAddSubtask, onUpdate, depth = 0,
       console.log('DatePicker error:', e);
     }
   };
+
+  // Check for content
+  const hasProtocol = task.details && task.details.trim().length > 0;
+  const hasPersonnel = task.personnel && task.personnel.length > 0;
+  const hasVisuals = task.images && task.images.length > 0;
 
   // Drag and Drop - Sortable for dragging and reordering
   const {
@@ -83,8 +88,6 @@ const TaskItem = ({ task, onDelete, onToggle, onAddSubtask, onUpdate, depth = 0,
     setIsEditing(false);
   };
 
-  // ... (handleSave)
-
   const handleAddSub = () => {
     if (!subtaskInput.trim()) return;
     // We need to update onAddSubtask to accept date if we want to support it
@@ -95,7 +98,7 @@ const TaskItem = ({ task, onDelete, onToggle, onAddSubtask, onUpdate, depth = 0,
     // Existing: onAddSubtask(task.id, subtaskInput);
     
     // We'll pass an object or 3rd arg. Let's assume onAddSubtask can take 3rd arg `dueDate`.
-    console.log('TaskItem calling onAddSubtask with:', { id: task.id, subtaskInput, subtaskDate });
+    // console.log('TaskItem calling onAddSubtask with:', { id: task.id, subtaskInput, subtaskDate });
     onAddSubtask(task.id, subtaskInput, subtaskDate);
     
     setSubtaskInput('');
@@ -163,14 +166,23 @@ const TaskItem = ({ task, onDelete, onToggle, onAddSubtask, onUpdate, depth = 0,
         </div>
 
         <div className="task-actions">
-           <LCARSButton 
-            onClick={() => onOpenDossier(task.id)}
-            color="var(--lcars-tan)"
-            scale={0.7}
-            rounded="left"
-           >
-             INFO
-           </LCARSButton>
+           {/* Info Wrapper with Icons */}
+           <div className="task-info-group">
+               <div className="task-content-icons">
+                   {hasProtocol && <FileText size={14} color="var(--lcars-tan)" title="Protocol" />}
+                   {hasPersonnel && <Users size={14} color="var(--lcars-red)" title="Personnel" />}
+                   {hasVisuals && <ImageIcon size={14} color="var(--lcars-blue)" title="Visuals" />}
+               </div>
+               <LCARSButton 
+                onClick={() => onOpenDossier(task.id)}
+                color="var(--lcars-tan)"
+                scale={0.7}
+                rounded="left"
+               >
+                 INFO
+               </LCARSButton>
+           </div>
+
            <LCARSButton 
             onClick={() => setShowSubInput(!showSubInput)}
             color="var(--lcars-blue)"

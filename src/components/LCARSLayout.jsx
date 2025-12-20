@@ -28,22 +28,26 @@ const LCARSLayout = ({
       {/* Sidebar (Left) */}
       <div className="lcars-sidebar">
         <div className="sidebar-buttons">
-          {navItems.map((item) => (
-            <button
-              key={item.id}
-              className={`lcars-sidebar-button ${activeTab === item.id ? 'active' : ''}`}
-              style={{ 
-                backgroundColor: item.color,
-                color: 'var(--lcars-black)',
-                borderColor: 'var(--lcars-bg)'
-              }}
-              onClick={() => onNavClick && onNavClick(item.id)}
-            >
-              {item.label}
-            </button>
-          ))}
+          {navItems.map((item) => {
+            const isActive = activeTab === item.id;
+            return (
+              <button
+                key={item.id}
+                className={`lcars-sidebar-button ${isActive ? 'active' : ''}`}
+                style={{ 
+                  backgroundColor: item.color,
+                  color: 'var(--lcars-black)',
+                  borderTop: isActive ? '4px solid var(--lcars-bg)' : 'none',
+                  borderBottom: isActive ? '4px solid var(--lcars-bg)' : 'none'
+                }}
+                onClick={() => onNavClick && onNavClick(item.id)}
+              >
+                {item.label}
+              </button>
+            );
+          })}
           {/* Fill the rest of the sidebar */}
-          <div className="sidebar-fill" style={{ backgroundColor: 'var(--lcars-tan)', flexGrow: 1 }}></div>
+          <div className="sidebar-fill" style={{ backgroundColor: activeColor, flexGrow: 1 }}></div>
         </div>
       </div>
 
