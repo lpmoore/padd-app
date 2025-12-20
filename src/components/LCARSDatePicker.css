@@ -1,0 +1,155 @@
+
+.lcars-date-picker-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.lcars-date-display {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 10px;
+    border: 1px solid var(--lcars-tan);
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 5px;
+    color: var(--lcars-tan);
+    font-family: var(--font-main);
+    font-size: 0.9rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    transition: all 0.2s;
+}
+
+.lcars-date-display:hover {
+    background-color: rgba(255, 153, 0, 0.1);
+    border-color: var(--lcars-orange);
+    color: var(--lcars-orange);
+}
+
+.lcars-popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5); /* Dim background */
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.lcars-calendar-panel {
+    background-color: var(--lcars-bg);
+    border: 4px solid var(--lcars-tan);
+    border-radius: 20px;
+    border-top-right-radius: 0;
+    border-bottom-left-radius: 0;
+    padding: 15px;
+    width: 320px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Header: Month Nav */
+.lcars-calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--lcars-orange);
+    font-size: 1.2rem;
+    font-weight: bold;
+    border-bottom: 2px solid var(--lcars-blue);
+    padding-bottom: 5px;
+    margin-bottom: 5px;
+}
+
+.lcars-nav-btn {
+    background: none;
+    border: none;
+    color: var(--lcars-blue);
+    cursor: pointer;
+    padding: 5px;
+}
+.lcars-nav-btn:hover {
+    color: var(--lcars-orange);
+}
+
+/* Calendar Grid */
+.lcars-calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+    text-align: center;
+}
+
+.day-label {
+    color: var(--lcars-blue);
+    font-size: 0.8rem;
+    padding-bottom: 5px;
+}
+
+.calendar-day {
+    padding: 8px 0;
+    cursor: pointer;
+    color: var(--lcars-tan);
+    border-radius: 3px;
+    transition: background-color 0.2s;
+}
+
+.calendar-day:hover:not(.empty) {
+    background-color: rgba(255, 153, 0, 0.2);
+    color: var(--lcars-orange);
+}
+
+.calendar-day.selected {
+    background-color: var(--lcars-orange);
+    color: black;
+    font-weight: bold;
+}
+
+.calendar-day.today {
+    border: 1px solid var(--lcars-blue);
+}
+
+.calendar-day.empty {
+    cursor: default;
+}
+
+/* Time Picker */
+.lcars-time-picker {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    border-top: 1px dashed var(--lcars-gray);
+    padding-top: 10px;
+}
+
+.time-input {
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--lcars-blue);
+    color: var(--lcars-orange);
+    font-family: var(--font-main);
+    font-size: 1.2rem;
+    width: 50px;
+    text-align: center;
+    padding: 5px;
+    outline: none;
+}
+
+/* Footer Actions */
+.lcars-calendar-footer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
+/* Colors for Date Display logic */
+.has-date {
+    border-color: var(--lcars-orange);
+    color: var(--lcars-orange);
+}

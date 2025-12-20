@@ -2,23 +2,20 @@ import React, { useState, useEffect, useRef } from 'react';
 import { 
   DndContext, 
   closestCenter,
-  closestCorners,
-  pointerWithin,
   KeyboardSensor, 
   PointerSensor, 
   useSensor, 
   useSensors,
-  DragOverlay,
   useDroppable
 } from '@dnd-kit/core';
 import { 
-  arrayMove, 
   SortableContext, 
   sortableKeyboardCoordinates, 
   verticalListSortingStrategy 
 } from '@dnd-kit/sortable';
 import TaskItem from './TaskItem';
 import LCARSButton from '../components/LCARSButton';
+import LCARSDatePicker from '../components/LCARSDatePicker'; // Custom Picker
 import './Tasks.css';
 
 /* 
@@ -84,11 +81,6 @@ const Tasks = ({ tasks, onAddTask, onUpdateTask, onDeleteTask, onMoveTask, onOpe
   };
 
   const handleToggle = (id) => {
-     // Find task to toggle status
-     // We need to look up the task in the tree to know its current status?
-     // Or we can just pass the new status if we know it.
-     // TaskItem passes us the ID.
-     // We need to find the task to flip its boolean.
      const findTask = (list) => {
          for (const t of list) {
              if (t.id === id) return t;
@@ -115,18 +107,7 @@ const Tasks = ({ tasks, onAddTask, onUpdateTask, onDeleteTask, onMoveTask, onOpe
     if (!over) return;
     if (active.id === over.id) return;
 
-    // Helper: Find which Task ID is the parent of the drop target
-    // If over.id is 'root-droppable', new parent is null.
-    // If over IS a task, we might be nesting into it (if Shift held) 
-    // OR just reordering next to it (if not).
-    
-    // BUT we don't support reordering yet.
-    // So current logic:
-    // 1. Shift + Drop on Task -> Make Child of Task
-    // 2. Drop on 'root-droppable' -> Make Root (Parent = null)
-    // 3. Drop on 'placeholder-X' -> Make Child of X (Empty list)
-
-    let newParentId = undefined; // undefined means "no change" (e.g. reorder attempt) logic
+    let newParentId = undefined; 
 
     if (over.id === 'root-droppable') {
         onMoveTask(active.id, null);
@@ -144,10 +125,6 @@ const Tasks = ({ tasks, onAddTask, onUpdateTask, onDeleteTask, onMoveTask, onOpe
         onMoveTask(active.id, over.id);
         return;
     }
-
-    // Standard drag without Shift = Reordering (sibling)
-    // For now we do NOT support DB reordering. 
-    // We only support nesting changes.
   };
 
   const handleDragStart = (event) => {
@@ -157,8 +134,6 @@ const Tasks = ({ tasks, onAddTask, onUpdateTask, onDeleteTask, onMoveTask, onOpe
   const handleDragCancel = () => {
     // No backup needed
   };
-
-
 
   return (
     <div className="tasks-container">
@@ -175,15 +150,15 @@ const Tasks = ({ tasks, onAddTask, onUpdateTask, onDeleteTask, onMoveTask, onOpe
           placeholder="ENTER MAIN TASK SPECIFICATION..."
           onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
         />
-        <div className="lcars-date-wrapper" onClick={() => mainInputDateRef.current?.showPicker()}>
-             <input 
-              ref={mainInputDateRef}
-              type="datetime-local"
-              className="lcars-input-date-main"
-              value={inputDate}
-              onChange={(e) => setInputDate(e.target.value)}
-            />
+        
+        <div style={{ marginLeft: '10px' }}>
+           <LCARSDatePicker 
+             value={inputDate}
+             onChange={(e) => setInputDate(e.target.value)}
+             label="SET DATE"
+           />
         </div>
+
         <LCARSButton onClick={handleAdd} rounded="right" color="var(--lcars-orange)">
           ENGAGE
         </LCARSButton>

@@ -1,10 +1,11 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { SortableContext } from '@dnd-kit/sortable';
 import { useDroppable } from '@dnd-kit/core';
-import { ChevronRight, ChevronDown, GripVertical, Calendar, Trash2, CheckSquare, Square, FileText, Users, Image as ImageIcon, Check } from 'lucide-react';
+import { ChevronRight, ChevronDown, GripVertical, Trash2, CheckSquare, Square, FileText, Users, Image as ImageIcon } from 'lucide-react';
 import LCARSButton from '../components/LCARSButton';
+import LCARSDatePicker from '../components/LCARSDatePicker'; // New custom picker
 import { formatDateForInput } from '../utils/dateUtils';
 
 const TaskItem = ({ task, onDelete, onToggle, onAddSubtask, onUpdate, depth = 0, isShiftHeld, onOpenDossier }) => {
@@ -12,33 +13,17 @@ const TaskItem = ({ task, onDelete, onToggle, onAddSubtask, onUpdate, depth = 0,
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(task.text);
   
-  // Date Handling
-  // We keep a local draft of the date string (YYYY-MM-DDTHH:mm)
-  const initialDate = formatDateForInput(task.dueDate);
-  const [draftDate, setDraftDate] = useState(initialDate);
-  
-  // Update local draft if task prop changes externally (e.g. from fetch)
-  useEffect(() => {
-     // Only update if we are not actively editing a dirty date?
-     // Actually, if we just saved, the prop comes back updated.
-     const formattedProp = formatDateForInput(task.dueDate);
-     setDraftDate(formattedProp);
-  }, [task.dueDate]);
+  // Date Handling (Simplified for LCARSDatePicker)
+  const dateValue = formatDateForInput(task.dueDate);
+
+  const handleDateUpdate = (e) => {
+    // e.target.value is compatible with YYYY-MM-DDTHH:mm
+    onUpdate(task.id, { dueDate: e.target.value });
+  };
 
   const [subtaskDate, setSubtaskDate] = useState('');
   const [showSubInput, setShowSubInput] = useState(false);
   const [subtaskInput, setSubtaskInput] = useState('');
-
-  const dateInputRef = useRef(null);
-  const subDateInputRef = useRef(null);
-
-  const openDatePicker = (ref) => {
-    try {
-      ref.current?.showPicker();
-    } catch (e) {
-      console.log('DatePicker error:', e);
-    }
-  };
 
   // Check for content
   const hasProtocol = task.details && task.details.trim().length > 0;
@@ -99,29 +84,13 @@ const TaskItem = ({ task, onDelete, onToggle, onAddSubtask, onUpdate, depth = 0,
 
   const handleAddSub = () => {
     if (!subtaskInput.trim()) return;
-    onAddSubtask(task.id, subtaskInput, subtaskDate); // subtaskDate is already draft format
+    onAddSubtask(task.id, subtaskInput, subtaskDate);
     
     setSubtaskInput('');
     setSubtaskDate('');
     setShowSubInput(false);
     setIsExpanded(true);
   };
-
-  // Date Change Handler: Just update local state
-  const handleDateChange = (e) => {
-      setDraftDate(e.target.value);
-  };
-
-  // Date Save Handler: Push to Database
-  const saveDate = () => {
-      // NOTE: We pass the draftDate (Local Format)
-      // App.jsx will handle conversion to Storage Format (ISO/UTC)
-      onUpdate(task.id, { dueDate: draftDate });
-  };
-
-  // Determine if date is dirty
-  // We compare draftDate against formatted initial prop
-  const dateIsDirty = draftDate !== formatDateForInput(task.dueDate);
 
   return (
     <div style={style} className="task-wrapper">
@@ -164,37 +133,12 @@ const TaskItem = ({ task, onDelete, onToggle, onAddSubtask, onUpdate, depth = 0,
           </div>
 
           <div className="task-meta">
-             <div className="date-picker-container" onClick={() => !dateIsDirty && openDatePicker(dateInputRef)}>
-                <Calendar size={14} color="var(--lcars-tan)" />
-                <input 
-                  ref={dateInputRef}
-                  type="datetime-local" 
-                  className="lcars-date-input"
-                  value={draftDate}
-                  onChange={handleDateChange}
+             <div onClick={(e) => e.stopPropagation()}>
+                <LCARSDatePicker 
+                    value={dateValue}
+                    onChange={handleDateUpdate}
+                    label="NO DATE"
                 />
-                {dateIsDirty && (
-                    <button 
-                        className="save-date-btn" 
-                        onClick={(e) => { e.stopPropagation(); saveDate(); }}
-                        title="SAVE DATE CHANGES"
-                        style={{ 
-                            background: 'var(--lcars-orange)', 
-                            border: 'none', 
-                            borderRadius: '4px', /* Rounded for attention */
-                            color: 'black',
-                            cursor: 'pointer',
-                            display: 'flex', 
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            padding: '4px',
-                            marginLeft: '8px',
-                            transition: 'transform 0.1s'
-                        }}
-                    >
-                        <Check size={18} strokeWidth={3} />
-                    </button>
-                )}
              </div>
           </div>
         </div>
@@ -243,14 +187,11 @@ const TaskItem = ({ task, onDelete, onToggle, onAddSubtask, onUpdate, depth = 0,
                 onKeyDown={(e) => e.key === 'Enter' && handleAddSub()}
                 autoFocus
               />
-               <div className="date-picker-container" onClick={() => openDatePicker(subDateInputRef)}>
-                    <Calendar size={14} color="var(--lcars-tan)" />
-                    <input 
-                      ref={subDateInputRef}
-                      type="datetime-local" 
-                      className="lcars-date-input"
-                      value={subtaskDate}
-                      onChange={(e) => setSubtaskDate(e.target.value)}
+               <div style={{ marginLeft: '5px' }}>
+                   <LCARSDatePicker 
+                        value={subtaskDate}
+                        onChange={(e) => setSubtaskDate(e.target.value)}
+                        label="DUE DATE"
                     />
                </div>
                <LCARSButton onClick={handleAddSub} scale={0.6} color="var(--lcars-orange)" rounded="right">ADD</LCARSButton>
