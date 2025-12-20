@@ -64,6 +64,7 @@ function App() {
       .from('tasks')
       .select('*')
       .eq('user_id', session.user.id)
+      .order('due_date', { ascending: true, nullsFirst: false })
       .order('created_at', { ascending: true });
 
     if (error) {
