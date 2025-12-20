@@ -19,9 +19,10 @@
     - [x] **Task Indicators**: Added icons (Protocol, Personnel, Visuals) to task items. (Pending refinement).
     - [x] **LCARS Layout**: Implemented dynamic color theming.
     - [x] **Sidebar**: Added "active break" styling.
+    - [x] **Custom Date Picker**: Implemented `LCARSDatePicker` with embedded "ENGAGE" button for explicit saving.
 
 ## Critical Issues
-- [x] **Task Due Dates**: Fixed `addTask` to accept due dates and verified `updateTask` mapping.
+- [x] **Task Due Dates**: Fixed persistence, timezone shifting (UTC/Local conversion), and Calendar display issues.
 
 ## Historical Fixes
 - Fixed screen blackout when clicking "Tasks" (missing `useSortable`).
@@ -34,3 +35,4 @@
 - [x] **Date Picker UX**: Improved hit areas to automatically open the date picker on click for better usability (Tasks and Subtasks).
 - [ ] **Sound Effects**: Add LCARS interface sounds for interactions (clicks, drag releases).
 - [ ] **Mobile Responsiveness**: Verify drag and drop behavior on touch devices.
+- [ ] **Date Picker Styling**: Refine the visual appearance of the new popup calendar (User Request).
