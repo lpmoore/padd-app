@@ -110,11 +110,7 @@ function App() {
     }
 
     setActiveTab(id);
-    setNavItems(prevItems => {
-      const activeItem = prevItems.find(item => item.id === id);
-      const otherItems = prevItems.filter(item => item.id !== id);
-      return [activeItem, ...otherItems];
-    });
+    // Removed reordering logic to keep sidebar buttons static
   };
 
   // CRUD Operations
