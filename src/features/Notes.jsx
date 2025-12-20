@@ -1,17 +1,43 @@
 import React, { useState, useEffect } from 'react';
+import { supabase } from '../lib/supabase';
 import LCARSButton from '../components/LCARSButton';
 import './Notes.css';
 
 const Notes = () => {
-  const [notes, setNotes] = useState(() => {
-    const saved = localStorage.getItem('padd-notes');
-    return saved ? JSON.parse(saved) : [{ id: 1, title: 'CAPTAIN\'S LOG', content: 'Stardate 4755. The crew is performing admirably...' }];
-  });
-  const [activeNoteId, setActiveNoteId] = useState(notes[0]?.id || null);
+  const [notes, setNotes] = useState([]);
+  const [activeNoteId, setActiveNoteId] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState('EDIT'); // 'EDIT' | 'READ'
   const [currentMatchIndex, setCurrentMatchIndex] = useState(0);
   const [matches, setMatches] = useState([]); // Array of match indices/ids for navigation
+  const [session, setSession] = useState(null);
+
+  // Get Session
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+        setSession(session);
+    });
+  }, []);
+
+  // Fetch Notes on Session Load
+  useEffect(() => {
+    if (session) fetchNotes();
+  }, [session]);
+
+  const fetchNotes = async () => {
+      const { data, error } = await supabase
+          .from('notes')
+          .select('*')
+          .order('created_at', { ascending: false });
+      
+      if (error) console.error('Error fetching notes:', error);
+      else {
+          setNotes(data || []);
+          if (data && data.length > 0 && !activeNoteId) {
+              setActiveNoteId(data[0].id);
+          }
+      }
+  };
 
   // Reset view mode when changing notes
   useEffect(() => {
@@ -49,41 +75,79 @@ const Notes = () => {
       return note.matchCount > 0;
   });
 
+  // Auto-Save Logic (Debounced)
   useEffect(() => {
-    localStorage.setItem('padd-notes', JSON.stringify(notes));
-  }, [notes]);
+      if (!activeNoteId || !session) return;
+      const noteToSave = notes.find(n => n.id === activeNoteId);
+      if (!noteToSave) return;
+
+      const timer = setTimeout(async () => {
+          const { error } = await supabase
+            .from('notes')
+            .update({ 
+                title: noteToSave.title, 
+                content: noteToSave.content,
+                updated_at: new Date() 
+            })
+            .eq('id', activeNoteId);
+            
+          if (error) console.error("Error auto-saving note:", error);
+      }, 1000);
+
+      return () => clearTimeout(timer);
+  }, [notes, activeNoteId, session]);
 
   const activeNote = notes.find(n => n.id === activeNoteId);
-  // Ensure we can still see the active note even if it's filtered out? 
-  // Standard behavior is probably to deselect if not in results, OR just show results.
-  // For now, simple standard list.
-  // Calculate total results found
   const totalResults = filteredNotes.length;
-  
-  // Determine if active note is in the search results
-  // If search matches exist (filteredNotes > 0) AND the active note isn't one of them -> Dim it
   const isDimmed = searchQuery && filteredNotes.length > 0 && !filteredNotes.find(n => n.id === activeNoteId);
 
-  const handleNewNote = () => {
+  const handleNewNote = async () => {
+    if (!session) return;
+
     const newNote = {
-      id: Date.now(),
+      user_id: session.user.id,
       title: 'NEW ENTRY',
       content: ''
     };
-    setNotes([newNote, ...notes]);
-    setActiveNoteId(newNote.id);
+
+    const { data, error } = await supabase
+        .from('notes')
+        .insert(newNote)
+        .select()
+        .single();
+
+    if (error) {
+        console.error('Error creating note:', error);
+        alert('Failed to create note');
+    } else {
+        setNotes([data, ...notes]);
+        setActiveNoteId(data.id);
+    }
   };
 
   const updateActiveNote = (field, value) => {
+    // Optimistic Update
     setNotes(notes.map(n => n.id === activeNoteId ? { ...n, [field]: value } : n));
   };
 
-  const deleteNote = (e, id) => {
+  const deleteNote = async (e, id) => {
     e.stopPropagation();
-    const newNotes = notes.filter(n => n.id !== id);
-    setNotes(newNotes);
-    if (activeNoteId === id) {
-        setActiveNoteId(newNotes[0]?.id || null);
+    if (!confirm('Are you sure you want to delete this log entry?')) return;
+
+    const { error } = await supabase
+        .from('notes')
+        .delete()
+        .eq('id', id);
+
+    if (error) {
+        console.error('Error deleting note:', error);
+        alert('Failed to delete note');
+    } else {
+        const newNotes = notes.filter(n => n.id !== id);
+        setNotes(newNotes);
+        if (activeNoteId === id) {
+            setActiveNoteId(newNotes[0]?.id || null);
+        }
     }
   };
 
@@ -190,13 +254,13 @@ const Notes = () => {
             {viewMode === 'EDIT' ? (
                 <textarea
                   className="note-content-input"
-                  value={activeNote.content}
+                  value={activeNote.content || ''}
                   onChange={(e) => updateActiveNote('content', e.target.value)}
                   placeholder="Start typing..."
                 />
             ) : (
                 <HighlightView 
-                    content={activeNote.content} 
+                    content={activeNote.content || ''} 
                     query={searchQuery} 
                     currentMatchIndex={currentMatchIndex}
                     onMatchesFound={(foundMatches) => setMatches(foundMatches)}

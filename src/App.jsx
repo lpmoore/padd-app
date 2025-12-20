@@ -1,38 +1,113 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { supabase } from './lib/supabase';
+import Auth from './features/Auth';
 import LCARSLayout from './components/LCARSLayout';
 import LCARSButton from './components/LCARSButton';
 import Tasks from './features/Tasks';
 import Calendar from './features/Calendar';
 import Notes from './features/Notes';
 import Library from './features/Library';
-
-const INITIAL_NAV_ITEMS = [
-  { id: 'TASKS', label: 'TASKS', color: 'var(--lcars-cyan)' }, // Primary Light Blue
-  { id: 'CALENDAR', label: 'CALENDAR', color: 'var(--lcars-teal)' }, // Teal
-  { id: 'NOTES', label: 'NOTES', color: 'var(--lcars-ice-blue)' }, // Ice Blue
-  { id: 'LIBRARY', label: 'LIBRARY', color: 'var(--lcars-periwinkle)' }, // Periwinkle
-];
-
 import TaskDossier from './features/TaskDossier';
 
+const INITIAL_NAV_ITEMS = [
+  { id: 'TASKS', label: 'TASKS', color: 'var(--lcars-cyan)' }, 
+  { id: 'CALENDAR', label: 'CALENDAR', color: 'var(--lcars-teal)' }, 
+  { id: 'NOTES', label: 'NOTES', color: 'var(--lcars-ice-blue)' }, 
+  { id: 'LIBRARY', label: 'LIBRARY', color: 'var(--lcars-periwinkle)' }, 
+  { id: 'LOGOUT', label: 'LOGOUT', color: 'var(--lcars-red)' }, // Added Logout
+];
+
 function App() {
+  const [session, setSession] = useState(null);
   const [activeTab, setActiveTab] = useState('TASKS');
   const [navItems, setNavItems] = useState(INITIAL_NAV_ITEMS);
 
-  // Lifted State for Tasks
-  const [tasks, setTasks] = useState(() => {
-    const saved = localStorage.getItem('padd-tasks-v2');
-    return saved ? JSON.parse(saved) : []; 
-  });
+  // Auth Session Management
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
 
-  // Dossier State
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // Data Fetching & Realtime Subscription
+  const [tasks, setTasks] = useState([]);
+
+  useEffect(() => {
+    if (!session) return;
+
+    fetchTasks();
+
+    const channel = supabase
+      .channel('tasks_channel')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'tasks' }, () => {
+        fetchTasks();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [session]);
+
+  const fetchTasks = async () => {
+    const { data, error } = await supabase
+      .from('tasks')
+      .select('*')
+      .eq('user_id', session.user.id) // Security: Only fetch own tasks
+      .order('created_at', { ascending: true });
+
+    if (error) {
+      console.error('Error fetching tasks:', error);
+    } else {
+      setTasks(buildTaskTree(data));
+    }
+  };
+
+  // Convert flat DB list (with parent_id) to nested tree
+  const buildTaskTree = (flatTasks) => {
+    const taskMap = {};
+    const rootTasks = [];
+
+    // 1. Initialize map
+    flatTasks.forEach(t => {
+      taskMap[t.id] = { 
+          ...t, 
+          // Map snake_case DB fields to camelCase UI props if needed
+          dueDate: t.due_date, 
+          subtasks: [] 
+      };
+    });
+
+    // 2. Build tree
+    flatTasks.forEach(t => {
+      if (t.parent_id) {
+        if (taskMap[t.parent_id]) {
+            taskMap[t.parent_id].subtasks.push(taskMap[t.id]);
+        }
+      } else {
+        rootTasks.push(taskMap[t.id]);
+      }
+    });
+
+    return rootTasks;
+  };
+
   const [activeDossierTaskId, setActiveDossierTaskId] = useState(null);
 
-  React.useEffect(() => {
-    localStorage.setItem('padd-tasks-v2', JSON.stringify(tasks));
-  }, [tasks]);
+  const handleNavClick = async (id) => {
+    if (id === 'LOGOUT') {
+        await supabase.auth.signOut();
+        return;
+    }
 
-  const handleNavClick = (id) => {
     setActiveTab(id);
     setNavItems(prevItems => {
       const activeItem = prevItems.find(item => item.id === id);
@@ -41,23 +116,44 @@ function App() {
     });
   };
 
-  // Helper to update a single task (deep update)
-  const updateTask = (id, updates) => {
-      const updateRecursively = (list) => {
-      return list.map(t => {
-        if (t.id === id) {
-          return { ...t, ...updates };
-        }
-        if (t.subtasks && t.subtasks.length > 0) {
-            return { ...t, subtasks: updateRecursively(t.subtasks) };
-        }
-        return t;
+  // CRUD Operations
+  const addTask = async (text, parentId = null) => {
+      const { data, error } = await supabase.from('tasks').insert({
+          user_id: session.user.id,
+          text,
+          parent_id: parentId
       });
-    };
-    setTasks(updateRecursively(tasks));
+      if (error) console.error('Error adding task:', error);
+      else fetchTasks();
+  };
+
+  const updateTask = async (id, updates) => {
+      const dbUpdates = {};
+      // Map UI fields to DB fields
+      if (updates.text !== undefined) dbUpdates.text = updates.text;
+      if (updates.completed !== undefined) dbUpdates.completed = updates.completed;
+      if (updates.dueDate !== undefined) dbUpdates.due_date = updates.dueDate;
+      if (updates.details !== undefined) dbUpdates.details = updates.details;
+      if (updates.personnel !== undefined) dbUpdates.personnel = updates.personnel;
+      if (updates.images !== undefined) dbUpdates.images = updates.images;
+      
+      const { error } = await supabase.from('tasks').update(dbUpdates).eq('id', id);
+      if (error) console.error('Error updating task:', error);
+      else fetchTasks();
+  };
+
+  const deleteTask = async (id) => {
+      const { error } = await supabase.from('tasks').delete().eq('id', id);
+      if (error) console.error('Error deleting task:', error);
+      else fetchTasks();
+  };
+
+  const moveTask = async (id, newParentId) => {
+      const { error } = await supabase.from('tasks').update({ parent_id: newParentId }).eq('id', id);
+      if (error) console.error('Error moving task:', error);
+      else fetchTasks();
   };
   
-  // Helper to find a task object by ID
   const findTask = (id, list) => {
       for (const t of list) {
           if (t.id === id) return t;
@@ -71,6 +167,10 @@ function App() {
 
   const activeDossierTask = activeDossierTaskId ? findTask(activeDossierTaskId, tasks) : null;
 
+  if (!session) {
+      return <Auth />;
+  }
+
   return (
     <LCARSLayout 
       title="PADD 4755"
@@ -83,7 +183,10 @@ function App() {
         {activeTab === 'TASKS' && (
             <Tasks 
                 tasks={tasks} 
-                setTasks={setTasks} 
+                onAddTask={addTask}
+                onUpdateTask={updateTask}
+                onDeleteTask={deleteTask}
+                onMoveTask={moveTask}
                 onOpenDossier={setActiveDossierTaskId} 
             />
         )}
@@ -91,12 +194,12 @@ function App() {
             <Calendar 
                 tasks={tasks} 
                 onOpenDossier={setActiveDossierTaskId}
+                // Calendar might need update capabilities later
             />
         )}
         {activeTab === 'NOTES' && <Notes />}
         {activeTab === 'LIBRARY' && <Library />}
         
-        {/* Render Dossier Modal if active */}
         {activeDossierTask && (
             <TaskDossier 
                 task={activeDossierTask}

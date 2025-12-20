@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { supabase } from '../lib/supabase';
 import LCARSButton from '../components/LCARSButton';
 import './TaskDossier.css';
 
@@ -78,6 +79,8 @@ const TaskDossier = ({ task, onClose, onUpdate }) => {
         setActivePerson(null);
     };
 
+    // Use Base64 for personnel images for now (simpler migration)
+    // Future: Migrate this to storage too
     const handlePersonImageSelect = (e) => {
         const file = e.target.files[0];
         if (!file) return;
@@ -95,26 +98,46 @@ const TaskDossier = ({ task, onClose, onUpdate }) => {
         }
     };
 
-    const processFiles = (files) => {
-        files.forEach(file => {
+    const processFiles = async (files) => {
+        const newImageUrls = [];
+
+        for (const file of files) {
             // Validate File Type
             if (!file.type.match(/^image\/(jpeg|png|gif|webp)$/)) {
                 alert(`FORMAT NOT SUPPORTED: ${file.name}\n प्लीज USE: JPG, PNG, GIF, WEBP`);
-                return;
+                continue;
             }
 
-            // Validate File Size (2MB Limit for LocalStorage safety)
+            // Validate File Size (2MB Limit)
             if (file.size > 2 * 1024 * 1024) {
                 alert(`FILE TOO LARGE: ${file.name}\nMAX SIZE: 2MB`);
-                return;
+                continue;
             }
             
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setImages(prev => [...prev, reader.result]);
-            };
-            reader.readAsDataURL(file);
-        });
+            // Upload to Supabase Storage
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${task.id}/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+
+            const { error: uploadError } = await supabase.storage
+                .from('task-images')
+                .upload(fileName, file);
+
+            if (uploadError) {
+                console.error('Error uploading image:', uploadError);
+                alert(`FAILED TO UPLOAD: ${file.name}`);
+                continue;
+            }
+
+            const { data: { publicUrl } } = supabase.storage
+                .from('task-images')
+                .getPublicUrl(fileName);
+            
+            newImageUrls.push(publicUrl);
+        }
+        
+        if (newImageUrls.length > 0) {
+            setImages(prev => [...prev, ...newImageUrls]);
+        }
     };
 
     const handleDragOver = (e) => {

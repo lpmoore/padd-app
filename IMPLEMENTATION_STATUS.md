@@ -3,6 +3,11 @@
 *NOTE: This file should be updated after every successful bug fix or feature completion.*
 
 ## Recent Progress & Fixes
+- **Backend Migration (Supabase)**:
+    - [x] **Auth**: Implemented Email/Password authentication using Supabase Auth.
+    - [x] **Data**: Migrated `Tasks` and `Notes` from localStorage to Supabase Database (`postgres`).
+    - [x] **Storage**: Implemented Supabase Storage for Task Dossier images (`task-images` bucket).
+    - [x] **Notes**: Added auto-save and search functionality for cloud-stored notes.
 - **Drag and Drop / Nesting**:
     - [x] Fixed syntax error in `Tasks.jsx` causing startup failure.
     - [x] Fixed "return outside of function" error by removing stale code.
@@ -19,6 +24,7 @@
 - Fixed tasks disappearing during rapid dragging (added backup/restore).
 
 ## Upcoming / Backlog
+- [ ] **UI Enhancements**: Add task content icons and redesign active tab layout.
 - [x] **Subtask Dates**: Wired up `onAddSubtask` to accept `dueDate`. Verified persistence.
 - [x] **Date Picker UX**: Improved hit areas to automatically open the date picker on click for better usability (Tasks and Subtasks).
 - [ ] **Sound Effects**: Add LCARS interface sounds for interactions (clicks, drag releases).
