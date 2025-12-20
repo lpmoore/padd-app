@@ -12,10 +12,29 @@ const TaskDossier = ({ task, onClose, onUpdate }) => {
     const [images, setImages] = useState(task.images || []);
     
     const [activePerson, setActivePerson] = useState(null);
+    const [activeImageIndex, setActiveImageIndex] = useState(null); // Lightbox state
     const personImageInputRef = React.useRef(null);
 
     // Use a ref for the hidden file input
     const fileInputRef = React.useRef(null);
+
+    // Lightbox Keyboard Navigation
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (activeImageIndex === null) return;
+
+            if (e.key === 'Escape' || e.key === 'Enter') {
+                setActiveImageIndex(null);
+            } else if (e.key === 'ArrowLeft') {
+                setActiveImageIndex(prev => (prev > 0 ? prev - 1 : images.length - 1));
+            } else if (e.key === 'ArrowRight') {
+                setActiveImageIndex(prev => (prev < images.length - 1 ? prev + 1 : 0));
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [activeImageIndex, images.length]);
 
     // Auto-save effect logic
     useEffect(() => {
@@ -78,7 +97,17 @@ const TaskDossier = ({ task, onClose, onUpdate }) => {
 
     const processFiles = (files) => {
         files.forEach(file => {
-            if (!file.type.startsWith('image/')) return;
+            // Validate File Type
+            if (!file.type.match(/^image\/(jpeg|png|gif|webp)$/)) {
+                alert(`FORMAT NOT SUPPORTED: ${file.name}\n प्लीज USE: JPG, PNG, GIF, WEBP`);
+                return;
+            }
+
+            // Validate File Size (2MB Limit for LocalStorage safety)
+            if (file.size > 2 * 1024 * 1024) {
+                alert(`FILE TOO LARGE: ${file.name}\nMAX SIZE: 2MB`);
+                return;
+            }
             
             const reader = new FileReader();
             reader.onloadend = () => {
@@ -180,12 +209,18 @@ const TaskDossier = ({ task, onClose, onUpdate }) => {
                                 style={{ minHeight: '200px' }} // Ensure hit area is large enough
                             >
                                 {images.map((img, idx) => (
-                                    <div key={idx} className="visual-item" style={{ backgroundImage: `url(${img})` }}>
-                                         <div style={{ position: 'absolute', top: 0, right: 0, background: 'black', cursor: 'pointer', padding: '5px' }} onClick={() => setImages(images.filter((_, i) => i !== idx))}>X</div>
+                                    <div key={idx} className="visual-item" style={{ backgroundImage: `url(${img})` }} onClick={() => setActiveImageIndex(idx)}>
+                                         <div 
+                                            style={{ position: 'absolute', top: 0, right: 0, background: 'black', cursor: 'pointer', padding: '5px', zIndex: 5 }} 
+                                            onClick={(e) => { e.stopPropagation(); setImages(images.filter((_, i) => i !== idx)); }}
+                                        >
+                                            X
+                                        </div>
                                     </div>
                                 ))}
                                 <div className="visual-add-btn" onClick={handleAddImageClick}>
                                     <span>+ UPLOAD VISUAL</span>
+                                    <span style={{fontSize:'0.6rem', marginTop:'5px', color:'var(--lcars-blue)'}}>JPG/PNG/GIF • MAX 2MB</span>
                                 </div>
                             </div>
                             
@@ -204,6 +239,7 @@ const TaskDossier = ({ task, onClose, onUpdate }) => {
                 {/* Personnel Detail Overlay (Bio-bed style) */}
                 {activePerson && (
                     <div className="personnel-detail-overlay">
+                        {/* ... existing personnel detail code ... */}
                         <div className="detail-bio-header">
                             <h3 style={{margin:0}}>PERSONNEL RECORD: {activePerson.name.toUpperCase() || 'NEW ENTRY'}</h3>
                             <div style={{display:'flex', gap:'10px'}}>
@@ -280,6 +316,37 @@ const TaskDossier = ({ task, onClose, onUpdate }) => {
                                         onChange={(e) => updateActivePersonStats('otherFacts', e.target.value)}
                                     />
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Lightbox Overlay */}
+                {activeImageIndex !== null && (
+                    <div className="lightbox-overlay" onClick={() => setActiveImageIndex(null)}>
+                        <div className="lightbox-content" onClick={e => e.stopPropagation()}>
+                            <button 
+                                className="lightbox-nav-btn nav-prev" 
+                                onClick={() => setActiveImageIndex(prev => (prev > 0 ? prev - 1 : images.length - 1))}
+                            >
+                                &#9664;
+                            </button>
+                            
+                            <img 
+                                src={images[activeImageIndex]} 
+                                className="lightbox-image" 
+                                alt="Visual Log" 
+                            />
+                            
+                            <button 
+                                className="lightbox-nav-btn nav-next" 
+                                onClick={() => setActiveImageIndex(prev => (prev < images.length - 1 ? prev + 1 : 0))}
+                            >
+                                &#9654;
+                            </button>
+                            
+                            <div className="lightbox-close-hint">
+                                PRESS ESC OR ENTER TO CLOSE
                             </div>
                         </div>
                     </div>
