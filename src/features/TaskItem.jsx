@@ -1,15 +1,27 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { SortableContext } from '@dnd-kit/sortable';
 import { useDroppable } from '@dnd-kit/core';
-import { ChevronRight, ChevronDown, GripVertical, Calendar, Trash2, CheckSquare, Square, FileText, Users, Image as ImageIcon } from 'lucide-react';
+import { ChevronRight, ChevronDown, GripVertical, Calendar, Trash2, CheckSquare, Square, FileText, Users, Image as ImageIcon, Check } from 'lucide-react';
 import LCARSButton from '../components/LCARSButton';
+import { formatDateForInput } from '../utils/dateUtils';
 
 const TaskItem = ({ task, onDelete, onToggle, onAddSubtask, onUpdate, depth = 0, isShiftHeld, onOpenDossier }) => {
   const [isExpanded, setIsExpanded] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(task.text);
+  
+  // Date Handling
+  // We keep a local draft of the date string (YYYY-MM-DDTHH:mm)
+  const initialDate = formatDateForInput(task.dueDate);
+  const [draftDate, setDraftDate] = useState(initialDate);
+  
+  // Update local draft if task prop changes externally
+  useEffect(() => {
+      setDraftDate(formatDateForInput(task.dueDate));
+  }, [task.dueDate]);
+
   const [subtaskDate, setSubtaskDate] = useState('');
   const [showSubInput, setShowSubInput] = useState(false);
   const [subtaskInput, setSubtaskInput] = useState('');
@@ -30,7 +42,7 @@ const TaskItem = ({ task, onDelete, onToggle, onAddSubtask, onUpdate, depth = 0,
   const hasPersonnel = task.personnel && task.personnel.length > 0;
   const hasVisuals = task.images && task.images.length > 0;
 
-  // Drag and Drop - Sortable for dragging and reordering
+  // Drag and Drop
   const {
     attributes,
     listeners,
@@ -40,28 +52,23 @@ const TaskItem = ({ task, onDelete, onToggle, onAddSubtask, onUpdate, depth = 0,
     isDragging,
   } = useSortable({ id: task.id });
 
-  // Also make this a drop target for nesting
   const { setNodeRef: setDroppableRef, isOver } = useDroppable({
     id: task.id,
   });
 
-  // Combine both refs
   const setNodeRef = (node) => {
     setSortableRef(node);
     setDroppableRef(node);
   };
 
-  // Dynamic style based on drag state
   let backgroundStyle = undefined;
   let borderStyle = undefined;
 
   if (isOver && !isDragging) {
       if (isShiftHeld) {
-          // Nesting indicator: Strong highlight or indentation cue
-          backgroundStyle = 'rgba(255, 153, 0, 0.2)'; // Orange nesting tint
+          backgroundStyle = 'rgba(255, 153, 0, 0.2)'; 
           borderStyle = '2px dashed var(--lcars-orange)';
       } else {
-          // Reordering indicator: Standard hover
           backgroundStyle = 'rgba(89, 195, 234, 0.1)'; 
       }
   }
@@ -74,7 +81,6 @@ const TaskItem = ({ task, onDelete, onToggle, onAddSubtask, onUpdate, depth = 0,
     border: borderStyle,
   };
 
-  // Auto-expand when subtasks are added
   React.useEffect(() => {
     if (task.subtasks && task.subtasks.length > 0) {
       setIsExpanded(true);
@@ -90,16 +96,7 @@ const TaskItem = ({ task, onDelete, onToggle, onAddSubtask, onUpdate, depth = 0,
 
   const handleAddSub = () => {
     if (!subtaskInput.trim()) return;
-    // We need to update onAddSubtask to accept date if we want to support it
-    // But currently onAddSubtask only takes (parentId, text).
-    // Let's modify onAddSubtask signature in Tasks.jsx first? 
-    // Or just pass an object? 
-    // The user wants to add date THEN hit enter. 
-    // Existing: onAddSubtask(task.id, subtaskInput);
-    
-    // We'll pass an object or 3rd arg. Let's assume onAddSubtask can take 3rd arg `dueDate`.
-    // console.log('TaskItem calling onAddSubtask with:', { id: task.id, subtaskInput, subtaskDate });
-    onAddSubtask(task.id, subtaskInput, subtaskDate);
+    onAddSubtask(task.id, subtaskInput, subtaskDate); // subtaskDate is already draft format
     
     setSubtaskInput('');
     setSubtaskDate('');
@@ -107,9 +104,19 @@ const TaskItem = ({ task, onDelete, onToggle, onAddSubtask, onUpdate, depth = 0,
     setIsExpanded(true);
   };
 
+  // Date Change Handler: Just update local state
   const handleDateChange = (e) => {
-    onUpdate(task.id, { dueDate: e.target.value });
+      setDraftDate(e.target.value);
   };
+
+  // Date Save Handler: Push to Database
+  const saveDate = () => {
+      onUpdate(task.id, { dueDate: draftDate });
+  };
+
+  // Determine if date is dirty
+  // We compare draftDate against formatted initial prop
+  const dateIsDirty = draftDate !== formatDateForInput(task.dueDate);
 
   return (
     <div style={style} className="task-wrapper">
@@ -152,15 +159,25 @@ const TaskItem = ({ task, onDelete, onToggle, onAddSubtask, onUpdate, depth = 0,
           </div>
 
           <div className="task-meta">
-             <div className="date-picker-container" onClick={() => openDatePicker(dateInputRef)}>
+             <div className="date-picker-container" onClick={() => !dateIsDirty && openDatePicker(dateInputRef)}>
                 <Calendar size={14} color="var(--lcars-tan)" />
                 <input 
                   ref={dateInputRef}
                   type="datetime-local" 
                   className="lcars-date-input"
-                  value={task.dueDate || ''}
+                  value={draftDate}
                   onChange={handleDateChange}
                 />
+                {dateIsDirty && (
+                    <button 
+                        className="icon-btn save-date-btn" 
+                        onClick={(e) => { e.stopPropagation(); saveDate(); }}
+                        title="Save Date"
+                        style={{ padding: '0 4px', color: 'var(--lcars-orange)' }}
+                    >
+                        <Check size={16} />
+                    </button>
+                )}
              </div>
           </div>
         </div>
@@ -182,7 +199,7 @@ const TaskItem = ({ task, onDelete, onToggle, onAddSubtask, onUpdate, depth = 0,
                  INFO
                </LCARSButton>
            </div>
-
+           
            <LCARSButton 
             onClick={() => setShowSubInput(!showSubInput)}
             color="var(--lcars-blue)"
@@ -226,7 +243,6 @@ const TaskItem = ({ task, onDelete, onToggle, onAddSubtask, onUpdate, depth = 0,
 
       {isExpanded && (
         <div className="subtasks-list">
-
           {task.subtasks && task.subtasks.length > 0 ? (
             <SortableContext 
                 items={task.subtasks.map(t => t.id)}
