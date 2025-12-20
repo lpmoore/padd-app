@@ -8,6 +8,7 @@ import Calendar from './features/Calendar';
 import Notes from './features/Notes';
 import Library from './features/Library';
 import TaskDossier from './features/TaskDossier';
+import { formatDateForStorage } from './utils/dateUtils';
 
 const INITIAL_NAV_ITEMS = [
   { id: 'TASKS', label: 'TASKS', color: 'var(--lcars-cyan)' }, 
@@ -123,8 +124,8 @@ function App() {
           text,
           parent_id: parentId
       };
-      // Only add due_date if it is provided and not empty string
-      if (dueDate) insertPayload.due_date = dueDate;
+      // Convert Local Input String (YYYY-MM-DDTHH:mm) to UTC ISO String for Storage
+      if (dueDate) insertPayload.due_date = formatDateForStorage(dueDate);
 
       const { data, error } = await supabase.from('tasks').insert(insertPayload);
       if (error) console.error('Error adding task:', error);
@@ -136,7 +137,12 @@ function App() {
       // Map UI fields to DB fields
       if (updates.text !== undefined) dbUpdates.text = updates.text;
       if (updates.completed !== undefined) dbUpdates.completed = updates.completed;
-      if (updates.dueDate !== undefined) dbUpdates.due_date = updates.dueDate;
+      
+      // Convert Date
+      if (updates.dueDate !== undefined) {
+         dbUpdates.due_date = formatDateForStorage(updates.dueDate);
+      }
+      
       if (updates.details !== undefined) dbUpdates.details = updates.details;
       if (updates.personnel !== undefined) dbUpdates.personnel = updates.personnel;
       if (updates.images !== undefined) dbUpdates.images = updates.images;

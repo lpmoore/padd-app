@@ -26,3 +26,17 @@ export const formatDateForDisplay = (isoString) => {
     if (!isoString) return '';
     return new Date(isoString).toLocaleString();
 };
+
+export const formatDateForStorage = (localDateString) => {
+    if (!localDateString) return null;
+    try {
+        // Input is YYYY-MM-DDTHH:mm (Local)
+        // We want to create a Date object treating this as local time
+        const date = new Date(localDateString);
+        // toISOString() will convert to UTC
+        return date.toISOString();
+    } catch (e) {
+        console.error('Date storage formatting error:', e);
+        return null;
+    }
+};

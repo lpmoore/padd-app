@@ -17,9 +17,12 @@ const TaskItem = ({ task, onDelete, onToggle, onAddSubtask, onUpdate, depth = 0,
   const initialDate = formatDateForInput(task.dueDate);
   const [draftDate, setDraftDate] = useState(initialDate);
   
-  // Update local draft if task prop changes externally
+  // Update local draft if task prop changes externally (e.g. from fetch)
   useEffect(() => {
-      setDraftDate(formatDateForInput(task.dueDate));
+     // Only update if we are not actively editing a dirty date?
+     // Actually, if we just saved, the prop comes back updated.
+     const formattedProp = formatDateForInput(task.dueDate);
+     setDraftDate(formattedProp);
   }, [task.dueDate]);
 
   const [subtaskDate, setSubtaskDate] = useState('');
@@ -111,6 +114,8 @@ const TaskItem = ({ task, onDelete, onToggle, onAddSubtask, onUpdate, depth = 0,
 
   // Date Save Handler: Push to Database
   const saveDate = () => {
+      // NOTE: We pass the draftDate (Local Format)
+      // App.jsx will handle conversion to Storage Format (ISO/UTC)
       onUpdate(task.id, { dueDate: draftDate });
   };
 
@@ -170,12 +175,24 @@ const TaskItem = ({ task, onDelete, onToggle, onAddSubtask, onUpdate, depth = 0,
                 />
                 {dateIsDirty && (
                     <button 
-                        className="icon-btn save-date-btn" 
+                        className="save-date-btn" 
                         onClick={(e) => { e.stopPropagation(); saveDate(); }}
-                        title="Save Date"
-                        style={{ padding: '0 4px', color: 'var(--lcars-orange)' }}
+                        title="SAVE DATE CHANGES"
+                        style={{ 
+                            background: 'var(--lcars-orange)', 
+                            border: 'none', 
+                            borderRadius: '4px', /* Rounded for attention */
+                            color: 'black',
+                            cursor: 'pointer',
+                            display: 'flex', 
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            padding: '4px',
+                            marginLeft: '8px',
+                            transition: 'transform 0.1s'
+                        }}
                     >
-                        <Check size={16} />
+                        <Check size={18} strokeWidth={3} />
                     </button>
                 )}
              </div>
