@@ -218,13 +218,13 @@ const TaskDossier = ({ task, onClose, onUpdate }) => {
                 </div>
 
                 {/* READ ONLY Personnel Modal */}
-                {activePerson && (
+                 {activePerson && (
                     <div className="personnel-detail-overlay" onClick={() => setActivePerson(null)}>
-                        <div className="detail-bio-content" style={{maxWidth:'900px', width: '90%', margin:'auto', background:'black', border:'2px solid var(--lcars-orange)', padding:'20px', borderRadius:'20px'}} onClick={e => e.stopPropagation()}>
-                             <h3 style={{color:'var(--lcars-orange)',  marginTop:0, fontSize: '2rem'}}>{activePerson.name}</h3>
-                             <p style={{color:'var(--lcars-blue)', fontSize: '1.5rem'}}>{activePerson.rank}</p>
+                        <div className="detail-bio-content" style={{maxWidth:'1100px', width: '90%', margin:'auto', background:'black', border:'2px solid var(--lcars-orange)', padding:'30px', borderRadius:'20px'}} onClick={e => e.stopPropagation()}>
+                             <h3 style={{color:'var(--lcars-orange)',  marginTop:0, fontSize: '2.5rem'}}>{activePerson.name}</h3>
+                             <p style={{color:'var(--lcars-blue)', fontSize: '1.8rem'}}>{activePerson.rank}</p>
                              <hr style={{borderColor:'var(--lcars-tan)'}}/>
-                             <div style={{display:'flex', gap:'30px', marginTop:'20px', alignItems: 'flex-start'}}>
+                             <div style={{display:'flex', gap:'40px', marginTop:'20px', alignItems: 'flex-start'}}>
                                 <div style={{
                                     width:'300px', 
                                     height:'400px', 
@@ -233,9 +233,10 @@ const TaskDossier = ({ task, onClose, onUpdate }) => {
                                     backgroundSize:'contain', 
                                     backgroundRepeat: 'no-repeat',
                                     backgroundPosition: 'center',
-                                    border: '1px solid var(--lcars-blue)'
+                                    border: '1px solid var(--lcars-blue)',
+                                    flexShrink: 0
                                 }}></div>
-                                <div style={{flex:1, color:'var(--lcars-tan)', fontSize: '1.2rem', lineHeight: '1.6'}}>
+                                <div style={{flex:1, color:'var(--lcars-tan)', fontSize: '1.4rem', lineHeight: '1.6'}}>
                                     <p><strong>BIRTHPLACE:</strong> {activePerson.birthplace}</p>
                                     <p><strong>EDUCATION:</strong> {activePerson.education}</p>
                                     <p><strong>EXPERTISE:</strong> {activePerson.expertise}</p>
@@ -259,13 +260,25 @@ const TaskDossier = ({ task, onClose, onUpdate }) => {
                                  {allPersonnel.map(person => {
                                      const isAssigned = assignedPersonnel.some(p => p.id === person.id);
                                      return (
-                                         <div key={person.id} className="assignment-row" style={{display:'flex', alignItems:'center', gap:'15px', padding:'15px', background:'rgba(255,255,255,0.05)', fontSize: '1.2rem'}}>
+                                         <div key={person.id} className="assignment-row" style={{display:'flex', alignItems:'center', gap:'15px', padding:'10px', background:'rgba(255,255,255,0.05)', fontSize: '1.2rem'}}>
                                              <input 
                                                 type="checkbox" 
                                                 checked={isAssigned}
                                                 onChange={() => toggleAssignment(person.id, isAssigned)}
                                                 style={{width:'25px', height:'25px', flexShrink: 0, cursor: 'pointer'}}
                                              />
+                                             {/* Thumbnail */}
+                                             <div style={{
+                                                 width: '50px', 
+                                                 height: '50px', 
+                                                 background: '#222', 
+                                                 backgroundImage: `url(${person.image_url})`, 
+                                                 backgroundSize: 'cover', 
+                                                 backgroundPosition: 'center',
+                                                 border: '1px solid var(--lcars-tan)',
+                                                 flexShrink: 0
+                                             }}></div>
+
                                              <div style={{fontWeight:'bold', color: isAssigned ? 'var(--lcars-orange)' : 'var(--lcars-gray)', flex: 1}}>
                                                  {person.name} <span style={{fontWeight:'normal', fontSize:'0.8em', color: 'var(--lcars-blue)'}}>({person.rank})</span>
                                              </div>
