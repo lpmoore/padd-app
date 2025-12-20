@@ -16,18 +16,21 @@
     - [x] **UX**: Added "HOLD SHIFT TO NEST TASKS" instruction to the UI.
     - [x] **UX**: Added distinct visual feedback (Orange Dashed Border) when nesting is active vs. standard highlight for reordering.
 - **UI/Visuals**:
-    - [x] **Task Indicators**: Added icons (Protocol, Personnel, Visuals) to task items to indicate content presence.
-    - [x] **LCARS Layout**: Implemented dynamic color theming for the layout based on the active tab.
-    - [x] **Sidebar**: Added "active break" styling to sidebar buttons for better selected state visibility.
-    - [x] Implemented sidebar navigation with dynamic coloring and animation.
+    - [x] **Task Indicators**: Added icons (Protocol, Personnel, Visuals) to task items. (Pending refinement).
+    - [x] **LCARS Layout**: Implemented dynamic color theming.
+    - [x] **Sidebar**: Added "active break" styling.
+
+## Critical Issues
+- [ ] **Task Due Dates**: Dates are not persisting when creating subtasks or updating existing tasks. Requires immediate fix.
 
 ## Historical Fixes
 - Fixed screen blackout when clicking "Tasks" (missing `useSortable`).
 - Fixed tasks disappearing during rapid dragging (added backup/restore).
 
 ## Upcoming / Backlog
-- [ ] **Sidebar Persistence**: Ensure navigation buttons remain static/fixed in position during interactions.
-- [x] **Subtask Dates**: Wired up `onAddSubtask` to accept `dueDate`. Verified persistence.
+- [ ] **Icon Refinement**: enhancements to task icons (paused).
+- [ ] **Sidebar Persistence**: Ensure navigation buttons remain static/fixed keys.
+- [x] **Subtask Dates**: Wired up `onAddSubtask`. (Needs regression fix).
 - [x] **Date Picker UX**: Improved hit areas to automatically open the date picker on click for better usability (Tasks and Subtasks).
 - [ ] **Sound Effects**: Add LCARS interface sounds for interactions (clicks, drag releases).
 - [ ] **Mobile Responsiveness**: Verify drag and drop behavior on touch devices.
