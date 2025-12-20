@@ -224,7 +224,7 @@ const TaskDossier = ({ task, onClose, onUpdate }) => {
                              <h3 style={{color:'var(--lcars-orange)',  marginTop:0, fontSize: '2.5rem'}}>{activePerson.name}</h3>
                              <p style={{color:'var(--lcars-blue)', fontSize: '1.8rem'}}>{activePerson.rank}</p>
                              <hr style={{borderColor:'var(--lcars-tan)'}}/>
-                             <div style={{display:'flex', gap:'40px', marginTop:'20px', alignItems: 'flex-start'}}>
+                             <div style={{display:'flex', gap:'30px', marginTop:'20px', alignItems: 'flex-start'}}>
                                 <div style={{
                                     width:'300px', 
                                     height:'400px', 
@@ -236,7 +236,15 @@ const TaskDossier = ({ task, onClose, onUpdate }) => {
                                     border: '1px solid var(--lcars-blue)',
                                     flexShrink: 0
                                 }}></div>
-                                <div style={{flex:1, color:'var(--lcars-tan)', fontSize: '1.4rem', lineHeight: '1.6'}}>
+                                <div style={{
+                                    flex:1, 
+                                    color:'var(--lcars-tan)', 
+                                    fontSize: '1.4rem', 
+                                    lineHeight: '1.6', 
+                                    maxHeight: '400px', 
+                                    overflowY: 'auto',
+                                    paddingRight: '10px'
+                                }}>
                                     <p><strong>BIRTHPLACE:</strong> {activePerson.birthplace}</p>
                                     <p><strong>EDUCATION:</strong> {activePerson.education}</p>
                                     <p><strong>EXPERTISE:</strong> {activePerson.expertise}</p>

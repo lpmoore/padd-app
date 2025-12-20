@@ -183,15 +183,16 @@
 
 /* Section: Personnel Detail Modal */
 .personnel-detail-overlay {
-    position: absolute; /* Relative to dossier panel */
+    position: fixed; /* FIXED to viewport */
     top: 0;
     left: 0;
-    right: 0;
-    bottom: 0;
+    width: 100vw;
+    height: 100vh;
     background-color: rgba(0, 0, 0, 0.95);
-    z-index: 10;
+    z-index: 2100; /* Above dossier-overlay */
     display: flex;
-    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 /* Lightbox Styles */
 .lightbox-overlay {
