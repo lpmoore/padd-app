@@ -1,0 +1,128 @@
+
+.personnel-manager {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    color: var(--lcars-orange);
+}
+
+.pm-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid var(--lcars-blue);
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.pm-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+    overflow-y: auto;
+    padding-right: 10px;
+}
+
+.pm-card {
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 2px solid var(--lcars-tan);
+    border-radius: 0 0 20px 0;
+    display: flex;
+    flex-direction: row;
+    height: 100px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.pm-card:hover {
+    background-color: rgba(255, 153, 0, 0.1);
+    border-color: var(--lcars-orange);
+}
+
+.pm-avatar {
+    width: 80px;
+    height: 100%;
+    background-color: #000;
+    background-size: cover;
+    background-position: center;
+    border-right: 2px solid var(--lcars-tan);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--lcars-gray);
+    font-weight: bold;
+}
+
+.pm-info {
+    flex: 1;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.pm-name {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--lcars-orange);
+    margin-bottom: 5px;
+}
+
+.pm-rank {
+    font-size: 0.9rem;
+    color: var(--lcars-blue);
+}
+
+.pm-add-card {
+    border-style: dashed;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    color: var(--lcars-blue);
+    font-weight: bold;
+}
+
+.pm-add-card:hover {
+    color: var(--lcars-orange);
+    background-color: rgba(0,0,0,0.5);
+}
+
+/* Modal Styles reuse existing Dossier/App styles mostly, 
+   but specific tweaks for form layout here */
+.pm-form-grid {
+    display: flex;
+    gap: 20px;
+    height: 100%;
+}
+
+.pm-form-left {
+    width: 250px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.pm-form-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.pm-image-upload {
+    width: 100%;
+    aspect-ratio: 1;
+    background-color: #111;
+    border: 2px dashed var(--lcars-blue);
+    background-size: cover;
+    background-position: center;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--lcars-blue);
+}
+.pm-image-upload:hover {
+    border-color: var(--lcars-orange);
+    color: var(--lcars-orange);
+}

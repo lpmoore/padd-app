@@ -7,21 +7,21 @@ import Tasks from './features/Tasks';
 import Calendar from './features/Calendar';
 import Notes from './features/Notes';
 import Library from './features/Library';
+import Admin from './features/Admin'; // New Admin Feature
 import TaskDossier from './features/TaskDossier';
 import { formatDateForStorage } from './utils/dateUtils';
 
-// 1. Reordered as requested: Calendar, Tasks, Library, Notes
-// 2. Removed Logout (to be handled separately)
 const INITIAL_NAV_ITEMS = [
   { id: 'CALENDAR', label: 'CALENDAR', color: 'var(--lcars-teal)' }, 
   { id: 'TASKS', label: 'TASKS', color: 'var(--lcars-cyan)' }, 
+  { id: 'ADMIN', label: 'ADMIN', color: 'var(--lcars-orange)' }, 
   { id: 'LIBRARY', label: 'LIBRARY', color: 'var(--lcars-periwinkle)' }, 
   { id: 'NOTES', label: 'NOTES', color: 'var(--lcars-ice-blue)' }, 
 ];
 
 function App() {
   const [session, setSession] = useState(null);
-  const [activeTab, setActiveTab] = useState('CALENDAR'); // Default to top item? Or Keep Tasks? User put Calendar top.
+  const [activeTab, setActiveTab] = useState('CALENDAR');
   const [navItems, setNavItems] = useState(INITIAL_NAV_ITEMS);
 
   // Auth Session Management
@@ -63,7 +63,7 @@ function App() {
     const { data, error } = await supabase
       .from('tasks')
       .select('*')
-      .eq('user_id', session.user.id) // Security: Only fetch own tasks
+      .eq('user_id', session.user.id)
       .order('created_at', { ascending: true });
 
     if (error) {
@@ -73,22 +73,18 @@ function App() {
     }
   };
 
-  // Convert flat DB list (with parent_id) to nested tree
   const buildTaskTree = (flatTasks) => {
     const taskMap = {};
     const rootTasks = [];
 
-    // 1. Initialize map
     flatTasks.forEach(t => {
       taskMap[t.id] = { 
           ...t, 
-          // Map snake_case DB fields to camelCase UI props if needed
           dueDate: t.due_date, 
           subtasks: [] 
       };
     });
 
-    // 2. Build tree
     flatTasks.forEach(t => {
       if (t.parent_id) {
         if (taskMap[t.parent_id]) {
@@ -106,7 +102,6 @@ function App() {
 
   const handleNavClick = async (id) => {
     setActiveTab(id);
-    // No reordering
   };
 
   const handleLogout = async () => {
@@ -120,7 +115,6 @@ function App() {
           text,
           parent_id: parentId
       };
-      // Convert Local Input String (YYYY-MM-DDTHH:mm) to UTC ISO String for Storage
       if (dueDate) insertPayload.due_date = formatDateForStorage(dueDate);
 
       const { data, error } = await supabase.from('tasks').insert(insertPayload);
@@ -130,16 +124,15 @@ function App() {
 
   const updateTask = async (id, updates) => {
       const dbUpdates = {};
-      // Map UI fields to DB fields
       if (updates.text !== undefined) dbUpdates.text = updates.text;
       if (updates.completed !== undefined) dbUpdates.completed = updates.completed;
       
-      // Convert Date
       if (updates.dueDate !== undefined) {
          dbUpdates.due_date = formatDateForStorage(updates.dueDate);
       }
       
       if (updates.details !== undefined) dbUpdates.details = updates.details;
+      // Personnel update logic might move to TaskDossier entirely, but basic struct update remains
       if (updates.personnel !== undefined) dbUpdates.personnel = updates.personnel;
       if (updates.images !== undefined) dbUpdates.images = updates.images;
       
@@ -183,7 +176,7 @@ function App() {
       activeTab={activeTab}
       navItems={navItems}
       onNavClick={handleNavClick}
-      onLogout={handleLogout} // Pass logout handler
+      onLogout={handleLogout}
     >
       <div style={{ padding: '20px' }}>
         
@@ -197,11 +190,11 @@ function App() {
                 onOpenDossier={setActiveDossierTaskId} 
             />
         )}
+        {activeTab === 'ADMIN' && <Admin />}
         {activeTab === 'CALENDAR' && (
             <Calendar 
                 tasks={tasks} 
                 onOpenDossier={setActiveDossierTaskId}
-                // Calendar might need update capabilities later
             />
         )}
         {activeTab === 'NOTES' && <Notes />}
@@ -211,6 +204,7 @@ function App() {
             <TaskDossier 
                 task={activeDossierTask}
                 onClose={() => setActiveDossierTaskId(null)}
+                // We still pass onUpdate, but Personnel handling will change inside Dossier.
                 onUpdate={updateTask}
             />
         )}
