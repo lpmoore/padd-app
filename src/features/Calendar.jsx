@@ -17,11 +17,21 @@ const Calendar = ({ tasks = [], onOpenDossier }) => {
     ];
 
     const getTasksForDate = (y, m, d) => {
-        const checkStr = `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+        // y, m, d are Local Date components from the calendar grid
         const allTasks = [];
         const traverse = (list) => {
             list.forEach(t => {
-                if (t.dueDate && t.dueDate.startsWith(checkStr)) allTasks.push(t);
+                if (t.dueDate) {
+                    const taskDate = new Date(t.dueDate);
+                    // Check if taskDate (in Local time) matches the requested y, m, d
+                    if (
+                        taskDate.getFullYear() === y &&
+                        taskDate.getMonth() === m &&
+                        taskDate.getDate() === d
+                    ) {
+                        allTasks.push(t);
+                    }
+                }
                 if (t.subtasks) traverse(t.subtasks);
             });
         };
@@ -97,20 +107,25 @@ const Calendar = ({ tasks = [], onOpenDossier }) => {
                         <div className="detail-content">
                             {selectedDate.tasks.length > 0 ? (
                                 <ul className="detail-task-list">
-                                    {selectedDate.tasks.map(task => (
-                                        <li 
-                                            key={task.id} 
-                                            className="detail-task-item"
-                                            onClick={() => {
-                                                onOpenDossier(task.id);
-                                                closeDetail(); // Close detail to show Dossier
-                                            }}
-                                            style={{ cursor: 'pointer' }}
-                                        >
-                                            <span className="task-time">{task.dueDate ? task.dueDate.split('T')[1] : '--:--'}</span>
-                                            <span className="task-text">{task.text}</span>
-                                        </li>
-                                    ))}
+                                    {selectedDate.tasks.map(task => {
+                                        const timeStr = task.dueDate 
+                                            ? new Date(task.dueDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
+                                            : '--:--';
+                                        return (
+                                            <li 
+                                                key={task.id} 
+                                                className="detail-task-item"
+                                                onClick={() => {
+                                                    onOpenDossier(task.id);
+                                                    closeDetail(); // Close detail to show Dossier
+                                                }}
+                                                style={{ cursor: 'pointer' }}
+                                            >
+                                                <span className="task-time">{timeStr}</span>
+                                                <span className="task-text">{task.text}</span>
+                                            </li>
+                                        );
+                                    })}
                                 </ul>
                             ) : (
                                 <div className="no-tasks-msg">NO TASKS SCHEDULED</div>
