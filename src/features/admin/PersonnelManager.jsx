@@ -142,7 +142,7 @@ const PersonnelManager = () => {
 };
 
 // Sub-component for the Editor Modal
-const PersonnelEditor = ({ person, onSave, onCancel, onDelete }) => {
+function PersonnelEditor({ person, onSave, onCancel, onDelete }) {
     const [formData, setFormData] = useState({ ...person });
     const fileRef = useRef(null);
     const [uploading, setUploading] = useState(false);
@@ -181,25 +181,38 @@ const PersonnelEditor = ({ person, onSave, onCancel, onDelete }) => {
 
     return (
         <div className="dossier-overlay" onClick={onCancel}>
-            <div className="personnel-detail-overlay" onClick={e => e.stopPropagation()}>
-                <div className="detail-bio-header">
-                    <h3 style={{ margin: 0 }}>
+            <div className="pm-lcars-container" onClick={e => e.stopPropagation()}>
+                
+                {/* 1. Top Bar */}
+                <div className="pm-lcars-top-bar">
+                    <div className="pm-lcars-title">
                         {formData.id ? `EDIT RECORD: ${formData.name}` : 'NEW PERSONNEL FILE'}
-                    </h3>
-                    <div style={{ display: 'flex', gap: '10px' }}>
-                        {formData.id && (
-                             <LCARSButton onClick={() => { onDelete(formData.id); onCancel(); }} color="var(--lcars-red)">DELETE</LCARSButton>
-                        )}
-                         <LCARSButton onClick={onCancel} color="white">CANCEL</LCARSButton>
-                        <LCARSButton onClick={() => onSave(formData)} color="var(--lcars-orange)">SAVE RECORD</LCARSButton>
+                    </div>
+                    <div className="pm-lcars-bar-fill"></div>
+                </div>
+
+                {/* 2. Right Sidebar */}
+                <div className="pm-lcars-right-col">
+                    <div className="pm-lcars-elbow-top"></div>
+                    <div className="pm-lcars-sidebar-content">
+                         <div style={{display:'flex', flexDirection:'column', gap:'10px'}}>
+                            <LCARSButton onClick={() => onSave(formData)} color="var(--lcars-orange)" className="pm-lcars-sidebar-btn">SAVE</LCARSButton>
+                            <LCARSButton onClick={onCancel} color="white" className="pm-lcars-sidebar-btn">CANCEL</LCARSButton>
+                             {formData.id && (
+                                <LCARSButton onClick={() => { onDelete(formData.id); onCancel(); }} color="var(--lcars-red)" className="pm-lcars-sidebar-btn">DELETE</LCARSButton>
+                            )}
+                         </div>
+                         <div className="pm-lcars-sidebar-fill"></div>
                     </div>
                 </div>
 
-                <div className="detail-bio-content">
-                    <div className="pm-form-grid" style={{ width: '100%' }}>
-                        
-                        {/* Left Column: Image & Basic Info */}
-                        <div className="pm-form-left">
+                {/* 3. Main Content */}
+                <div className="pm-lcars-main-content">
+                    <div className="detail-bio-content" style={{ padding: 0 }}>
+                        <div className="pm-form-grid" style={{ width: '100%' }}>
+                            
+                            {/* Left Column: Image & Basic Info */}
+                            <div className="pm-form-left">
                             <div 
                                 className="pm-image-upload"
                                 style={formData.image_url ? { backgroundImage: `url(${formData.image_url})` } : {}}
@@ -272,7 +285,7 @@ const PersonnelEditor = ({ person, onSave, onCancel, onDelete }) => {
                                 />
                             </div>
                         </div>
-
+                    </div>
                     </div>
                 </div>
             </div>
@@ -280,27 +293,37 @@ const PersonnelEditor = ({ person, onSave, onCancel, onDelete }) => {
     );
 };
 
-export default PersonnelManager;
 
-const PersonnelViewer = ({ person, onClose, onEdit }) => {
+function PersonnelViewer({ person, onClose, onEdit }) {
     return (
         <div className="dossier-overlay" onClick={onClose}>
-            <div className="personnel-detail-overlay" onClick={e => e.stopPropagation()}>
-                <div className="detail-bio-header">
-                    <h3 style={{ margin: 0 }}>
-                        PERSONNEL FILE: {person.name}
-                    </h3>
-                    <div style={{ display: 'flex', gap: '10px' }}>
-                        <LCARSButton onClick={onClose} color="white">CLOSE</LCARSButton>
-                        <LCARSButton onClick={onEdit} color="var(--lcars-orange)">EDIT RECORD</LCARSButton>
+            <div className="pm-lcars-container" onClick={e => e.stopPropagation()}>
+                
+                {/* 1. Top Bar */}
+                <div className="pm-lcars-top-bar">
+                    <div className="pm-lcars-title">PERSONNEL FILE: {person.name}</div>
+                    <div className="pm-lcars-bar-fill"></div>
+                </div>
+
+                {/* 2. Right Sidebar */}
+                <div className="pm-lcars-right-col">
+                    <div className="pm-lcars-elbow-top"></div>
+                    <div className="pm-lcars-sidebar-content">
+                         <div style={{display:'flex', flexDirection:'column', gap:'10px'}}>
+                            <LCARSButton onClick={onEdit} color="var(--lcars-orange)" className="pm-lcars-sidebar-btn">EDIT</LCARSButton>
+                            <LCARSButton onClick={onClose} color="white" className="pm-lcars-sidebar-btn">CLOSE</LCARSButton>
+                         </div>
+                         <div className="pm-lcars-sidebar-fill"></div>
                     </div>
                 </div>
 
-                <div className="detail-bio-content">
-                    <div className="pm-form-grid" style={{ width: '100%' }}>
-                        
-                        {/* Left Column: Image & Basic Info */}
-                        <div className="pm-form-left">
+                {/* 3. Main Content */}
+                <div className="pm-lcars-main-content">
+                     <div className="detail-bio-content" style={{ padding: 0 }}>
+                        <div className="pm-form-grid" style={{ width: '100%' }}>
+                            
+                            {/* Left Column: Image & Basic Info */}
+                            <div className="pm-form-left">
                             <div 
                                 className="pm-image-upload"
                                 style={{ 
@@ -346,7 +369,10 @@ const PersonnelViewer = ({ person, onClose, onEdit }) => {
 
                     </div>
                 </div>
+                </div>
             </div>
         </div>
     );
 };
+
+export default PersonnelManager;

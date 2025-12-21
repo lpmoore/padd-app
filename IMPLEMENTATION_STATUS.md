@@ -19,7 +19,9 @@
     - [x] **Task Indicators**: Added icons (Protocol, Personnel, Visuals) to task items. (Pending refinement).
     - [x] **LCARS Layout**: Implemented dynamic color theming.
     - [x] **Sidebar**: Added "active break" styling and ensured buttons remain static (fixed height/borders).
+    - [x] **LCARS Frame**: Implemented proper "File Folder" frame (Right Column, Top Row) for Personnel Viewer/Editor.
     - [x] **Custom Date Picker**: Implemented `LCARSDatePicker` with embedded "ENGAGE" button for explicit saving.
+
 
 ## Critical Issues
 - [x] **Task Due Dates**: Fixed persistence, timezone shifting (UTC/Local conversion), and Calendar display issues.

@@ -135,3 +135,104 @@
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     min-height: 2.5em;
 }
+
+/* Personnel Viewer Layout */
+/* LCARS Frame Layout (Viewer & Editor) */
+.pm-lcars-container {
+    width: 95vw;
+    height: 90vh;
+    display: grid;
+    grid-template-columns: 1fr var(--elbow-width);
+    grid-template-rows: var(--elbow-radius) 1fr;
+    gap: var(--gap);
+    position: relative;
+    /* No background on container itself, elements define shape */
+}
+
+/* Area 1: Top Bar (Row 1, Col 1) */
+.pm-lcars-top-bar {
+    grid-column: 1 / 2;
+    grid-row: 1 / 2;
+    display: flex;
+    align-items: center;
+    padding-right: var(--gap);
+}
+
+.pm-lcars-title {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--lcars-orange);
+    text-transform: uppercase;
+    margin-right: 20px;
+    white-space: nowrap;
+    align-self: flex-end; /* Align to bottom of bar area */
+    margin-bottom: 5px;   /* Lift slightly */
+}
+
+.pm-lcars-bar-fill {
+    flex: 1;
+    height: 30px; /* Standard bar thickness */
+    background-color: var(--lcars-tan);
+    border-top-left-radius: 15px;
+    border-bottom-left-radius: 15px;
+    align-self: flex-end; /* Align to bottom */
+    margin-bottom: 5px; /* Visual alignment with elbow bottom */
+}
+
+/* Improved Right Column Approach */
+.pm-lcars-right-col {
+    grid-column: 2 / 3;
+    grid-row: 1 / 3; /* Spans top and bottom */
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.pm-lcars-elbow-top {
+    height: var(--elbow-radius);
+    background-color: var(--lcars-tan);
+    border-bottom-left-radius: var(--elbow-radius);
+    margin-bottom: var(--gap);
+    width: 100%;
+}
+
+.pm-lcars-sidebar-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap);
+}
+
+.pm-lcars-sidebar-fill {
+    flex: 1;
+    background-color: var(--lcars-tan);
+    width: 100%;
+    border-top-left-radius: 30px;
+    border-bottom-left-radius: 30px;
+}
+
+/* Button overrides for sidebar context */
+.pm-lcars-sidebar-btn {
+    width: 100%;
+    text-align: right;
+    justify-content: flex-end;
+    border-radius: 15px 0 0 15px; /* Rounded left side */
+    padding-right: 20px;
+    height: 50px; /* Consistent height */
+    font-size: 1.2rem;
+}
+
+/* Area 3: Main Content (Row 2, Col 1) */
+.pm-lcars-main-content {
+    grid-column: 1 / 2;
+    grid-row: 2 / 3;
+    background-color: black;
+    /* Create the illusion of the curve: 
+       The elbow (Top-Right of this cell relative to page) curves away.
+    */
+    /* border-top-right-radius: 30px; */ /* Let the elbow do the work */
+    padding: 30px;
+    overflow-y: auto;
+    width: 100%;
+    height: 100%;
+}
