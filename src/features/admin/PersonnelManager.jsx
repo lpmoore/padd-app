@@ -6,7 +6,8 @@ import './PersonnelManager.css';
 const PersonnelManager = () => {
     const [personnel, setPersonnel] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [editPerson, setEditPerson] = useState(null); // If set, modal is open
+    const [editPerson, setEditPerson] = useState(null); // If set, editor modal is open
+    const [viewPerson, setViewPerson] = useState(null); // If set, viewer modal is open
     const fileInputRef = useRef(null);
 
     // Initial Fetch
@@ -52,6 +53,12 @@ const PersonnelManager = () => {
         } else {
             fetchPersonnel();
             setEditPerson(null);
+            if (id) {
+                // If we were editing, maybe go back to view? Or just close?
+                // For now, let's close everything or maybe update the viewPerson if we strictly want to return to view.
+                // User requirement implies "clicking profile -> view -> edit". 
+                // After save, usually nice to go back to list or view. Let's go back to null (list) as per existing behavior.
+            }
         }
     };
 
@@ -65,6 +72,7 @@ const PersonnelManager = () => {
 
     // --- Modal Logic ---
     const handleAddNew = () => {
+        setViewPerson(null); // Ensure viewer is closed
         setEditPerson({
             name: '',
             rank: '',
@@ -91,7 +99,7 @@ const PersonnelManager = () => {
                 </div>
 
                 {personnel.map(p => (
-                    <div key={p.id} className="pm-card" onClick={() => setEditPerson(p)}>
+                    <div key={p.id} className="pm-card" onClick={() => setViewPerson(p)}>
                         <div 
                             className="pm-avatar"
                             style={p.image_url ? { backgroundImage: `url(${p.image_url})` } : {}}
@@ -115,6 +123,18 @@ const PersonnelManager = () => {
                     onSave={handleSave} 
                     onCancel={() => setEditPerson(null)}
                     onDelete={handleDelete}
+                />
+            )}
+
+            {/* View Modal */}
+            {viewPerson && !editPerson && (
+                <PersonnelViewer
+                    person={viewPerson}
+                    onClose={() => setViewPerson(null)}
+                    onEdit={() => {
+                        setEditPerson(viewPerson);
+                        setViewPerson(null);
+                    }}
                 />
             )}
         </div>
@@ -261,3 +281,72 @@ const PersonnelEditor = ({ person, onSave, onCancel, onDelete }) => {
 };
 
 export default PersonnelManager;
+
+const PersonnelViewer = ({ person, onClose, onEdit }) => {
+    return (
+        <div className="dossier-overlay" onClick={onClose}>
+            <div className="personnel-detail-overlay" onClick={e => e.stopPropagation()}>
+                <div className="detail-bio-header">
+                    <h3 style={{ margin: 0 }}>
+                        PERSONNEL FILE: {person.name}
+                    </h3>
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                        <LCARSButton onClick={onClose} color="white">CLOSE</LCARSButton>
+                        <LCARSButton onClick={onEdit} color="var(--lcars-orange)">EDIT RECORD</LCARSButton>
+                    </div>
+                </div>
+
+                <div className="detail-bio-content">
+                    <div className="pm-form-grid" style={{ width: '100%' }}>
+                        
+                        {/* Left Column: Image & Basic Info */}
+                        <div className="pm-form-left">
+                            <div 
+                                className="pm-image-upload"
+                                style={{ 
+                                    backgroundImage: person.image_url ? `url(${person.image_url})` : 'none',
+                                    cursor: 'default',
+                                    border: '2px solid var(--lcars-orange)'
+                                }}
+                            >
+                                {!person.image_url && <span>NO IMAGE</span>}
+                            </div>
+
+                            <div className="bio-input-group">
+                                <label className="bio-label">NAME</label>
+                                <div className="bio-value">{person.name}</div>
+                            </div>
+                            <div className="bio-input-group">
+                                <label className="bio-label">RANK / TITLE</label>
+                                <div className="bio-value">{person.rank}</div>
+                            </div>
+                        </div>
+
+                        {/* Right Column: Stats */}
+                        <div className="pm-form-right">
+                             <div className="bio-input-group">
+                                <label className="bio-label">BIRTHPLACE / ORIGIN</label>
+                                <div className="bio-value">{person.birthplace || 'N/A'}</div>
+                            </div>
+                             <div className="bio-input-group">
+                                <label className="bio-label">EDUCATION / ACADEMY</label>
+                                <div className="bio-value">{person.education || 'N/A'}</div>
+                            </div>
+                             <div className="bio-input-group">
+                                <label className="bio-label">EXPERTISE</label>
+                                <div className="bio-value">{person.expertise || 'N/A'}</div>
+                            </div>
+                             <div className="bio-input-group" style={{ flex: 1 }}>
+                                <label className="bio-label">SERVICE RECORD / BIO</label>
+                                <div className="bio-value bio-scroll" style={{ whiteSpace: 'pre-wrap', height: '100%', overflowY: 'auto' }}>
+                                    {person.bio || 'No service record available.'}
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};

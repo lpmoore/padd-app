@@ -126,3 +126,12 @@
     border-color: var(--lcars-orange);
     color: var(--lcars-orange);
 }
+
+.bio-value {
+    color: white;
+    padding: 8px;
+    font-size: 1rem;
+    font-family: var(--font-main);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    min-height: 2.5em;
+}
