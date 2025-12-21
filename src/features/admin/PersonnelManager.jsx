@@ -20,7 +20,7 @@ const PersonnelManager = () => {
         const { data, error } = await supabase
             .from('personnel')
             .select('*')
-            .order('name');
+            .order('name', { ascending: true });
         
         if (error) console.error('Error fetching personnel:', error);
         else setPersonnel(data);

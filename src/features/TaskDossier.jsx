@@ -60,7 +60,7 @@ const TaskDossier = ({ task, onClose, onUpdate }) => {
     const openAssignmentModal = async () => {
         setIsAssigning(true);
         // Fetch all available personnel
-        const { data } = await supabase.from('personnel').select('*').order('name');
+        const { data } = await supabase.from('personnel').select('*').order('name', { ascending: true });
         setAllPersonnel(data || []);
     };
 
