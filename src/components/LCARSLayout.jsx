@@ -16,7 +16,7 @@ const LCARSLayout = ({
     <div className="lcars-grid">
       {/* Top Left Elbow */}
       <div className="lcars-elbow" style={{ backgroundColor: activeColor }}>
-        <div className="elbow-text" style={{ color: 'var(--lcars-black)' }}>USS ENTERPRISE</div>
+        <div className="elbow-text" style={{ color: 'var(--lcars-black)' }}>USS CERRITOS</div>
       </div>
 
       {/* Top Bar */}

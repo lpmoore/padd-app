@@ -21,6 +21,9 @@
     - [x] **Sidebar**: Added "active break" styling and ensured buttons remain static (fixed height/borders).
     - [x] **LCARS Frame**: Implemented proper "File Folder" frame (Right Column, Top Row) for Personnel Viewer/Editor.
     - [x] **Custom Date Picker**: Implemented `LCARSDatePicker` with embedded "ENGAGE" button for explicit saving.
+    - [x] **Nav Reorder**: Moved Admin button to the bottom of the navigation list.
+    - [x] **LCARS Header**: Updated elbow text to "USS CERRITOS".
+
 
 
 ## Critical Issues

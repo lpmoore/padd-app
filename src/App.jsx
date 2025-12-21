@@ -14,9 +14,9 @@ import { formatDateForStorage } from './utils/dateUtils';
 const INITIAL_NAV_ITEMS = [
   { id: 'CALENDAR', label: 'CALENDAR', color: 'var(--lcars-teal)' }, 
   { id: 'TASKS', label: 'TASKS', color: 'var(--lcars-cyan)' }, 
-  { id: 'ADMIN', label: 'ADMIN', color: 'var(--lcars-orange)' }, 
   { id: 'LIBRARY', label: 'LIBRARY', color: 'var(--lcars-periwinkle)' }, 
   { id: 'NOTES', label: 'NOTES', color: 'var(--lcars-ice-blue)' }, 
+  { id: 'ADMIN', label: 'ADMIN', color: 'var(--lcars-orange)' }, 
 ];
 
 function App() {
