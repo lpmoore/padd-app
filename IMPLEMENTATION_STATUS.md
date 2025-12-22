@@ -9,6 +9,7 @@
     - [x] **Storage**: Implemented Supabase Storage for Task Dossier images (`task-images` bucket).
     - [x] **Notes**: Added auto-save and search functionality for cloud-stored notes.
     - [x] **Captain's Log**: Converted Notes feature to "Captain's Log" with chronological feed and standard date formatting.
+    - [x] **Security**: Added "Security" tab to Admin section for password updates.
 - **Drag and Drop / Nesting**:
     - [x] Fixed syntax error in `Tasks.jsx` causing startup failure.
     - [x] Fixed "return outside of function" error by removing stale code.
