@@ -39,6 +39,8 @@ const TaskDossier = ({ task, onClose, onUpdate }) => {
         } else {
             // Flatten the structure
             const assignments = data.map(item => item.personnel);
+            // Sort client-side because Supabase sorting on joined relations is complex
+            assignments.sort((a, b) => a.name.localeCompare(b.name));
             setAssignedPersonnel(assignments);
         }
     };

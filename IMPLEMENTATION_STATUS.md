@@ -8,6 +8,7 @@
     - [x] **Data**: Migrated `Tasks` and `Notes` from localStorage to Supabase Database (`postgres`).
     - [x] **Storage**: Implemented Supabase Storage for Task Dossier images (`task-images` bucket).
     - [x] **Notes**: Added auto-save and search functionality for cloud-stored notes.
+    - [x] **Captain's Log**: Converted Notes feature to "Captain's Log" with chronological feed and standard date formatting.
 - **Drag and Drop / Nesting**:
     - [x] Fixed syntax error in `Tasks.jsx` causing startup failure.
     - [x] Fixed "return outside of function" error by removing stale code.
@@ -23,6 +24,12 @@
     - [x] **Custom Date Picker**: Implemented `LCARSDatePicker` with embedded "ENGAGE" button for explicit saving.
     - [x] **Nav Reorder**: Moved Admin button to the bottom of the navigation list.
     - [x] **LCARS Header**: Updated elbow text to "USS CERRITOS".
+    - [x] **Personnel Sort**: Enforced alphabetical sorting for Personnel Manager and Task Dossier assignments.
+    - [x] **Notes Images**: Added support for attaching images to log entries (requires DB update).
+    - [x] **Library Images/DB**: Migrated Library to Supabase (dynamic) and added image upload support.
+
+
+
 
 
 

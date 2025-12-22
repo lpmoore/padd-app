@@ -1,0 +1,232 @@
+.log-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    gap: 20px;
+    padding-right: 10px;
+}
+
+.log-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    border-bottom: 2px solid var(--lcars-orange);
+    padding-bottom: 10px;
+}
+
+.log-search-wrapper {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+.log-search-input {
+    width: 100%;
+    background-color: var(--lcars-bg);
+    border: 2px solid var(--lcars-blue);
+    color: var(--lcars-blue);
+    font-family: var(--font-main);
+    padding: 10px 15px;
+    padding-right: 80px;
+    font-size: 1.2rem;
+    border-radius: 20px; /* LCARS-ish rounded */
+    border-bottom-left-radius: 0;
+    text-transform: uppercase;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.log-search-input:focus {
+    border-color: var(--lcars-orange);
+    box-shadow: 0 0 10px rgba(255, 153, 0, 0.2);
+}
+
+.log-search-count {
+    position: absolute;
+    right: 15px;
+    color: var(--lcars-orange);
+    font-weight: bold;
+    pointer-events: none;
+}
+
+/* Feed Container */
+.log-feed {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    padding-bottom: 50px; /* Space for scrolling */
+}
+
+/* Individual Log Entry */
+.log-entry {
+    background-color: rgba(0, 0, 0, 0.3);
+    border-left: 10px solid var(--lcars-tan);
+    border-radius: 0 20px 20px 0;
+    padding: 0;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.log-entry:hover {
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+.log-entry.active {
+    border-left-color: var(--lcars-orange);
+}
+
+/* Entry Header (Stardate & Title) */
+.log-entry-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--lcars-tan);
+    color: black;
+    padding: 5px 15px;
+    border-top-right-radius: 15px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+.log-entry.active .log-entry-header {
+    background-color: var(--lcars-orange);
+}
+
+.log-meta {
+    display: flex;
+    gap: 20px;
+}
+
+.log-title {
+    font-size: 1.1rem;
+    font-weight: 900;
+}
+
+.log-stardate {
+    font-family: monospace; /* Tech look */
+    opacity: 0.8;
+}
+
+.log-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.log-action-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 0.8rem;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+    text-transform: uppercase;
+}
+
+.log-action-btn:hover {
+    opacity: 1;
+}
+
+/* Entry Body */
+.log-entry-body {
+    padding: 20px;
+    color: var(--lcars-ice-blue);
+    font-size: 1.1rem;
+    line-height: 1.6;
+    white-space: pre-wrap;
+}
+
+/* Images Grid within Entry */
+.log-images {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 0 20px 20px 20px;
+}
+
+.log-image-thumb {
+    width: 100px;
+    height: 100px;
+    background-size: cover;
+    background-position: center;
+    border: 1px solid var(--lcars-blue);
+    border-radius: 5px;
+    cursor: zoom-in;
+    transition: transform 0.2s;
+}
+
+.log-image-thumb:hover {
+    transform: scale(1.05);
+    border-color: var(--lcars-orange);
+}
+
+/* New Entry Editor Area (Expandable/Inline) */
+.new-log-area {
+    background-color: rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--lcars-blue);
+    border-radius: 15px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 20px;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.new-log-header {
+    display: flex;
+    justify-content: space-between;
+}
+
+.new-log-title {
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid var(--lcars-orange);
+    color: var(--lcars-orange);
+    font-family: var(--font-main);
+    font-size: 1.5rem;
+    width: 60%;
+    outline: none;
+    text-transform: uppercase;
+}
+
+.new-log-content {
+    background: transparent;
+    border: 1px solid var(--lcars-gray);
+    color: var(--lcars-ice-blue);
+    font-family: var(--font-main);
+    font-size: 1.2rem;
+    min-height: 150px;
+    padding: 10px;
+    resize: vertical;
+    outline: none;
+}
+
+.new-log-content:focus {
+    border-color: var(--lcars-blue);
+}
+
+.new-log-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.image-upload-label {
+    cursor: pointer;
+    color: var(--lcars-blue);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.9rem;
+}
+.image-upload-label:hover {
+    color: var(--lcars-orange);
+}

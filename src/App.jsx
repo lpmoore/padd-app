@@ -5,7 +5,7 @@ import LCARSLayout from './components/LCARSLayout';
 import LCARSButton from './components/LCARSButton';
 import Tasks from './features/Tasks';
 import Calendar from './features/Calendar';
-import Notes from './features/Notes';
+import Log from './features/Log';
 import Library from './features/Library';
 import Admin from './features/Admin'; // New Admin Feature
 import TaskDossier from './features/TaskDossier';
@@ -15,7 +15,7 @@ const INITIAL_NAV_ITEMS = [
   { id: 'CALENDAR', label: 'CALENDAR', color: 'var(--lcars-teal)' }, 
   { id: 'TASKS', label: 'TASKS', color: 'var(--lcars-cyan)' }, 
   { id: 'LIBRARY', label: 'LIBRARY', color: 'var(--lcars-periwinkle)' }, 
-  { id: 'NOTES', label: 'NOTES', color: 'var(--lcars-ice-blue)' }, 
+  { id: 'LOG', label: 'LOG', color: 'var(--lcars-ice-blue)' }, 
   { id: 'ADMIN', label: 'ADMIN', color: 'var(--lcars-orange)' }, 
 ];
 
@@ -198,7 +198,7 @@ function App() {
                 onOpenDossier={setActiveDossierTaskId}
             />
         )}
-        {activeTab === 'NOTES' && <Notes />}
+        {activeTab === 'LOG' && <Log />}
         {activeTab === 'LIBRARY' && <Library />}
         
         {activeDossierTask && (

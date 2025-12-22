@@ -78,3 +78,220 @@
   color: var(--lcars-blue);
   line-height: 1.4;
 }
+
+/* --- Header Group --- */
+.library-header-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.library-subtitle {
+     color: var(--lcars-tan);
+     margin: 0;
+     margin-bottom: 5px;
+     font-size: 1.5rem;
+}
+
+/* --- Gallery View --- */
+.library-gallery {
+    display: flex;
+    gap: 10px;
+    height: 200px;
+    overflow-x: auto;
+    margin-bottom: 10px;
+}
+
+.library-image-view {
+    min-width: 300px;
+    height: 100%;
+    background-color: black;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    border: 2px solid var(--lcars-blue);
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+/* --- Edit Mode Styles --- */
+.library-edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    height: 100%;
+    overflow-y: auto;
+}
+
+.edit-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--lcars-red);
+    font-weight: bold;
+    border-bottom: 2px dashed var(--lcars-red);
+    padding-bottom: 5px;
+}
+
+.edit-field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.edit-field-group label {
+    color: var(--lcars-tan);
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.edit-field-group input, 
+.edit-field-group textarea {
+    background-color: rgba(0,0,0,0.5);
+    border: 1px solid var(--lcars-blue);
+    color: var(--lcars-blue);
+    padding: 10px;
+    font-family: var(--font-main);
+    font-size: 1.2rem;
+    outline: none;
+    resize: none;
+}
+
+.edit-field-group input:focus, 
+.edit-field-group textarea:focus {
+    border-color: var(--lcars-orange);
+    color: var(--lcars-orange);
+}
+
+.edit-field-group textarea {
+    height: 150px;
+}
+
+/* Dynamic Details Editor */
+.edit-details-section {
+    border: 1px solid var(--lcars-blue);
+    padding: 10px;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.edit-details-section > label {
+    color: var(--lcars-tan);
+    font-weight: bold;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.edit-detail-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.detail-key {
+    width: 100px;
+    color: var(--lcars-blue);
+    font-size: 0.9rem;
+    text-align: right;
+}
+
+.edit-detail-row input {
+    flex: 1;
+    background-color: transparent;
+    border: none;
+    border-bottom: 1px solid var(--lcars-gray);
+    color: white;
+    padding: 5px;
+}
+
+/* Reuse note visual styles if imported globally or duplicate here if needed. 
+   Assuming Notes.css is scoped or we copy relevant parts. 
+   Ah, Notes.css is imported in Notes.jsx. 
+   I should copy the .note-visual-* styles here or move them to global.
+   For speed, I'll copy them here but renamed to .library-visual-*?
+   Wait, the component uses .note-visual-* classes. 
+   I should add those classes here or ensure Notes.css is loaded (not reliable).
+   I will add the visual strip styles here. */
+
+.note-visuals-strip {
+    margin-top: 10px;
+    border-top: 2px solid var(--lcars-tan);
+    padding-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.note-visuals-header {
+    color: var(--lcars-tan);
+    font-size: 0.9rem;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+.note-visuals-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.note-visual-thumb {
+    width: 60px;
+    height: 60px;
+    background-color: #222;
+    background-size: cover;
+    background-position: center;
+    border: 1px solid var(--lcars-blue);
+    border-radius: 5px;
+    cursor: pointer;
+    position: relative;
+    transition: transform 0.2s;
+}
+
+.note-visual-thumb:hover {
+    transform: scale(1.05);
+    border-color: var(--lcars-orange);
+}
+
+.note-visual-remove {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background-color: var(--lcars-red);
+    color: white;
+    width: 15px;
+    height: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 0.6rem;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.note-visual-thumb:hover .note-visual-remove {
+    opacity: 1;
+}
+
+.note-visual-add {
+    width: 60px;
+    height: 60px;
+    border: 2px dashed var(--lcars-tan);
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--lcars-tan);
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.note-visual-add:hover {
+    background-color: rgba(255, 153, 0, 0.1);
+    color: var(--lcars-orange);
+    border-color: var(--lcars-orange);
+}
