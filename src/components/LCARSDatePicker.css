@@ -9,22 +9,27 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 5px 10px;
-    border: 1px solid var(--lcars-tan);
-    background-color: rgba(0, 0, 0, 0.5);
-    border-radius: 5px;
-    color: var(--lcars-tan);
+    padding: 5px 15px;
+    background-color: var(--lcars-deep-blue);
+    border-radius: 15px;
+    color: var(--lcars-ice-blue);
     font-family: var(--font-main);
-    font-size: 0.9rem;
+    font-size: 1.1rem;
     font-weight: bold;
     text-transform: uppercase;
     transition: all 0.2s;
+    min-width: 200px;
+    justify-content: space-between;
 }
 
 .lcars-date-display:hover {
-    background-color: rgba(255, 153, 0, 0.1);
-    border-color: var(--lcars-orange);
-    color: var(--lcars-orange);
+    background-color: var(--lcars-cyan);
+    color: var(--lcars-black);
+}
+
+.lcars-date-display.has-date {
+    background-color: var(--lcars-teal);
+    color: var(--lcars-black);
 }
 
 .lcars-popup-overlay {
@@ -33,112 +38,158 @@
     left: 0;
     width: 100vw;
     height: 100vh;
-    background-color: rgba(0, 0, 0, 0.5); /* Dim background */
+    background-color: rgba(0, 0, 0, 0.7);
     z-index: 1000;
     display: flex;
     justify-content: center;
     align-items: center;
+    backdrop-filter: blur(2px);
 }
 
+/* Main Panel Frame */
 .lcars-calendar-panel {
     background-color: var(--lcars-bg);
-    border: 4px solid var(--lcars-tan);
+    border-top: 8px solid var(--lcars-periwinkle);
+    border-bottom: 8px solid var(--lcars-teal);
+    border-left: 12px solid var(--lcars-periwinkle);
+    border-right: 4px solid var(--lcars-teal);
     border-radius: 20px;
     border-top-right-radius: 0;
-    border-bottom-left-radius: 0;
-    padding: 15px;
-    width: 320px;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+    border-bottom-left-radius: 30px;
+    padding: 20px;
+    width: 360px;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.9);
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 15px;
+    position: relative;
 }
 
-/* Header: Month Nav */
+/* Decorative Elbow */
+.lcars-calendar-panel::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: -12px;
+    width: 80px;
+    height: 40px;
+    background-color: var(--lcars-periwinkle);
+    border-top-left-radius: 20px;
+    z-index: -1;
+}
+
+/* Header */
 .lcars-calendar-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    color: var(--lcars-orange);
-    font-size: 1.2rem;
+    color: var(--lcars-cyan);
+    font-size: 1.4rem;
     font-weight: bold;
-    border-bottom: 2px solid var(--lcars-blue);
-    padding-bottom: 5px;
-    margin-bottom: 5px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--lcars-teal);
 }
 
 .lcars-nav-btn {
-    background: none;
+    background-color: var(--lcars-deep-blue);
     border: none;
-    color: var(--lcars-blue);
+    color: var(--lcars-ice-blue);
     cursor: pointer;
-    padding: 5px;
+    padding: 5px 10px;
+    border-radius: 10px;
+    transition: background 0.2s;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
+
 .lcars-nav-btn:hover {
-    color: var(--lcars-orange);
+    background-color: var(--lcars-cyan);
+    color: var(--lcars-black);
 }
 
 /* Calendar Grid */
 .lcars-calendar-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 2px;
+    gap: 4px; /* Slightly larger gap */
     text-align: center;
 }
 
 .day-label {
-    color: var(--lcars-blue);
-    font-size: 0.8rem;
+    color: var(--lcars-periwinkle);
+    font-size: 0.9rem;
     padding-bottom: 5px;
+    text-transform: uppercase;
 }
 
 .calendar-day {
-    padding: 8px 0;
+    padding: 10px 0;
     cursor: pointer;
-    color: var(--lcars-tan);
-    border-radius: 3px;
-    transition: background-color 0.2s;
+    color: var(--lcars-ice-blue);
+    background-color: rgba(255, 255, 255, 0.05); /* Slight fill */
+    border-radius: 4px;
+    transition: all 0.2s;
+    font-size: 1.1rem;
 }
 
 .calendar-day:hover:not(.empty) {
-    background-color: rgba(255, 153, 0, 0.2);
-    color: var(--lcars-orange);
+    background-color: var(--lcars-teal);
+    color: var(--lcars-black);
 }
 
 .calendar-day.selected {
-    background-color: var(--lcars-orange);
-    color: black;
+    background-color: var(--lcars-orange); /* Use orange for selection */
+    color: var(--lcars-black);
     font-weight: bold;
+    box-shadow: 0 0 10px var(--lcars-orange);
 }
 
 .calendar-day.today {
-    border: 1px solid var(--lcars-blue);
+    border: 2px solid var(--lcars-ice-blue);
 }
 
 .calendar-day.empty {
     cursor: default;
+    background: transparent;
 }
 
-/* Time Picker */
+/* Time Picker Section */
 .lcars-time-picker {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 10px;
-    border-top: 1px dashed var(--lcars-gray);
-    padding-top: 10px;
+    gap: 15px;
+    border-top: 1px dashed var(--lcars-teal);
+    padding-top: 15px;
 }
 
 .time-input {
-    background-color: rgba(255, 255, 255, 0.1);
-    border: 1px solid var(--lcars-blue);
-    color: var(--lcars-orange);
+    background-color: var(--lcars-deep-blue);
+    border: none;
+    border-radius: 10px;
+    color: var(--lcars-cyan);
     font-family: var(--font-main);
-    font-size: 1.2rem;
-    width: 50px;
+    font-size: 1.8rem;
+    width: 70px;
     text-align: center;
     padding: 5px;
     outline: none;
+    /* Remove standard spinners */
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+.time-input::-webkit-outer-spin-button,
+.time-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.time-input:focus {
+    background-color: var(--lcars-ice-blue);
+    color: var(--lcars-black);
 }
 
 /* Footer Actions */
@@ -146,10 +197,4 @@
     display: flex;
     justify-content: space-between;
     margin-top: 10px;
-}
-
-/* Colors for Date Display logic */
-.has-date {
-    border-color: var(--lcars-orange);
-    color: var(--lcars-orange);
 }

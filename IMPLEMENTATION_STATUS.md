@@ -48,4 +48,4 @@
 - [x] **Date Picker UX**: Improved hit areas to automatically open the date picker on click for better usability (Tasks and Subtasks).
 - [ ] **Sound Effects**: Add LCARS interface sounds for interactions (clicks, drag releases).
 - [ ] **Mobile Responsiveness**: Verify drag and drop behavior on touch devices.
-- [ ] **Date Picker Styling**: Refine the visual appearance of the new popup calendar (User Request).
+- [x] **Date Picker Styling**: Refine the visual appearance of the new popup calendar (User Request).

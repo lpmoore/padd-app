@@ -181,21 +181,23 @@ const LCARSDatePicker = ({ value, onChange, label = "SELECT DATE" }) => {
 
                         {/* Time Picker */}
                         <div className="lcars-time-picker">
-                            <Clock size={16} color="var(--lcars-tan)" />
+                            <Clock size={20} color="var(--lcars-ice-blue)" />
                             <input 
                                 className="time-input" 
                                 type="number" 
                                 min="0" max="23" 
                                 value={draftTime.hours}
                                 onChange={(e) => handleTimeChange('hours', e.target.value)}
+                                autoComplete="off"
                             />
-                            <span style={{color: 'var(--lcars-orange)', fontSize: '1.2rem'}}>:</span>
+                            <span style={{color: 'var(--lcars-cyan)', fontSize: '1.8rem', fontWeight: 'bold'}}>:</span>
                             <input 
                                 className="time-input" 
                                 type="number" 
                                 min="0" max="59" 
                                 value={draftTime.minutes}
-                                onChange={(e) => handleTimeChange('minutes', e.target.value)} 
+                                onChange={(e) => handleTimeChange('minutes', e.target.value)}
+                                autoComplete="off" 
                             />
                         </div>
 
@@ -205,7 +207,6 @@ const LCARSDatePicker = ({ value, onChange, label = "SELECT DATE" }) => {
                                 color="var(--lcars-red)" 
                                 onClick={() => setIsOpen(false)}
                                 rounded="left"
-                                scale={0.8}
                             >
                                 CANCEL
                             </LCARSButton>
@@ -213,7 +214,6 @@ const LCARSDatePicker = ({ value, onChange, label = "SELECT DATE" }) => {
                                 color="var(--lcars-orange)" 
                                 onClick={handleEngage}
                                 rounded="right"
-                                scale={0.8}
                             >
                                 ENGAGE
                             </LCARSButton>
