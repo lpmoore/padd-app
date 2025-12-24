@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   DndContext, 
-  closestCenter,
+  pointerWithin,
   KeyboardSensor, 
   MouseSensor,
   TouchSensor, 
@@ -46,7 +46,7 @@ const Tasks = ({ tasks, onAddTask, onUpdateTask, onDeleteTask, onMoveTask, onOpe
     useSensor(TouchSensor, {
         activationConstraint: {
             delay: 150,
-            tolerance: 5,
+            tolerance: 8,
         },
     }),
     useSensor(KeyboardSensor, {
@@ -198,7 +198,7 @@ const Tasks = ({ tasks, onAddTask, onUpdateTask, onDeleteTask, onMoveTask, onOpe
 
       <DndContext 
           sensors={sensors} 
-          collisionDetection={closestCenter} 
+          collisionDetection={pointerWithin} 
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
           onDragCancel={handleDragCancel}
@@ -206,7 +206,7 @@ const Tasks = ({ tasks, onAddTask, onUpdateTask, onDeleteTask, onMoveTask, onOpe
         <div className="tasks-scroll-area">
             <SortableContext 
                 items={tasks.map(t => t.id)} 
-                strategy={verticalListSortingStrategy}
+                strategy={isNestingActive ? undefined : verticalListSortingStrategy}
             >
                 <div className="tasks-list">
                     {tasks.map(task => (

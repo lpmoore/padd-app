@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { SortableContext } from '@dnd-kit/sortable';
-import { useDroppable } from '@dnd-kit/core';
+
 import { ChevronRight, ChevronDown, GripVertical, Trash2, CheckSquare, Square, FileText, Users, Image as ImageIcon } from 'lucide-react';
 import LCARSButton from '../components/LCARSButton';
 import LCARSDatePicker from '../components/LCARSDatePicker'; // New custom picker
@@ -34,20 +34,12 @@ const TaskItem = ({ task, onDelete, onToggle, onAddSubtask, onUpdate, depth = 0,
   const {
     attributes,
     listeners,
-    setNodeRef: setSortableRef,
+    setNodeRef,
     transform,
     transition,
     isDragging,
+    isOver,
   } = useSortable({ id: task.id });
-
-  const { setNodeRef: setDroppableRef, isOver } = useDroppable({
-    id: task.id,
-  });
-
-  const setNodeRef = (node) => {
-    setSortableRef(node);
-    setDroppableRef(node);
-  };
 
   let backgroundStyle = undefined;
   let borderStyle = undefined;
