@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Calendar, ChevronLeft, ChevronRight, Clock } from 'lucide-react';
 import LCARSButton from './LCARSButton';
 import './LCARSDatePicker.css';
+import useLCARSSound from '../hooks/useLCARSSound';
 
 /**
  * Custom LCARS Date Picker
@@ -90,6 +91,8 @@ const LCARSDatePicker = ({ value, onChange, label = "SELECT DATE" }) => {
     };
 
     // Calendar Generation Logic
+    const { playClick } = useLCARSSound();
+
     const getDaysInMonth = (date) => {
         return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
     };
@@ -124,7 +127,10 @@ const LCARSDatePicker = ({ value, onChange, label = "SELECT DATE" }) => {
                 <div 
                     key={d} 
                     className={`calendar-day ${isSelected ? 'selected' : ''} ${isToday ? 'today' : ''}`}
-                    onClick={() => handleDayClick(d)}
+                    onClick={() => {
+                        playClick();
+                        handleDayClick(d);
+                    }}
                 >
                     {d}
                 </div>

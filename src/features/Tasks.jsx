@@ -17,6 +17,7 @@ import {
 import TaskItem from './TaskItem';
 import LCARSButton from '../components/LCARSButton';
 import LCARSDatePicker from '../components/LCARSDatePicker'; // Custom Picker
+import useLCARSSound from '../hooks/useLCARSSound';
 import './Tasks.css';
 
 /* 
@@ -76,8 +77,14 @@ const Tasks = ({ tasks, onAddTask, onUpdateTask, onDeleteTask, onMoveTask, onOpe
     };
   }, []);
 
+  const { playEngage, playError } = useLCARSSound();
+
   const handleAdd = () => {
-    if (!inputValue.trim()) return;
+    if (!inputValue.trim()) {
+        playError();
+        return;
+    }
+    playEngage();
     // Call parent handler (Supabase)
     // Pass inputDate to root task creation
     onAddTask(inputValue, null, inputDate); 
@@ -191,7 +198,12 @@ const Tasks = ({ tasks, onAddTask, onUpdateTask, onDeleteTask, onMoveTask, onOpe
            />
         </div>
 
-        <LCARSButton onClick={handleAdd} rounded="right" color="var(--lcars-orange)">
+        <LCARSButton 
+            onClick={handleAdd} 
+            rounded="right" 
+            color="var(--lcars-orange)"
+            sound={false} // Handle sound manually for success/failure
+        >
           ENGAGE
         </LCARSButton>
       </div>

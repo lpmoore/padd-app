@@ -46,6 +46,6 @@
 - [ ] **Sidebar Persistence**: Ensure navigation buttons remain static/fixed keys.
 - [x] **Subtask Dates**: Wired up `onAddSubtask`. (Needs regression fix).
 - [x] **Date Picker UX**: Improved hit areas to automatically open the date picker on click for better usability (Tasks and Subtasks).
-- [ ] **Sound Effects**: Add LCARS interface sounds for interactions (clicks, drag releases).
+- [x] **Sound Effects**: Add LCARS interface sounds for interactions (clicks, drag releases).
 - [x] **Mobile Responsiveness**: Verify drag and drop behavior on touch devices. (Increased touch tolerance).
 - [x] **Date Picker Styling**: Refine the visual appearance of the new popup calendar (User Request).

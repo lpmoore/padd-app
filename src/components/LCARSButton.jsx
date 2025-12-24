@@ -1,5 +1,6 @@
 import React from 'react';
 import './LCARSButton.css';
+import useLCARSSound from '../hooks/useLCARSSound';
 
 const LCARSButton = ({ 
   children, 
@@ -7,8 +8,16 @@ const LCARSButton = ({
   color = 'var(--lcars-orange)', 
   rounded = 'left', // 'left', 'right', 'both', 'none'
   block = false,
-  className = '' // Add className to props destructuring
+  className = '', // Add className to props destructuring
+  sound = true // Prop to optionally disable sound
 }) => {
+  const { playClick } = useLCARSSound();
+
+  const handleClick = (e) => {
+      if (sound) playClick();
+      if (onClick) onClick(e);
+  };
+
   const style = {
     backgroundColor: color,
   };
@@ -24,7 +33,7 @@ const LCARSButton = ({
     <button 
       className={classes} 
       style={style} 
-      onClick={onClick}
+      onClick={handleClick}
     >
       <span className="button-content">{children}</span>
     </button>

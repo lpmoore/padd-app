@@ -1,5 +1,6 @@
 import React from 'react';
 import './LCARSLayout.css';
+import useLCARSSound from '../hooks/useLCARSSound';
 
 const LCARSLayout = ({ 
   children, 
@@ -9,6 +10,8 @@ const LCARSLayout = ({
   onNavClick,
   onLogout
 }) => {
+  const { playClick } = useLCARSSound();
+
   // Find the color of the active item to tint the top bar/elbow
   const activeColor = navItems.find(item => item.id === activeTab)?.color || 'var(--lcars-cyan)';
 
@@ -42,7 +45,10 @@ const LCARSLayout = ({
                   borderTop: `4px solid ${isActive ? 'var(--lcars-bg)' : item.color}`,
                   borderBottom: `4px solid ${isActive ? 'var(--lcars-bg)' : item.color}`
                 }}
-                onClick={() => onNavClick && onNavClick(item.id)}
+                onClick={() => {
+                    playClick();
+                    if (onNavClick) onNavClick(item.id);
+                }}
               >
                 {item.label}
               </button>
