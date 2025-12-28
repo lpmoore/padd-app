@@ -43,7 +43,7 @@
 
 ## Upcoming / Backlog
 - [x] **Icon Refinement**: Enhanced task indicators to be interactive "pills" that link directly to Dossier tabs. Fixed data fetch for Personnel icon. Added icons to Calendar view.
-- [ ] **Sidebar Persistence**: Ensure navigation buttons remain static/fixed keys.
+- [x] **Sidebar Persistence**: Refactored `LCARSLayout` to use CSS-based active states (color/box-shadow) instead of borders, ensuring completely static geometry during navigation.
 - [x] **Subtask Dates**: Wired up `onAddSubtask`. (Needs regression fix).
 - [x] **Date Picker UX**: Improved hit areas to automatically open the date picker on click for better usability (Tasks and Subtasks).
 - [x] **Sound Effects**: Add LCARS interface sounds for interactions (clicks, drag releases).

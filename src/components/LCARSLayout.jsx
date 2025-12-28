@@ -41,9 +41,6 @@ const LCARSLayout = ({
                 style={{ 
                   backgroundColor: item.color,
                   color: 'var(--lcars-black)',
-                  // Constant 4px border to prevent layout shift.
-                  borderTop: `4px solid ${isActive ? 'var(--lcars-bg)' : item.color}`,
-                  borderBottom: `4px solid ${isActive ? 'var(--lcars-bg)' : item.color}`
                 }}
                 onClick={() => {
                     playClick();
@@ -74,8 +71,6 @@ const LCARSLayout = ({
                 style={{ 
                   backgroundColor: 'var(--lcars-red)',
                   color: 'var(--lcars-black)',
-                  borderTop: `4px solid var(--lcars-red)`, 
-                  borderBottom: `4px solid var(--lcars-red)`, // Keep solid look
                   marginTop: '0px' 
                 }}
                 onClick={onLogout}

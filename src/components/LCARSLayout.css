@@ -96,6 +96,18 @@
   text-align: right;
   padding-right: 20px;
   transition: all 0.3s ease; /* Smooth transition for movements */
+  box-sizing: border-box;
+  opacity: 0.8;
+}
+
+.lcars-sidebar-button:hover {
+    opacity: 1;
+}
+
+.lcars-sidebar-button.active {
+    opacity: 1;
+    color: white !important; /* High contrast for active */
+    box-shadow: inset -5px 0 0 0 white; /* subtle indicator on the rounded edge */
 }
 
 .sidebar-fill {
