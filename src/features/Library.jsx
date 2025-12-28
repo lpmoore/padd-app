@@ -14,7 +14,8 @@ const INITIAL_DATA = [
 ];
 
 const Library = () => {
-    const [category, setCategory] = useState('SHIPS');
+    const [activeCategory, setActiveCategory] = useState('SHIPS');
+    const [availableCategories, setAvailableCategories] = useState(['SHIPS', 'PLANETS']);
     const [items, setItems] = useState([]);
     const [selectedItem, setSelectedItem] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -22,6 +23,7 @@ const Library = () => {
     // Auth & Edit State
     const [session, setSession] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
+    const [isCustomCategory, setIsCustomCategory] = useState(false); // Top level state
     const [editFormData, setEditFormData] = useState({});
     const [uploading, setUploading] = useState(false);
     const fileInputRef = useRef(null);
@@ -30,31 +32,46 @@ const Library = () => {
         supabase.auth.getSession().then(({ data: { session } }) => setSession(session));
     }, []);
 
+    // 1. Fetch Categories & Items
     useEffect(() => {
-        fetchItems();
-    }, [category]);
+        fetchLibraryData();
+    }, []);
 
-    const fetchItems = async () => {
+    const fetchLibraryData = async () => {
         setLoading(true);
         const { data, error } = await supabase
             .from('library_items')
             .select('*')
-            .eq('category', category)
             .order('title');
 
         if (error) {
             console.error('Error fetching library items:', error);
-            // If table doesn't exist, this will error.
         } else {
-            setItems(data || []);
-            if (data && data.length > 0) {
-                // If we have a selected item, try to keep it selected if it exists in new data
+            const allItems = data || [];
+            
+            // Extract unique categories
+            const cats = [...new Set(allItems.map(i => i.category))].sort();
+            if (cats.length === 0) cats.push('SHIPS', 'PLANETS'); // Defaults if empty
+            setAvailableCategories(cats);
+
+            // Filter items for current category view
+            let cleanActiveCat = activeCategory;
+            if (!cats.includes(activeCategory) && cats.length > 0) {
+                 cleanActiveCat = cats[0];
+                 setActiveCategory(cleanActiveCat);
+            }
+
+            const filtered = allItems.filter(i => i.category === cleanActiveCat);
+            setItems(filtered);
+
+            // Maintain selection if possible
+            if (filtered.length > 0) {
                 if (selectedItem) {
-                    const stillExists = data.find(i => i.id === selectedItem.id);
+                    const stillExists = filtered.find(i => i.id === selectedItem.id);
                     if (stillExists) setSelectedItem(stillExists);
-                    else setSelectedItem(data[0]);
+                    else setSelectedItem(filtered[0]);
                 } else {
-                    setSelectedItem(data[0]);
+                    setSelectedItem(filtered[0]);
                 }
             } else {
                 setSelectedItem(null);
@@ -62,6 +79,41 @@ const Library = () => {
         }
         setLoading(false);
     };
+
+    // Re-filter when category changes
+    useEffect(() => {
+        if (!loading) fetchItemsForCategory(activeCategory);
+    }, [activeCategory]);
+
+    const fetchItemsForCategory = async (cat) => {
+        setLoading(true);
+        const { data } = await supabase
+            .from('library_items')
+            .select('*')
+            .eq('category', cat)
+            .order('title');
+        
+        setItems(data || []);
+        if (data && data.length > 0 && !isEditing) {
+             setSelectedItem(data[0]);
+        } else if (!isEditing) {
+             setSelectedItem(null);
+        }
+        setLoading(false);
+    };
+
+    // Separate fetch for categories to update sidebar
+    const refreshCategories = async () => {
+        const { data } = await supabase
+            .from('library_items')
+            .select('category');
+        
+        if (data) {
+             const cats = [...new Set(data.map(i => i.category))].sort();
+             if (cats.length > 0) setAvailableCategories(cats);
+        }
+    };
+
 
     const handleSeedData = async () => {
         if (!confirm('Populate database with default library data?')) return;
@@ -73,32 +125,86 @@ const Library = () => {
             title: d.title,
             subtitle: d.subtitle,
             details: d.details,
-            description: d.desc, // Map desc to description
+            description: d.desc,
             user_id: user?.id
         }));
 
         const { error } = await supabase.from('library_items').insert(rows);
         if (error) alert('Seed failed: ' + error.message);
-        else fetchItems();
+        else {
+            await refreshCategories();
+            fetchItemsForCategory(activeCategory);
+        }
         setLoading(false);
     };
 
-    const handleCategoryChange = (cat) => {
-        setCategory(cat);
-        setIsEditing(false);
+    // --- Actions ---
+    const handleAddNew = () => {
+        setSelectedItem(null);
+        setEditFormData({
+            category: activeCategory, // Default to current
+            title: '',
+            subtitle: '',
+            details: { 'DATA': '' },
+            description: '',
+            images: []
+        });
+        setIsCustomCategory(false);
+        setIsEditing(true);
     };
 
-    // --- Edit Logic ---
     const handleEditClick = () => {
         setEditFormData({ ...selectedItem });
+        setIsCustomCategory(!availableCategories.includes(selectedItem.category));
         setIsEditing(true);
     };
 
     const handleCancelEdit = () => {
         setIsEditing(false);
         setEditFormData({});
+        setIsCustomCategory(false);
+        // Restore selection
+        if (!selectedItem && items.length > 0) setSelectedItem(items[0]);
     };
 
+    const handleSave = async () => {
+        // Prepare Payload
+        const { id, ...dataToSave } = editFormData;
+        // Ensure user_id
+        if (session) dataToSave.user_id = session.user.id;
+
+        let error;
+        if (id) {
+            // Update
+            const { error: err } = await supabase
+                .from('library_items')
+                .update(dataToSave)
+                .eq('id', id);
+            error = err;
+        } else {
+            // Create
+            const { error: err } = await supabase
+                .from('library_items')
+                .insert(dataToSave);
+            error = err;
+        }
+
+        if (error) {
+            alert('Error saving: ' + error.message);
+        } else {
+            setIsEditing(false);
+            // Refresh everything in case Category changed
+            await refreshCategories();
+            // If we changed category, switch to it?
+            if (dataToSave.category !== activeCategory) {
+                setActiveCategory(dataToSave.category);
+            } else {
+                fetchItemsForCategory(activeCategory);
+            }
+        }
+    };
+
+    // Form Handling
     const handleInputChange = (field, value) => {
         setEditFormData(prev => ({ ...prev, [field]: value }));
     };
@@ -106,87 +212,59 @@ const Library = () => {
     const handleDetailChange = (key, value) => {
         setEditFormData(prev => ({
             ...prev,
-            details: {
-                ...prev.details,
-                [key]: value
-            }
+            details: { ...prev.details, [key]: value }
         }));
     };
 
-    const handleSave = async () => {
-        const { id, ...updates } = editFormData;
-        const { error } = await supabase
-            .from('library_items')
-            .update(updates)
-            .eq('id', id);
-
-        if (error) {
-            alert('Error saving: ' + error.message);
-        } else {
-            setIsEditing(false);
-            fetchItems();
-        }
-    };
-
-    // --- Image Upload ---
+    // Image Upload
     const handleImageSelect = async (e) => {
         if (!e.target.files || e.target.files.length === 0) return;
         setUploading(true);
-        
         const newImageUrls = [];
         const files = Array.from(e.target.files);
-    
+        // Use temp ID if new
+        const recordId = editFormData.id || 'new';
+
         for (const file of files) {
             if (!file.type.match(/^image\/(jpeg|png|gif|webp)$/)) continue;
-            
-            const fileExt = file.name.split('.').pop();
-            const fileName = `library/${selectedItem.id}/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-    
-            const { error: uploadError } = await supabase.storage
-                .from('task-images') // Reuse bucket
-                .upload(fileName, file);
-    
-            if (!uploadError) {
-                const { data: { publicUrl } } = supabase.storage
-                    .from('task-images')
-                    .getPublicUrl(fileName);
-                newImageUrls.push(publicUrl);
-            } else {
-                 console.error('Upload failed:', uploadError);
+            const fileName = `library/${recordId}/${Date.now()}_${file.name}`;
+            const { error } = await supabase.storage.from('task-images').upload(fileName, file);
+            if (!error) {
+                const { data } = supabase.storage.from('task-images').getPublicUrl(fileName);
+                newImageUrls.push(data.publicUrl);
             }
         }
-    
         if (newImageUrls.length > 0) {
-            const currentImages = editFormData.images || [];
-            // Update local form state directly
-            const updatedImages = [...currentImages, ...newImageUrls];
-            handleInputChange('images', updatedImages);
+            setEditFormData(prev => ({
+                ...prev,
+                images: [...(prev.images || []), ...newImageUrls]
+            }));
         }
         setUploading(false);
     };
 
-    const removeImage = (index) => {
-        const currentImages = editFormData.images || [];
-        const newImages = currentImages.filter((_, i) => i !== index);
-        handleInputChange('images', newImages);
-    };
-
-
     return (
         <div className="library-container">
             <div className="library-sidebar">
-                <LCARSButton 
-                   onClick={() => handleCategoryChange('SHIPS')} 
-                   color={category === 'SHIPS' ? 'var(--lcars-orange)' : 'var(--lcars-tan)'} 
-                   rounded="left" block
-                >SHIPS</LCARSButton>
-                <LCARSButton 
-                   onClick={() => handleCategoryChange('PLANETS')} 
-                   color={category === 'PLANETS' ? 'var(--lcars-orange)' : 'var(--lcars-tan)'} 
-                   rounded="left" block
-                >PLANETS</LCARSButton>
+                <div className="library-sidebar-title">TOPICS</div>
+                {availableCategories.map(cat => (
+                     <LCARSButton 
+                        key={cat}
+                        onClick={() => { setActiveCategory(cat); setIsEditing(false); }} 
+                        color={activeCategory === cat ? 'var(--lcars-orange)' : 'var(--lcars-tan)'} 
+                        rounded="left" block
+                     >{cat}</LCARSButton>
+                ))}
                 
+                {/* Add New Entry Button */}
+                <div style={{ marginTop: '20px', borderTop: '2px solid var(--lcars-tan)', paddingTop: '10px' }}>
+                    <LCARSButton onClick={handleAddNew} color="var(--lcars-ice-blue)" rounded="left" block>
+                        + NEW ENTRY
+                    </LCARSButton>
+                </div>
+
                 <div className="library-list">
+                   <div className="library-list-header">RECORDS ({items.length})</div>
                    {items.map(item => (
                      <div 
                        key={item.id} 
@@ -197,8 +275,8 @@ const Library = () => {
                      </div>
                    ))}
                    {items.length === 0 && !loading && (
-                       <div style={{padding:'20px', color:'var(--lcars-tan)', textAlign:'center', cursor:'pointer', border:'1px dashed var(--lcars-tan)'}} onClick={handleSeedData}>
-                           NO DATA FOUND. <br/>CLICK TO INITIALIZE DATABASE.
+                       <div className="library-empty-state" onClick={handleSeedData}>
+                           NO DATA. INITIALIZE?
                        </div>
                    )}
                 </div>
@@ -207,7 +285,8 @@ const Library = () => {
             <div className="library-content">
                 {loading && <div className="loading">ACCESSING DATABASE...</div>}
                 
-                {!loading && selectedItem && !isEditing && (
+                {/* READ MODE */}
+                {!loading && !isEditing && selectedItem && (
                     <>
                         <div style={{display:'flex', justifyContent:'space-between', alignItems:'flex-start'}}>
                              <div className="library-header-group">
@@ -219,7 +298,6 @@ const Library = () => {
                              )}
                         </div>
 
-                        {/* Image Gallery (Read Mode) */}
                         {selectedItem.images && selectedItem.images.length > 0 && (
                             <div className="library-gallery">
                                 {selectedItem.images.map((img, idx) => (
@@ -239,16 +317,61 @@ const Library = () => {
                         <p className="library-desc">{selectedItem.description || selectedItem.desc}</p>
                     </>
                 )}
-
-                {/* Edit Mode */}
-                {!loading && selectedItem && isEditing && (
+                
+                {/* EDIT / CREATE MODE */}
+                {!loading && isEditing && (
                     <div className="library-edit-form">
                         <div className="edit-header">
-                            <span>EDITING RECORD</span>
+                            <span>{editFormData.id ? 'EDITING RECORD' : 'NEW LIBRARY RECORD'}</span>
                             <div style={{display:'flex', gap:'10px'}}>
                                 <LCARSButton onClick={handleSave} color="var(--lcars-orange)" tiny>SAVE</LCARSButton>
                                 <LCARSButton onClick={handleCancelEdit} color="var(--lcars-red)" tiny>CANCEL</LCARSButton>
                             </div>
+                        </div>
+
+                        <div className="edit-field-group">
+                            <label>CATEGORY (TOPIC)</label>
+                            {/* Hybrid Select / Input Logic */}
+                            {isCustomCategory ? (
+                                <div style={{display:'flex', gap:'10px'}}>
+                                    <input 
+                                        value={editFormData.category || ''} 
+                                        onChange={e => handleInputChange('category', e.target.value.toUpperCase())} 
+                                        placeholder="ENTER NEW TOPIC NAME"
+                                        autoFocus
+                                        style={{flex: 1}}
+                                    />
+                                    <LCARSButton onClick={() => setIsCustomCategory(false)} color="var(--lcars-tan)" tiny>SELECT EXISTING</LCARSButton>
+                                </div>
+                            ) : (
+                                <div style={{display:'flex', gap:'10px'}}>
+                                     <select 
+                                        className="lcars-select"
+                                        value={availableCategories.includes(editFormData.category) ? editFormData.category : '__NEW__'}
+                                        onChange={e => {
+                                            if (e.target.value === '__NEW__') {
+                                                setIsCustomCategory(true);
+                                                handleInputChange('category', '');
+                                            } else {
+                                                handleInputChange('category', e.target.value);
+                                            }
+                                        }}
+                                        style={{
+                                            flex: 1,
+                                            backgroundColor: 'var(--lcars-bg)',
+                                            color: 'var(--lcars-orange)',
+                                            border: '2px solid var(--lcars-orange)',
+                                            borderRadius: '15px',
+                                            padding: '5px 10px',
+                                            fontFamily: 'var(--font-main)',
+                                            fontSize: '1em'
+                                        }}
+                                    >
+                                        {availableCategories.map(c => <option key={c} value={c}>{c}</option>)}
+                                        <option value="__NEW__">[ NEW TOPIC... ]</option>
+                                    </select>
+                                </div>
+                            )}
                         </div>
 
                         <div className="edit-field-group">
@@ -260,50 +383,22 @@ const Library = () => {
                             <input value={editFormData.subtitle || ''} onChange={e => handleInputChange('subtitle', e.target.value)} />
                         </div>
 
-                        {/* Visuals Editor */}
                         <div className="note-visuals-strip">
-                            <div className="note-visuals-header">VISUAL ATTACHMENTS</div>
+                            <div className="note-visuals-header">VISUALS</div>
                             <div className="note-visuals-grid">
                                 {(editFormData.images || []).map((img, idx) => (
-                                    <div key={idx} className="note-visual-thumb" style={{backgroundImage: `url(${img})`}}>
-                                        <div className="note-visual-remove" onClick={() => removeImage(idx)}>X</div>
-                                    </div>
+                                    <div key={idx} className="note-visual-thumb" style={{backgroundImage: `url(${img})`}}></div>
                                 ))}
-                                <div className="note-visual-add" onClick={() => fileInputRef.current?.click()}>
-                                    {uploading ? '...' : '+'}
-                                </div>
+                                <div className="note-visual-add" onClick={() => fileInputRef.current?.click()}>+</div>
                             </div>
-                            <input 
-                                type="file" 
-                                ref={fileInputRef} 
-                                style={{display:'none'}} 
-                                accept="image/*" 
-                                multiple 
-                                onChange={handleImageSelect} 
-                            />
-                        </div>
-
-
-                        {/* Dynamic Details Editor */}
-                        <div className="edit-details-section">
-                            <label>TECHNICAL DATA</label>
-                            {editFormData.details && Object.entries(editFormData.details).map(([key, value]) => (
-                                <div key={key} className="edit-detail-row">
-                                    <span className="detail-key">{key.toUpperCase()}</span>
-                                    <input value={value} onChange={e => handleDetailChange(key, e.target.value)} />
-                                </div>
-                            ))}
-                             {/* Add more arbitrary fields? Keep simple for now */}
+                            <input type="file" ref={fileInputRef} hidden accept="image/*" multiple onChange={handleImageSelect} />
                         </div>
 
                         <div className="edit-field-group" style={{flex:1}}>
                             <label>DESCRIPTION</label>
                             <textarea 
                                 value={editFormData.description || editFormData.desc || ''} 
-                                onChange={e => {
-                                    handleInputChange('description', e.target.value);
-                                    handleInputChange('desc', e.target.value); // Sync for legacy compat
-                                }} 
+                                onChange={e => handleInputChange('description', e.target.value)} 
                             />
                         </div>
                     </div>

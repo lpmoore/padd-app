@@ -46,6 +46,7 @@
 - [x] **Sidebar Persistence**: Refactored `LCARSLayout` to use CSS-based active states (color/box-shadow) instead of borders, ensuring completely static geometry during navigation.
 - [x] **Visual Polish**: Darkened sidebar colors to TNG-style Blue (`#4a7eb0`) and adjusted other palette colors for better text contrast. Rescued `lcars-orange` to distinct `#ff9900`.
 - [x] **Security Audit**: Enabled Row Level Security (RLS) on all public tables and restricted Storage Bucket operations to authenticated users only.
+- [x] **Library Enhancements**: Added "Add New Entry" feature and Dynamic Category support. Users can now create custom topics (e.g. "CHARACTERS") simply by typing them in the new entry form. Regressed and then fixed a "Black Screen" crash caused by a React Hook violation.
 - [x] **Subtask Dates**: Wired up `onAddSubtask`. (Needs regression fix).
 - [x] **Date Picker UX**: Improved hit areas to automatically open the date picker on click for better usability (Tasks and Subtasks).
 - [x] **Sound Effects**: Add LCARS interface sounds for interactions (clicks, drag releases).
