@@ -3,14 +3,15 @@
 :root {
   /* LCARS Lower Decks Palette (Cool Tones) */
   /* Primary accents */
-  --lcars-cyan: #59c3ea;       /* Top bars, bright text */
-  --lcars-teal: #2d818f;       /* Sidebar fills */
-  --lcars-ice-blue: #99d9ea;   /* Highlight segments */
-  --lcars-periwinkle: #a7a3d4; /* Specialized buttons */
+  /* Primary accents */
+  --lcars-cyan: #0095c2;       /* Top bars, bright text (Darkened from #59c3ea) */
+  --lcars-teal: #4a7eb0;       /* Sidebar fills (Updated to TNG-ish Blue) */
+  --lcars-ice-blue: #70b4c8;   /* Highlight segments (Darkened from #99d9ea) */
+  --lcars-periwinkle: #8b86bd; /* Specialized buttons (Darkened from #a7a3d4) */
   --lcars-deep-blue: #1c3d5a;  /* Darker backgrounds/accents */
   
   /* Mappings to original generic names to maintain component compatibility */
-  --lcars-orange: var(--lcars-cyan);        /* Default Primary Color */
+  --lcars-orange: #ff9900;                  /* Restored to actual Orange for contrast */
   --lcars-pale-orange: var(--lcars-ice-blue); /* Secondary Color */
   --lcars-tan: var(--lcars-teal);           /* Sidebar/Background Color */
   --lcars-red: #d15c5c;                    /* Alert Color */
