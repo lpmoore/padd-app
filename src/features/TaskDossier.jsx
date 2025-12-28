@@ -3,8 +3,8 @@ import { supabase } from '../lib/supabase';
 import LCARSButton from '../components/LCARSButton';
 import './TaskDossier.css';
 
-const TaskDossier = ({ task, onClose, onUpdate }) => {
-    const [activeTab, setActiveTab] = useState('PROTOCOL');
+const TaskDossier = ({ task, onClose, onUpdate, initialTab = 'PROTOCOL' }) => {
+    const [activeTab, setActiveTab] = useState(initialTab);
     
     // Core Task Data
     const [protocol, setProtocol] = useState(task.details || '');

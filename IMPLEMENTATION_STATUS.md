@@ -42,7 +42,7 @@
 - Fixed tasks disappearing during rapid dragging (added backup/restore).
 
 ## Upcoming / Backlog
-- [ ] **Icon Refinement**: enhancements to task icons (paused).
+- [x] **Icon Refinement**: Enhanced task indicators to be interactive "pills" that link directly to Dossier tabs. Fixed data fetch for Personnel icon. Added icons to Calendar view.
 - [ ] **Sidebar Persistence**: Ensure navigation buttons remain static/fixed keys.
 - [x] **Subtask Dates**: Wired up `onAddSubtask`. (Needs regression fix).
 - [x] **Date Picker UX**: Improved hit areas to automatically open the date picker on click for better usability (Tasks and Subtasks).

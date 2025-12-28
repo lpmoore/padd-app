@@ -62,7 +62,7 @@ function App() {
   const fetchTasks = async () => {
     const { data, error } = await supabase
       .from('tasks')
-      .select('*')
+      .select('*, task_personnel(personnel_id)')
       .eq('user_id', session.user.id)
       .order('due_date', { ascending: true, nullsFirst: false })
       .order('created_at', { ascending: true });
@@ -82,6 +82,8 @@ function App() {
       taskMap[t.id] = { 
           ...t, 
           dueDate: t.due_date, 
+          // Map foreign key join to local property expected by TaskItem
+          personnel: t.task_personnel || [],
           subtasks: [] 
       };
     });
@@ -100,6 +102,12 @@ function App() {
   };
 
   const [activeDossierTaskId, setActiveDossierTaskId] = useState(null);
+  const [activeDossierTab, setActiveDossierTab] = useState('PROTOCOL');
+
+  const handleOpenDossier = (id, tab = 'PROTOCOL') => {
+      setActiveDossierTaskId(id);
+      setActiveDossierTab(tab);
+  };
 
   const handleNavClick = async (id) => {
     setActiveTab(id);
@@ -188,14 +196,14 @@ function App() {
                 onUpdateTask={updateTask}
                 onDeleteTask={deleteTask}
                 onMoveTask={moveTask}
-                onOpenDossier={setActiveDossierTaskId} 
+                onOpenDossier={handleOpenDossier} 
             />
         )}
         {activeTab === 'ADMIN' && <Admin />}
         {activeTab === 'CALENDAR' && (
             <Calendar 
                 tasks={tasks} 
-                onOpenDossier={setActiveDossierTaskId}
+                onOpenDossier={handleOpenDossier}
             />
         )}
         {activeTab === 'LOG' && <Log />}
@@ -204,6 +212,7 @@ function App() {
         {activeDossierTask && (
             <TaskDossier 
                 task={activeDossierTask}
+                initialTab={activeDossierTab}
                 onClose={() => setActiveDossierTaskId(null)}
                 // We still pass onUpdate, but Personnel handling will change inside Dossier.
                 onUpdate={updateTask}

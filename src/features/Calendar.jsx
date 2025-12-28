@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { FileText, Users, Image as ImageIcon } from 'lucide-react';
 import './Calendar.css';
 
 const Calendar = ({ tasks = [], onOpenDossier }) => {
@@ -111,18 +112,85 @@ const Calendar = ({ tasks = [], onOpenDossier }) => {
                                         const timeStr = task.dueDate 
                                             ? new Date(task.dueDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
                                             : '--:--';
+                                            
+                                        const hasProtocol = task.details && task.details.trim().length > 0;
+                                        // Calendar receives tasks from App.jsx, which now includes mapped 'personnel' array
+                                        const hasPersonnel = task.personnel && task.personnel.length > 0;
+                                        const hasVisuals = task.images && task.images.length > 0;
+
                                         return (
                                             <li 
                                                 key={task.id} 
                                                 className="detail-task-item"
-                                                onClick={() => {
-                                                    onOpenDossier(task.id);
-                                                    closeDetail(); // Close detail to show Dossier
-                                                }}
-                                                style={{ cursor: 'pointer' }}
                                             >
                                                 <span className="task-time">{timeStr}</span>
-                                                <span className="task-text">{task.text}</span>
+                                                <span 
+                                                    className="task-text" 
+                                                    onClick={() => {
+                                                        onOpenDossier(task.id);
+                                                        closeDetail();
+                                                    }}
+                                                    style={{ cursor: 'pointer' }}
+                                                >
+                                                    {task.text}
+                                                </span>
+                                                
+                                                <div style={{ display: 'flex', gap: '4px' }}>
+                                                    {hasProtocol && (
+                                                        <div 
+                                                            style={{ 
+                                                                width: '20px', height: '14px', borderRadius: '3px',
+                                                                backgroundColor: 'var(--lcars-tan)',
+                                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                                cursor: 'pointer', color: 'black'
+                                                            }}
+                                                            title="Open Protocol"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                onOpenDossier(task.id, 'PROTOCOL');
+                                                                closeDetail();
+                                                            }}
+                                                        >
+                                                            <FileText size={10} strokeWidth={3} />
+                                                        </div>
+                                                    )}
+                                                    {hasPersonnel && (
+                                                        <div 
+                                                            style={{ 
+                                                                width: '20px', height: '14px', borderRadius: '3px',
+                                                                backgroundColor: 'var(--lcars-red)',
+                                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                                cursor: 'pointer', color: 'black'
+                                                            }}
+                                                            title="Open Personnel"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                onOpenDossier(task.id, 'PERSONNEL');
+                                                                closeDetail();
+                                                            }}
+                                                        >
+                                                            <Users size={10} strokeWidth={3} />
+                                                        </div>
+                                                    )}
+                                                    {hasVisuals && (
+                                                        <div 
+                                                            style={{ 
+                                                                width: '20px', height: '14px', borderRadius: '3px',
+                                                                backgroundColor: 'var(--lcars-blue)',
+                                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                                cursor: 'pointer', color: 'black'
+                                                            }}
+                                                            title="Open Visuals"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                onOpenDossier(task.id, 'VISUALS');
+                                                                closeDetail();
+                                                            }}
+                                                        >
+                                                            <ImageIcon size={10} strokeWidth={3} />
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </li>
                                         );
                                     })}

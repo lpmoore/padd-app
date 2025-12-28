@@ -138,11 +138,38 @@ const TaskItem = ({ task, onDelete, onToggle, onAddSubtask, onUpdate, depth = 0,
         <div className="task-actions">
            {/* Info Wrapper with Icons */}
            <div className="task-info-group">
-               <div className="task-content-icons">
-                   {hasProtocol && <FileText size={14} color="var(--lcars-tan)" title="Protocol" />}
-                   {hasPersonnel && <Users size={14} color="var(--lcars-red)" title="Personnel" />}
-                   {hasVisuals && <ImageIcon size={14} color="var(--lcars-blue)" title="Visuals" />}
-               </div>
+                <div className="task-content-icons">
+                    {hasProtocol && (
+                        <div 
+                            className="task-indicator" 
+                            style={{ backgroundColor: 'var(--lcars-tan)' }}
+                            title="Open Protocol"
+                            onClick={() => onOpenDossier(task.id, 'PROTOCOL')}
+                        >
+                            <FileText size={12} strokeWidth={3} />
+                        </div>
+                    )}
+                    {hasPersonnel && (
+                        <div 
+                            className="task-indicator" 
+                            style={{ backgroundColor: 'var(--lcars-red)' }}
+                            title="Open Personnel"
+                            onClick={() => onOpenDossier(task.id, 'PERSONNEL')}
+                        >
+                            <Users size={12} strokeWidth={3} />
+                        </div>
+                    )}
+                    {hasVisuals && (
+                        <div 
+                            className="task-indicator" 
+                            style={{ backgroundColor: 'var(--lcars-blue)' }}
+                            title="Open Visuals"
+                            onClick={() => onOpenDossier(task.id, 'VISUALS')}
+                        >
+                            <ImageIcon size={12} strokeWidth={3} />
+                        </div>
+                    )}
+                </div>
                <LCARSButton 
                 onClick={() => onOpenDossier(task.id)}
                 color="var(--lcars-tan)"
