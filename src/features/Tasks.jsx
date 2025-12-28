@@ -33,6 +33,16 @@ const RootDroppable = ({ children }) => {
   );
 };
 
+const INITIAL_TASKS = [
+    { title: 'DIAGNOSTIC: WARP CORE', completed: false, date: null, subtasks: [] },
+    { title: 'SENSOR CALIBRATION', completed: true, date: null, subtasks: [] },
+    { title: 'WEEKLY STAFF MEETING', completed: false, date: new Date().toISOString(), subtasks: [
+        { title: 'PREPARE REPORT', completed: false },
+        { title: 'REVIEW LOGS', completed: false }
+    ]},
+    { title: 'RESUPPLY AT DS9', completed: false, date: null, subtasks: [] }
+];
+
 const Tasks = ({ tasks, onAddTask, onUpdateTask, onDeleteTask, onMoveTask, onOpenDossier }) => {
   const [inputValue, setInputValue] = useState('');
   const [inputDate, setInputDate] = useState('');
@@ -120,6 +130,14 @@ const Tasks = ({ tasks, onAddTask, onUpdateTask, onDeleteTask, onMoveTask, onOpe
 
   const handleUpdate = (id, updates) => {
     onUpdateTask(id, updates);
+  };
+
+  // Custom Seed Function for Demo
+  const handleSeedTasks = () => {
+      if (!confirm('INITIALIZE TASK PROTOCOLS WITH DEMO DATA?')) return;
+      INITIAL_TASKS.forEach(t => {
+          onAddTask(t.title, null, t.date);
+      });
   };
 
   // Drag and Drop (Simplified for Nesting Only)
@@ -233,7 +251,12 @@ const Tasks = ({ tasks, onAddTask, onUpdateTask, onDeleteTask, onMoveTask, onOpe
                             onOpenDossier={onOpenDossier}
                         />
                     ))}
-                    {tasks.length === 0 && <p className="no-tasks">NO ACTIVE TASKS RECORDED.</p>}
+                    {tasks.length === 0 && (
+                        <div className="no-tasks">
+                            <p>NO ACTIVE TASKS RECORDED.</p>
+                            <LCARSButton onClick={handleSeedTasks} color="var(--lcars-tan)" tiny>INITIALIZE DEMO PROTOCOLS</LCARSButton>
+                        </div>
+                    )}
                 </div>
             </SortableContext>
             

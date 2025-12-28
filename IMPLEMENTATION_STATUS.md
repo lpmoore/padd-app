@@ -53,3 +53,4 @@
 - [x] **Mobile Responsiveness**: Verify drag and drop behavior on touch devices. (Increased touch tolerance).
 - [x] **Date Picker Styling**: Refine the visual appearance of the new popup calendar (User Request).
 - [x] **Log Layout**: Rearranged Captain's Log header for better usability; New Entry button moved to left, Search bar constrained and moved to right.
+- [x] **Deployment Prep**: Added "Initialize Demo Data" features to Tasks and Personnel modules. Created DEPLOYMENT.md guide.

@@ -3,6 +3,13 @@ import { supabase } from '../../lib/supabase';
 import LCARSButton from '../../components/LCARSButton';
 import './PersonnelManager.css';
 
+const INITIAL_CREW = [
+    { name: 'BECKETT MARINER', rank: 'ENSIGN', birthplace: 'Earth', education: 'Starfleet Academy', expertise: 'Command / Ops', bio: 'Extremely capable but insubordinate. Daughter of Captain Freeman.' },
+    { name: 'BRADIM BOIMLER', rank: 'ENSIGN', birthplace: 'Modesto, CA', education: 'Starfleet Academy', expertise: 'Command / Analysis', bio: 'Stickler for protocols. Aspires to captaincy. Nervous.' },
+    { name: 'D\'VANA TENDI', rank: 'LIEUTENANT J.G.', birthplace: 'Orion', education: 'Starfleet Medical', expertise: 'Science / Medical', bio: 'Enthusiastic and optimistic. Expert in alien physiology.' },
+    { name: 'SAMANTHAN RUTHERFORD', rank: 'LIEUTENANT J.G.', birthplace: 'Earth', education: 'Starfleet Engineering', expertise: 'Engineering / Systems', bio: 'Cyborg implant. Excellent engineer. Loves calibration.' }
+];
+
 const PersonnelManager = () => {
     const [personnel, setPersonnel] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -70,6 +77,19 @@ const PersonnelManager = () => {
         else fetchPersonnel();
     };
 
+    const handleSeedPersonnel = async () => {
+        if (!confirm('INITIALIZE CREW MANIFEST WITH DEMO DATA?')) return;
+        setLoading(true);
+        const user = (await supabase.auth.getUser()).data.user;
+        
+        const rows = INITIAL_CREW.map(p => ({ ...p, user_id: user.id }));
+        const { error } = await supabase.from('personnel').insert(rows);
+        
+        if (error) alert('Seed failed: ' + error.message);
+        else fetchPersonnel();
+        setLoading(false);
+    };
+
     // --- Modal Logic ---
     const handleAddNew = () => {
         setViewPerson(null); // Ensure viewer is closed
@@ -97,6 +117,13 @@ const PersonnelManager = () => {
                     <span style={{ fontSize: '3rem' }}>+</span>
                     <span>NEW ENTRY</span>
                 </div>
+
+                {personnel.length === 0 && !loading && (
+                    <div className="pm-card pm-add-card" style={{borderStyle:'dashed', borderColor:'var(--lcars-tan)'}} onClick={handleSeedPersonnel}>
+                        <span style={{ fontSize: '1.5rem' }}>⚠</span>
+                        <span style={{textAlign:'center'}}>LOAD DEMO<br/>CREW</span>
+                    </div>
+                )}
 
                 {personnel.map(p => (
                     <div key={p.id} className="pm-card" onClick={() => setViewPerson(p)}>
