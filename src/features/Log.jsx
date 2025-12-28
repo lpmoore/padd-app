@@ -180,6 +180,11 @@ const Log = () => {
         <div className="log-container">
             {/* Header Controls */}
             <div className="log-header">
+                {!isCreating && !editingId && (
+                     <LCARSButton onClick={handleStartCreate} color="var(--lcars-orange)" rounded="both">
+                        NEW ENTRY
+                     </LCARSButton>
+                )}
                 <div className="log-search-wrapper">
                     <input 
                         className="log-search-input"
@@ -189,11 +194,6 @@ const Log = () => {
                     />
                     {searchQuery && <div className="log-search-count">{filteredLogs.length} FOUND</div>}
                 </div>
-                {!isCreating && !editingId && (
-                     <LCARSButton onClick={handleStartCreate} color="var(--lcars-orange)" rounded="both">
-                        NEW ENTRY
-                     </LCARSButton>
-                )}
             </div>
 
             {/* Editor Area (Create/Edit) */}
