@@ -141,32 +141,32 @@ const TaskItem = ({ task, onDelete, onToggle, onAddSubtask, onUpdate, depth = 0,
                 <div className="task-content-icons">
                     {hasProtocol && (
                         <div 
-                            className="task-indicator" 
+                            className="task-pill" 
                             style={{ backgroundColor: 'var(--lcars-tan)' }}
                             title="Open Protocol"
                             onClick={() => onOpenDossier(task.id, 'PROTOCOL')}
                         >
-                            <FileText size={12} strokeWidth={3} />
+                            <FileText size={14} strokeWidth={2.5} />
                         </div>
                     )}
                     {hasPersonnel && (
                         <div 
-                            className="task-indicator" 
+                            className="task-pill" 
                             style={{ backgroundColor: 'var(--lcars-red)' }}
                             title="Open Personnel"
                             onClick={() => onOpenDossier(task.id, 'PERSONNEL')}
                         >
-                            <Users size={12} strokeWidth={3} />
+                            <Users size={14} strokeWidth={2.5} />
                         </div>
                     )}
                     {hasVisuals && (
                         <div 
-                            className="task-indicator" 
+                            className="task-pill" 
                             style={{ backgroundColor: 'var(--lcars-blue)' }}
                             title="Open Visuals"
                             onClick={() => onOpenDossier(task.id, 'VISUALS')}
                         >
-                            <ImageIcon size={12} strokeWidth={3} />
+                            <ImageIcon size={14} strokeWidth={2.5} />
                         </div>
                     )}
                 </div>

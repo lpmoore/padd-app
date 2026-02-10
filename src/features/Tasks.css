@@ -231,25 +231,30 @@
 }
 
 /* Indicators (Pills) */
-.task-indicator {
+/* Indicators (Pills) */
+.task-pill {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 24px;
-    height: 18px;
-    border-radius: 4px;
+    padding: 2px 10px;
+    border-radius: 12px; /* Pill shape */
     cursor: pointer;
-    transition: transform 0.1s, opacity 0.2s;
+    transition: transform 0.1s, opacity 0.2s, filter 0.2s;
     opacity: 0.9;
     color: black; /* Icon color inside pill */
+    font-weight: bold;
+    font-size: 0.7rem;
+    height: 22px;
+    min-width: 30px;
 }
 
-.task-indicator:hover {
-    transform: scale(1.1);
+.task-pill:hover {
+    transform: scale(1.05);
     opacity: 1;
+    filter: brightness(1.2);
 }
 
-.task-indicator:active {
+.task-pill:active {
     transform: scale(0.95);
 }
 
