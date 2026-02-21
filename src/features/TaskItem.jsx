@@ -112,7 +112,7 @@ const TaskItem = ({ task, onDelete, onToggle, onAddSubtask, onUpdate, depth = 0,
                   if (!task.completed) playEngage();
                   onToggle(task.id);
               }}
-              title={task.completed ? "Mark as incomplete" : "Mark as complete"}
+              data-tooltip={task.completed ? "MARK AS INCOMPLETE" : "MARK AS COMPLETE"}
             >
               {task.completed ? <CheckSquare size={20} color="var(--lcars-orange)" /> : <Square size={20} color="var(--lcars-blue)" />}
             </div>
@@ -152,7 +152,7 @@ const TaskItem = ({ task, onDelete, onToggle, onAddSubtask, onUpdate, depth = 0,
                         <div 
                             className="task-pill" 
                             style={{ backgroundColor: 'var(--lcars-tan)' }}
-                            title="Open Protocol"
+                            data-tooltip="OPEN PROTOCOL"
                             onClick={() => onOpenDossier(task.id, 'PROTOCOL')}
                         >
                             <FileText size={14} strokeWidth={2.5} />
@@ -162,7 +162,7 @@ const TaskItem = ({ task, onDelete, onToggle, onAddSubtask, onUpdate, depth = 0,
                         <div 
                             className="task-pill" 
                             style={{ backgroundColor: 'var(--lcars-red)' }}
-                            title="Open Personnel"
+                            data-tooltip="OPEN PERSONNEL"
                             onClick={() => onOpenDossier(task.id, 'PERSONNEL')}
                         >
                             <Users size={14} strokeWidth={2.5} />
@@ -172,7 +172,7 @@ const TaskItem = ({ task, onDelete, onToggle, onAddSubtask, onUpdate, depth = 0,
                         <div 
                             className="task-pill" 
                             style={{ backgroundColor: 'var(--lcars-blue)' }}
-                            title="Open Visuals"
+                            data-tooltip="OPEN VISUALS"
                             onClick={() => onOpenDossier(task.id, 'VISUALS')}
                         >
                             <ImageIcon size={14} strokeWidth={2.5} />
