@@ -528,24 +528,23 @@ const Library = () => {
                             <input value={editFormData.subtitle || ''} onChange={e => handleInputChange('subtitle', e.target.value)} />
                         </div>
 
-                        <div className="edit-field-group">
+                        <div className="edit-details-section">
                             <label style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
                                 <span>DETAILS</span>
                                 <LCARSButton onClick={handleAddDetail} color="var(--lcars-ice-blue)" tiny>+ ADD</LCARSButton>
                             </label>
                             {(editFormData.details ? Object.entries(editFormData.details) : []).map(([key, value], idx) => (
-                                <div key={idx} style={{display:'flex', gap:'10px', marginBottom:'10px'}}>
+                                <div key={idx} className="edit-detail-row">
                                     <input 
+                                        className="detail-key"
                                         value={key} 
                                         onChange={e => handleDetailKeyChange(key, e.target.value)} 
                                         placeholder="KEY" 
-                                        style={{flex: 1}}
                                     />
                                     <input 
                                         value={value} 
                                         onChange={e => handleDetailValueChange(key, e.target.value)} 
                                         placeholder="VALUE" 
-                                        style={{flex: 2}}
                                     />
                                     <LCARSButton onClick={() => handleRemoveDetail(key)} color="var(--lcars-red)" tiny>x</LCARSButton>
                                 </div>
