@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import LCARSButton from '../components/LCARSButton';
 import PersonnelManager from './admin/PersonnelManager';
 import Security from './admin/Security';
+import Settings from './admin/Settings';
 import './Admin.css';
 
 const Admin = () => {
@@ -23,10 +24,17 @@ const Admin = () => {
                 >
                     SECURITY
                 </button>
+                <button 
+                    className={`admin-tab-btn ${subTab === 'SETTINGS' ? 'active' : ''}`}
+                    onClick={() => setSubTab('SETTINGS')}
+                >
+                    SETTINGS
+                </button>
             </div>
             
             {subTab === 'PERSONNEL' && <PersonnelManager />}
             {subTab === 'SECURITY' && <Security />}
+            {subTab === 'SETTINGS' && <Settings />}
         </div>
     );
 };
