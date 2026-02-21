@@ -10,7 +10,7 @@ const LCARSLayout = ({
   onNavClick,
   onLogout
 }) => {
-  const { playClick, playEngage } = useLCARSSound();
+  const { playClick } = useLCARSSound();
 
   // Find the color of the active item to tint the top bar/elbow
   const activeColor = navItems.find(item => item.id === activeTab)?.color || 'var(--lcars-cyan)';
@@ -43,7 +43,7 @@ const LCARSLayout = ({
                   color: 'var(--lcars-black)',
                 }}
                 onClick={() => {
-                    playEngage();
+                    playClick();
                     if (onNavClick) onNavClick(item.id);
                 }}
               >
