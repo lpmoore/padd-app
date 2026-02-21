@@ -7,11 +7,13 @@ import { ChevronRight, ChevronDown, GripVertical, Trash2, CheckSquare, Square, F
 import LCARSButton from '../components/LCARSButton';
 import LCARSDatePicker from '../components/LCARSDatePicker'; // New custom picker
 import { formatDateForInput } from '../utils/dateUtils';
+import useLCARSSound from '../hooks/useLCARSSound';
 
 const TaskItem = ({ task, onDelete, onToggle, onAddSubtask, onUpdate, depth = 0, isShiftHeld, onOpenDossier }) => {
   const [isExpanded, setIsExpanded] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(task.text);
+  const { playEngage } = useLCARSSound();
   
   // Date Handling (Simplified for LCARSDatePicker)
   const dateValue = formatDateForInput(task.dueDate);
@@ -104,7 +106,10 @@ const TaskItem = ({ task, onDelete, onToggle, onAddSubtask, onUpdate, depth = 0,
               {isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
             </button>
 
-            <div className="task-checkbox" onClick={() => onToggle(task.id)}>
+            <div className="task-checkbox" onClick={() => {
+                if (!task.completed) playEngage();
+                onToggle(task.id);
+            }}>
               {task.completed ? <CheckSquare size={20} color="var(--lcars-orange)" /> : <Square size={20} color="var(--lcars-blue)" />}
             </div>
 
