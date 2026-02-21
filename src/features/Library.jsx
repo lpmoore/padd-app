@@ -19,6 +19,7 @@ const Library = () => {
     const [items, setItems] = useState([]);
     const [selectedItem, setSelectedItem] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
     
     // Auth & Edit State
     const [session, setSession] = useState(null);
@@ -288,6 +289,17 @@ const Library = () => {
         setUploading(false);
     };
 
+    const filteredItems = items.filter(item => {
+        if (!searchQuery) return true;
+        const query = searchQuery.toLowerCase();
+        return (
+            (item.title && item.title.toLowerCase().includes(query)) ||
+            (item.subtitle && item.subtitle.toLowerCase().includes(query)) ||
+            (item.description && item.description.toLowerCase().includes(query)) ||
+            (item.desc && item.desc.toLowerCase().includes(query))
+        );
+    });
+
     return (
         <div className="library-container">
             <div className="library-sidebar">
@@ -309,8 +321,28 @@ const Library = () => {
                 </div>
 
                 <div className="library-list">
-                   <div className="library-list-header">RECORDS ({items.length})</div>
-                   {items.map(item => (
+                   <div className="library-search-container" style={{ padding: '0 0 10px 0' }}>
+                       <input 
+                           type="text" 
+                           placeholder="SEARCH DATA..." 
+                           value={searchQuery}
+                           onChange={e => setSearchQuery(e.target.value)}
+                           style={{
+                               width: '100%',
+                               backgroundColor: 'var(--lcars-bg)',
+                               color: 'var(--lcars-ice-blue)',
+                               border: '2px solid var(--lcars-ice-blue)',
+                               borderRadius: '15px',
+                               padding: '8px 12px',
+                               fontFamily: 'var(--font-main)',
+                               fontSize: '0.9em',
+                               outline: 'none',
+                               boxSizing: 'border-box'
+                           }}
+                       />
+                   </div>
+                   <div className="library-list-header">RECORDS ({filteredItems.length})</div>
+                   {filteredItems.map(item => (
                      <div 
                        key={item.id} 
                        className={`library-list-item ${selectedItem?.id === item.id ? 'active' : ''}`}
