@@ -227,11 +227,38 @@ const Library = () => {
         setEditFormData(prev => ({ ...prev, [field]: value }));
     };
 
-    const handleDetailChange = (key, value) => {
+    const handleDetailKeyChange = (oldKey, newKey) => {
+        setEditFormData(prev => {
+            const newDetails = { ...prev.details };
+            if (oldKey !== newKey) {
+                newDetails[newKey] = newDetails[oldKey];
+                delete newDetails[oldKey];
+            }
+            return { ...prev, details: newDetails };
+        });
+    };
+
+    const handleDetailValueChange = (key, value) => {
         setEditFormData(prev => ({
             ...prev,
             details: { ...prev.details, [key]: value }
         }));
+    };
+
+    const handleAddDetail = () => {
+        const newKey = `NEW_DETAIL_${Date.now()}`;
+        setEditFormData(prev => ({
+            ...prev,
+            details: { ...prev.details, [newKey]: '' }
+        }));
+    };
+
+    const handleRemoveDetail = (keyToRemove) => {
+        setEditFormData(prev => {
+            const newDetails = { ...prev.details };
+            delete newDetails[keyToRemove];
+            return { ...prev, details: newDetails };
+        });
     };
 
     // Image Upload
@@ -402,6 +429,30 @@ const Library = () => {
                         <div className="edit-field-group">
                             <label>SUBTITLE</label>
                             <input value={editFormData.subtitle || ''} onChange={e => handleInputChange('subtitle', e.target.value)} />
+                        </div>
+
+                        <div className="edit-field-group">
+                            <label style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+                                <span>DETAILS</span>
+                                <LCARSButton onClick={handleAddDetail} color="var(--lcars-ice-blue)" tiny>+ ADD</LCARSButton>
+                            </label>
+                            {(editFormData.details ? Object.entries(editFormData.details) : []).map(([key, value], idx) => (
+                                <div key={idx} style={{display:'flex', gap:'10px', marginBottom:'10px'}}>
+                                    <input 
+                                        value={key} 
+                                        onChange={e => handleDetailKeyChange(key, e.target.value)} 
+                                        placeholder="KEY" 
+                                        style={{flex: 1}}
+                                    />
+                                    <input 
+                                        value={value} 
+                                        onChange={e => handleDetailValueChange(key, e.target.value)} 
+                                        placeholder="VALUE" 
+                                        style={{flex: 2}}
+                                    />
+                                    <LCARSButton onClick={() => handleRemoveDetail(key)} color="var(--lcars-red)" tiny>x</LCARSButton>
+                                </div>
+                            ))}
                         </div>
 
                         <div className="note-visuals-strip">
