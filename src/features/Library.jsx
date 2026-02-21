@@ -28,6 +28,7 @@ const Library = () => {
     const [editFormData, setEditFormData] = useState({});
     const [uploading, setUploading] = useState(false);
     const [isDragging, setIsDragging] = useState(false);
+    const [imagesToDelete, setImagesToDelete] = useState([]);
     const fileInputRef = useRef(null);
 
     useEffect(() => {
@@ -153,18 +154,21 @@ const Library = () => {
         });
         setIsCustomCategory(false);
         setIsEditing(true);
+        setImagesToDelete([]);
     };
 
     const handleEditClick = () => {
         setEditFormData({ ...selectedItem });
         setIsCustomCategory(!availableCategories.includes(selectedItem.category));
         setIsEditing(true);
+        setImagesToDelete([]);
     };
 
     const handleCancelEdit = () => {
         setIsEditing(false);
         setEditFormData({});
         setIsCustomCategory(false);
+        setImagesToDelete([]);
         // Restore selection
         if (!selectedItem && items.length > 0) setSelectedItem(items[0]);
     };
@@ -261,6 +265,40 @@ const Library = () => {
             delete newDetails[keyToRemove];
             return { ...prev, details: newDetails };
         });
+    };
+
+    const toggleImageDeletion = (imgUrl) => {
+        setImagesToDelete(prev => 
+            prev.includes(imgUrl) 
+                ? prev.filter(url => url !== imgUrl)
+                : [...prev, imgUrl]
+        );
+    };
+
+    const handleDeleteSelectedImages = async () => {
+        if (!window.confirm(`Delete ${imagesToDelete.length} selected image(s)?`)) return;
+        setLoading(true);
+
+        const storagePathsToDelete = imagesToDelete
+            .filter(url => url.includes('supabase.co') && url.includes('task-images/'))
+            .map(url => {
+                const parts = url.split('task-images/');
+                return parts.length === 2 ? parts[1] : null;
+            })
+            .filter(Boolean);
+
+        if (storagePathsToDelete.length > 0) {
+            const { error: deleteError } = await supabase.storage.from('task-images').remove(storagePathsToDelete);
+            if (deleteError) {
+                console.error("Error deleting images from storage:", deleteError);
+            }
+        }
+
+        const remainingImages = (editFormData.images || []).filter(img => !imagesToDelete.includes(img));
+        
+        setEditFormData(prev => ({ ...prev, images: remainingImages }));
+        setImagesToDelete([]);
+        setLoading(false);
     };
 
     // Image Upload
@@ -537,13 +575,36 @@ const Library = () => {
                                 padding: isDragging ? '8px' : '0'
                             }}
                         >
-                            <div className="note-visuals-header">
-                                {isDragging ? 'DROP IMAGES HERE' : 'VISUALS'}
-                                {uploading && <span style={{fontSize:'0.8em', marginLeft:'10px'}}>UPLOADING...</span>}
+                            <div className="note-visuals-header" style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+                                <div>
+                                    {isDragging ? 'DROP IMAGES HERE' : 'VISUALS'}
+                                    {uploading && <span style={{fontSize:'0.8em', marginLeft:'10px'}}>UPLOADING...</span>}
+                                </div>
+                                {imagesToDelete.length > 0 && (
+                                    <LCARSButton onClick={handleDeleteSelectedImages} color="var(--lcars-red)" tiny>
+                                        DELETE SELECTED ({imagesToDelete.length})
+                                    </LCARSButton>
+                                )}
                             </div>
                             <div className="note-visuals-grid">
                                 {(editFormData.images || []).map((img, idx) => (
-                                    <div key={idx} className="note-visual-thumb" style={{backgroundImage: `url(${img})`}}></div>
+                                    <div 
+                                        key={idx} 
+                                        className="note-visual-thumb" 
+                                        style={{
+                                            backgroundImage: `url(${img})`,
+                                            border: imagesToDelete.includes(img) ? '3px solid var(--lcars-red)' : 'none',
+                                            opacity: imagesToDelete.includes(img) ? 0.5 : 1,
+                                            cursor: 'pointer'
+                                        }}
+                                        onClick={() => toggleImageDeletion(img)}
+                                    >
+                                        {imagesToDelete.includes(img) && (
+                                            <div style={{display:'flex', height:'100%', alignItems:'center', justifyContent:'center', color:'var(--lcars-red)', fontSize:'24px', fontWeight:'bold', backgroundColor:'rgba(0,0,0,0.5)'}}>
+                                                X
+                                            </div>
+                                        )}
+                                    </div>
                                 ))}
                                 <div className="note-visual-add" onClick={() => fileInputRef.current?.click()}>+</div>
                             </div>
