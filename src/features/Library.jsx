@@ -27,6 +27,7 @@ const Library = () => {
     const [isCustomCategory, setIsCustomCategory] = useState(false); // Top level state
     const [editFormData, setEditFormData] = useState({});
     const [uploading, setUploading] = useState(false);
+    const [isDragging, setIsDragging] = useState(false);
     const fileInputRef = useRef(null);
 
     useEffect(() => {
@@ -263,15 +264,13 @@ const Library = () => {
     };
 
     // Image Upload
-    const handleImageSelect = async (e) => {
-        if (!e.target.files || e.target.files.length === 0) return;
+    const uploadFiles = async (filesArray) => {
+        if (!filesArray || filesArray.length === 0) return;
         setUploading(true);
         const newImageUrls = [];
-        const files = Array.from(e.target.files);
-        // Use temp ID if new
         const recordId = editFormData.id || 'new';
 
-        for (const file of files) {
+        for (const file of filesArray) {
             if (!file.type.match(/^image\/(jpeg|png|gif|webp)$/)) continue;
             const fileName = `library/${recordId}/${Date.now()}_${file.name}`;
             const { error } = await supabase.storage.from('task-images').upload(fileName, file);
@@ -287,6 +286,46 @@ const Library = () => {
             }));
         }
         setUploading(false);
+    };
+
+    const handleImageSelect = (e) => {
+        uploadFiles(Array.from(e.target.files));
+    };
+
+    const handleDragOver = (e) => {
+        e.preventDefault();
+        setIsDragging(true);
+    };
+
+    const handleDragLeave = (e) => {
+        e.preventDefault();
+        setIsDragging(false);
+    };
+
+    const handleDrop = (e) => {
+        e.preventDefault();
+        setIsDragging(false);
+        const files = Array.from(e.dataTransfer.files);
+        if (files.length > 0) {
+            uploadFiles(files);
+            return;
+        }
+
+        // Handle dragging images from other websites
+        let droppedUrl = e.dataTransfer.getData('text/uri-list') || e.dataTransfer.getData('text/plain');
+        const html = e.dataTransfer.getData('text/html');
+        
+        if (!droppedUrl && html) {
+            const match = html.match(/src=["'](.*?)["']/i);
+            if (match) droppedUrl = match[1];
+        }
+
+        if (droppedUrl && (droppedUrl.startsWith('http') || droppedUrl.startsWith('data:image'))) {
+            setEditFormData(prev => ({
+                ...prev,
+                images: [...(prev.images || []), droppedUrl]
+            }));
+        }
     };
 
     const filteredItems = items.filter(item => {
@@ -487,8 +526,21 @@ const Library = () => {
                             ))}
                         </div>
 
-                        <div className="note-visuals-strip">
-                            <div className="note-visuals-header">VISUALS</div>
+                        <div 
+                            className="note-visuals-strip"
+                            onDragOver={handleDragOver}
+                            onDragLeave={handleDragLeave}
+                            onDrop={handleDrop}
+                            style={{
+                                border: isDragging ? '2px dashed var(--lcars-orange)' : 'none',
+                                transition: 'border 0.2s ease',
+                                padding: isDragging ? '8px' : '0'
+                            }}
+                        >
+                            <div className="note-visuals-header">
+                                {isDragging ? 'DROP IMAGES HERE' : 'VISUALS'}
+                                {uploading && <span style={{fontSize:'0.8em', marginLeft:'10px'}}>UPLOADING...</span>}
+                            </div>
                             <div className="note-visuals-grid">
                                 {(editFormData.images || []).map((img, idx) => (
                                     <div key={idx} className="note-visual-thumb" style={{backgroundImage: `url(${img})`}}></div>
