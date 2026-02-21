@@ -204,6 +204,24 @@ const Library = () => {
         }
     };
 
+    const handleDelete = async () => {
+        if (!selectedItem) return;
+        if (window.confirm(`Delete record: ${selectedItem.title}?`)) {
+            const { error } = await supabase
+                .from('library_items')
+                .delete()
+                .eq('id', selectedItem.id);
+            
+            if (error) {
+                alert('Error deleting: ' + error.message);
+            } else {
+                setSelectedItem(null);
+                await refreshCategories();
+                fetchItemsForCategory(activeCategory);
+            }
+        }
+    };
+
     // Form Handling
     const handleInputChange = (field, value) => {
         setEditFormData(prev => ({ ...prev, [field]: value }));
@@ -294,7 +312,10 @@ const Library = () => {
                                 <h3 className="library-subtitle">{selectedItem.subtitle}</h3>
                              </div>
                              {session && (
-                                 <LCARSButton onClick={handleEditClick} color="var(--lcars-orange)" tiny>EDIT</LCARSButton>
+                                 <div style={{display:'flex', gap:'10px'}}>
+                                     <LCARSButton onClick={handleEditClick} color="var(--lcars-orange)" tiny>EDIT</LCARSButton>
+                                     <LCARSButton onClick={handleDelete} color="var(--lcars-red)" tiny>DELETE</LCARSButton>
+                                 </div>
                              )}
                         </div>
 
