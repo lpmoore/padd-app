@@ -106,10 +106,14 @@ const TaskItem = ({ task, onDelete, onToggle, onAddSubtask, onUpdate, depth = 0,
               {isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
             </button>
 
-            <div className="task-checkbox" onClick={() => {
-                if (!task.completed) playEngage();
-                onToggle(task.id);
-            }}>
+            <div 
+              className="task-checkbox" 
+              onClick={() => {
+                  if (!task.completed) playEngage();
+                  onToggle(task.id);
+              }}
+              title={task.completed ? "Mark as incomplete" : "Mark as complete"}
+            >
               {task.completed ? <CheckSquare size={20} color="var(--lcars-orange)" /> : <Square size={20} color="var(--lcars-blue)" />}
             </div>
 
