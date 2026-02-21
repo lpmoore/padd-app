@@ -404,18 +404,6 @@ const Library = () => {
                            placeholder="SEARCH DATA..." 
                            value={searchQuery}
                            onChange={e => setSearchQuery(e.target.value)}
-                           style={{
-                               width: '100%',
-                               backgroundColor: 'var(--lcars-bg)',
-                               color: 'var(--lcars-ice-blue)',
-                               border: '2px solid var(--lcars-ice-blue)',
-                               borderRadius: '15px',
-                               padding: '8px 12px',
-                               fontFamily: 'var(--font-main)',
-                               fontSize: '0.9em',
-                               outline: 'none',
-                               boxSizing: 'border-box'
-                           }}
                        />
                    </div>
                    <div className="library-list-header">RECORDS ({filteredItems.length})</div>

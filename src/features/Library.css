@@ -20,6 +20,25 @@
   gap: 5px;
 }
 
+.library-search-container input {
+  width: 100%;
+  background-color: var(--lcars-bg);
+  color: var(--lcars-ice-blue);
+  border: 2px solid var(--lcars-ice-blue);
+  border-radius: 15px;
+  padding: 8px 12px;
+  font-family: var(--font-main);
+  font-size: 0.9rem;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.library-search-container input:focus {
+  border-color: var(--lcars-orange);
+  box-shadow: 0 0 5px var(--lcars-orange);
+}
+
 .library-list-item {
   padding: 5px 10px;
   color: var(--lcars-blue);
