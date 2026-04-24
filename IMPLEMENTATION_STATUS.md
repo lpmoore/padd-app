@@ -60,7 +60,6 @@
 - [x] **Deployment Prep**: Added "Initialize Demo Data" features to Tasks and Personnel modules. Created DEPLOYMENT.md guide.
 
 ### 🖖 Thematic (Star Trek / LCARS) Enhancements
-- [ ] **Stardate Toggle:** Add a global setting to toggle all dates between standard Earth dates and calculated Stardates.
 - [x] **Stardate Toggle:** Added global setting and context to toggle standard Earth dates and calculated Stardates. (Core logic/UI complete; component wiring in progress).
 - [ ] **Voice Command Integration:** Integrate Web Speech API for hands-free dictation into Logs and Tasks.
 - [ ] **"Red Alert" Mode:** Toggle for critical tasks that flashes LCARS borders red and plays a klaxon sound.
