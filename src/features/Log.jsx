@@ -10,20 +10,20 @@ import { useSettings } from '../contexts/settingsContextValue';
 const pickRandomIndex = (length) => Math.floor(Math.random() * length);
 
 const Log = () => {
-  // extract toggle state from settings context
+  // Extract toggle state from settings context
   const settings = useSettings();
   const isStardateEnabled = settings?.isStardateEnabled || false;
 
-  //conditionally format date based on stardate preference
+  // Conditionally format date based on stardate preference
   const formatLogDate = (dateString) => {
     if (!dateString) return 'UNKNOWN DATE';
 
     const dateObj = new Date(dateString);
     if (isStardateEnabled) {
-      // use Stardate format if enabled
+      // Use stardate format if enabled
       return calculateStardate(dateObj);
     } else {
-      // default to standard date format
+      // Default to standard date format
       return dateObj
         .toLocaleString('en-US', {
           year: 'numeric',
