@@ -31,6 +31,24 @@ export const formatDateForDisplay = (isoString, useStardate = false) => {
     return new Date(isoString).toLocaleString();
 };
 
+export const formatLogDate = (dateString, useStardate = false) => {
+    if (!dateString) return 'UNKNOWN DATE';
+
+    const dateObj = new Date(dateString);
+    if (useStardate) {
+        return calculateStardate(dateObj);
+    }
+    return dateObj
+        .toLocaleString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+        })
+        .toUpperCase();
+};
+
 export const formatDateForStorage = (localDateString) => {
     if (!localDateString) return null;
     try {

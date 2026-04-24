@@ -3,7 +3,7 @@ import './Log.css';
 import React, { useEffect, useRef, useState } from 'react';
 
 import LCARSButton from '../components/LCARSButton';
-import { calculateStardate } from '../utils/stardate';
+import { formatLogDate } from '../utils/dateUtils';
 import { supabase } from '../lib/supabase';
 import { useSettings } from '../contexts/settingsContextValue';
 
@@ -13,28 +13,6 @@ const Log = () => {
   // Extract toggle state from settings context
   const settings = useSettings();
   const isStardateEnabled = settings?.isStardateEnabled || false;
-
-  // Conditionally format date based on stardate preference
-  const formatLogDate = (dateString) => {
-    if (!dateString) return 'UNKNOWN DATE';
-
-    const dateObj = new Date(dateString);
-    if (isStardateEnabled) {
-      // Use stardate format if enabled
-      return calculateStardate(dateObj);
-    } else {
-      // Default to standard date format
-      return dateObj
-        .toLocaleString('en-US', {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit',
-        })
-        .toUpperCase();
-    }
-  };
 
   const scrollToLog = (id) => {
     const el = document.getElementById(`log-entry-${id}`);
@@ -343,7 +321,7 @@ const Log = () => {
             <div className='log-entry-header'>
               <div className='log-meta'>
                 <span className='log-stardate'>
-                  {formatLogDate(log.created_at)}
+                  {formatLogDate(log.created_at, isStardateEnabled)}
                 </span>
                 <span className='log-title'>{log.title || 'UNKNOWN'}</span>
               </div>
