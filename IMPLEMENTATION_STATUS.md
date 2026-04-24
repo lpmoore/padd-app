@@ -1,51 +1,50 @@
 # PADD App Implementation Status
 
-*NOTE: This file should be updated after every successful bug fix or feature completion.*
+_NOTE: This file should be updated after every successful bug fix or feature completion._
 
 ## Recent Progress & Fixes
+
 - **Backend Migration (Supabase)**:
-    - [x] **Auth**: Implemented Email/Password authentication using Supabase Auth.
-    - [x] **Data**: Migrated `Tasks` and `Notes` from localStorage to Supabase Database (`postgres`).
-    - [x] **Storage**: Implemented Supabase Storage for Task Dossier images (`task-images` bucket).
-    - [x] **Notes**: Added auto-save and search functionality for cloud-stored notes.
-    - [x] **Captain's Log**: Converted Notes feature to "Captain's Log" with chronological feed and standard date formatting.
-    - [x] **Security**: Added "Security" tab to Admin section for password updates.
+  - [x] **Auth**: Implemented Email/Password authentication using Supabase Auth.
+  - [x] **Data**: Migrated `Tasks` and `Notes` from localStorage to Supabase Database (`postgres`).
+  - [x] **Storage**: Implemented Supabase Storage for Task Dossier images (`task-images` bucket).
+  - [x] **Notes**: Added auto-save and search functionality for cloud-stored notes.
+  - [x] **Captain's Log**: Converted Notes feature to "Captain's Log" with chronological feed and standard date formatting.
+  - [x] **Security**: Added "Security" tab to Admin section for password updates.
 - **Drag and Drop / Nesting**:
-    - [x] Fixed syntax error in `Tasks.jsx` causing startup failure.
-    - [x] Fixed "return outside of function" error by removing stale code.
-    - [x] Resolved console log spam in `TaskItem.jsx`.
-    - [x] **Feature**: Implemented global **Shift Key** tracking to toggle between "Reorder" and "Nest" modes.
-    - [x] **UX**: Added "HOLD SHIFT TO NEST TASKS" instruction to the UI.
-    - [x] **UX**: Added distinct visual feedback (Orange Dashed Border) when nesting is active vs. standard highlight for reordering.
+  - [x] Fixed syntax error in `Tasks.jsx` causing startup failure.
+  - [x] Fixed "return outside of function" error by removing stale code.
+  - [x] Resolved console log spam in `TaskItem.jsx`.
+  - [x] **Feature**: Implemented global **Shift Key** tracking to toggle between "Reorder" and "Nest" modes.
+  - [x] **UX**: Added "HOLD SHIFT TO NEST TASKS" instruction to the UI.
+  - [x] **UX**: Added distinct visual feedback (Orange Dashed Border) when nesting is active vs. standard highlight for reordering.
 - **UI/Visuals**:
-    - [x] **Settings Context**: Created global `SettingsContext` to manage and persist app-wide preferences (localStorage).
-    - [x] **Settings Panel**: Built out the `Settings.jsx` panel in the Admin section with an LCARS-themed toggle.
+  - [x] **Settings Context**: Created global `SettingsContext` to manage and persist app-wide preferences (localStorage).
+  - [x] **Settings Panel**: Built out the `Settings.jsx` panel in the Admin section with an LCARS-themed toggle.
 - **Thematic Enhancements**:
-    - [x] **Stardate Utility**: Created mathematical converter (`stardate.js`) to translate standard dates to Star Trek TNG-era Stardates.
-    - [x] **Task Indicators**: Added icons (Protocol, Personnel, Visuals) to task items. (Pending refinement).
-    - [x] **LCARS Layout**: Implemented dynamic color theming.
-    - [x] **Sidebar**: Added "active break" styling and ensured buttons remain static (fixed height/borders).
-    - [x] **LCARS Frame**: Implemented proper "File Folder" frame (Right Column, Top Row) for Personnel Viewer/Editor.
-    - [x] **Custom Date Picker**: Implemented `LCARSDatePicker` with embedded "ENGAGE" button for explicit saving.
-    - [x] **Nav Reorder**: Moved Admin button to the bottom of the navigation list.
-    - [x] **LCARS Header**: Updated elbow text to "USS CERRITOS".
-    - [x] **Personnel Sort**: Enforced alphabetical sorting for Personnel Manager and Task Dossier assignments.
-    - [x] **Notes Images**: Added support for attaching images to log entries (requires DB update).
-    - [x] **Library Images/DB**: Migrated Library to Supabase (dynamic) and added image upload support.
-
-
-
-
-
+  - [x] **Stardate Utility**: Created mathematical converter (`stardate.js`) to translate standard dates to Star Trek TNG-era Stardates.
+  - [x] **Task Indicators**: Added icons (Protocol, Personnel, Visuals) to task items. (Pending refinement).
+  - [x] **LCARS Layout**: Implemented dynamic color theming.
+  - [x] **Sidebar**: Added "active break" styling and ensured buttons remain static (fixed height/borders).
+  - [x] **LCARS Frame**: Implemented proper "File Folder" frame (Right Column, Top Row) for Personnel Viewer/Editor.
+  - [x] **Custom Date Picker**: Implemented `LCARSDatePicker` with embedded "ENGAGE" button for explicit saving.
+  - [x] **Nav Reorder**: Moved Admin button to the bottom of the navigation list.
+  - [x] **LCARS Header**: Updated elbow text to "USS CERRITOS".
+  - [x] **Personnel Sort**: Enforced alphabetical sorting for Personnel Manager and Task Dossier assignments.
+  - [x] **Notes Images**: Added support for attaching images to log entries (requires DB update).
+  - [x] **Library Images/DB**: Migrated Library to Supabase (dynamic) and added image upload support.
 
 ## Critical Issues
+
 - [x] **Task Due Dates**: Fixed persistence, timezone shifting (UTC/Local conversion), and Calendar display issues.
 
 ## Historical Fixes
+
 - Fixed screen blackout when clicking "Tasks" (missing `useSortable`).
 - Fixed tasks disappearing during rapid dragging (added backup/restore).
 
 ## Upcoming / Backlog
+
 - [x] **Icon Refinement**: Enhanced task indicators to be interactive "pills" that link directly to Dossier tabs. Fixed data fetch for Personnel icon. Added icons to Calendar view.
 - [x] **Sidebar Persistence**: Refactored `LCARSLayout` to use CSS-based active states (color/box-shadow) instead of borders, ensuring completely static geometry during navigation.
 - [x] **Visual Polish**: Darkened sidebar colors to TNG-style Blue (`#4a7eb0`) and adjusted other palette colors for better text contrast. Rescued `lcars-orange` to distinct `#ff9900`.
@@ -60,13 +59,20 @@
 - [x] **Deployment Prep**: Added "Initialize Demo Data" features to Tasks and Personnel modules. Created DEPLOYMENT.md guide.
 
 ### 🖖 Thematic (Star Trek / LCARS) Enhancements
-- [x] **Stardate Toggle:** Added global setting and context to toggle standard Earth dates and calculated Stardates. (Core logic/UI complete; component wiring in progress).
+
+- [x] **Stardate Toggle:** Added global setting and context to toggle standard Earth dates and calculated Stardates. (Global context and settings panel toggle are fully wired. Integration across app components is next.)
+- [ ] **Stardate Integration:** Wire up Stardate toggle to all date displays.
+  - [ ] Update Task items (main list, subtasks) to show Stardates.
+  - [ ] Update Task Dossier to show Stardates.
+  - [ ] Update Captain's Log entries to show Stardates.
+  - [ ] Update Calendar view to show Stardates.
 - [ ] **Voice Command Integration:** Integrate Web Speech API for hands-free dictation into Logs and Tasks.
 - [ ] **"Red Alert" Mode:** Toggle for critical tasks that flashes LCARS borders red and plays a klaxon sound.
 - [ ] **Global "Computer" Search:** Global LCARS query interface searching Tasks, Personnel, Logs, and Library simultaneously.
 - [ ] **Duty Roster / Status:** Expand Personnel to include statuses (On Duty, Away Mission) and shift assignments.
 
 ### 🚀 Productivity & Usability Features
+
 - [ ] **Home Dashboard / Main View:** "At-a-glance" summary of the day (overdue tasks, due today, latest log, active personnel).
 - [ ] **Push Notifications / Reminders:** Browser/email alerts for approaching task due dates.
 - [ ] **Rich Text or Markdown Support:** Add markdown parsing or an LCARS-styled rich text editor to Logs/Dossiers.
@@ -74,6 +80,7 @@
 - [ ] **Tags & Filtering:** Tagging system (#engineering, #diplomacy) to quickly filter views.
 
 ### ⚙️ Technical & Architecture Upgrades
+
 - [ ] **Offline Mode (PWA):** Progressive Web App capabilities for offline read/write with background syncing to Supabase.
 - [ ] **Real-time Collaboration:** Leverage Supabase Realtime for live updates across multiple users/crew members.
 - [ ] **Keyboard Shortcuts:** Global hotkeys (Ctrl+N, Ctrl+L) with LCARS audio feedback.

@@ -1,13 +1,17 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './App.jsx'
-import { SoundProvider } from './contexts/SoundContext'
+import './index.css';
+
+import App from './App.jsx';
+import { SettingsProvider } from './contexts/SettingsContext';
+import { SoundProvider } from './contexts/SoundContext';
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <SoundProvider>
-      <App />
+      <SettingsProvider>
+        <App />
+      </SettingsProvider>
     </SoundProvider>
   </StrictMode>,
-)
+);
