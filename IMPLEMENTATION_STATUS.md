@@ -18,6 +18,10 @@
     - [x] **UX**: Added "HOLD SHIFT TO NEST TASKS" instruction to the UI.
     - [x] **UX**: Added distinct visual feedback (Orange Dashed Border) when nesting is active vs. standard highlight for reordering.
 - **UI/Visuals**:
+    - [x] **Settings Context**: Created global `SettingsContext` to manage and persist app-wide preferences (localStorage).
+    - [x] **Settings Panel**: Built out the `Settings.jsx` panel in the Admin section with an LCARS-themed toggle.
+- **Thematic Enhancements**:
+    - [x] **Stardate Utility**: Created mathematical converter (`stardate.js`) to translate standard dates to Star Trek TNG-era Stardates.
     - [x] **Task Indicators**: Added icons (Protocol, Personnel, Visuals) to task items. (Pending refinement).
     - [x] **LCARS Layout**: Implemented dynamic color theming.
     - [x] **Sidebar**: Added "active break" styling and ensured buttons remain static (fixed height/borders).
@@ -54,3 +58,23 @@
 - [x] **Date Picker Styling**: Refine the visual appearance of the new popup calendar (User Request).
 - [x] **Log Layout**: Rearranged Captain's Log header for better usability; New Entry button moved to left, Search bar constrained and moved to right.
 - [x] **Deployment Prep**: Added "Initialize Demo Data" features to Tasks and Personnel modules. Created DEPLOYMENT.md guide.
+
+### 🖖 Thematic (Star Trek / LCARS) Enhancements
+- [ ] **Stardate Toggle:** Add a global setting to toggle all dates between standard Earth dates and calculated Stardates.
+- [x] **Stardate Toggle:** Added global setting and context to toggle standard Earth dates and calculated Stardates. (Core logic/UI complete; component wiring in progress).
+- [ ] **Voice Command Integration:** Integrate Web Speech API for hands-free dictation into Logs and Tasks.
+- [ ] **"Red Alert" Mode:** Toggle for critical tasks that flashes LCARS borders red and plays a klaxon sound.
+- [ ] **Global "Computer" Search:** Global LCARS query interface searching Tasks, Personnel, Logs, and Library simultaneously.
+- [ ] **Duty Roster / Status:** Expand Personnel to include statuses (On Duty, Away Mission) and shift assignments.
+
+### 🚀 Productivity & Usability Features
+- [ ] **Home Dashboard / Main View:** "At-a-glance" summary of the day (overdue tasks, due today, latest log, active personnel).
+- [ ] **Push Notifications / Reminders:** Browser/email alerts for approaching task due dates.
+- [ ] **Rich Text or Markdown Support:** Add markdown parsing or an LCARS-styled rich text editor to Logs/Dossiers.
+- [ ] **Data Export:** Export Captain's Logs or Task lists to PDF or JSON.
+- [ ] **Tags & Filtering:** Tagging system (#engineering, #diplomacy) to quickly filter views.
+
+### ⚙️ Technical & Architecture Upgrades
+- [ ] **Offline Mode (PWA):** Progressive Web App capabilities for offline read/write with background syncing to Supabase.
+- [ ] **Real-time Collaboration:** Leverage Supabase Realtime for live updates across multiple users/crew members.
+- [ ] **Keyboard Shortcuts:** Global hotkeys (Ctrl+N, Ctrl+L) with LCARS audio feedback.

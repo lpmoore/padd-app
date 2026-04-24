@@ -4,6 +4,18 @@ import LCARSButton from '../components/LCARSButton';
 import './Log.css';
 
 const Log = () => {
+// Duplicate scrollToLog removed
+
+    // Random log handler
+    const handleRandomLog = () => {
+        if (!logs.length) return;
+        const randomIndex = Math.floor(Math.random() * logs.length);
+        const randomLogId = logs[randomIndex].id;
+        scrollToLog(randomLogId);
+    };
+
+// Duplicate scrollToLog removed
+
     const [logs, setLogs] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [session, setSession] = useState(null);
@@ -184,6 +196,7 @@ const Log = () => {
                      <LCARSButton onClick={handleStartCreate} color="var(--lcars-orange)" rounded="both">
                         NEW ENTRY
                      </LCARSButton>
+                     <LCARSButton onClick={handleRandomLog} color="var(--lcars-cyan)" rounded="both" disabled={logs.length===0}>RANDOM LOG</LCARSButton>
                 )}
                 <div className="log-search-wrapper">
                     <input 

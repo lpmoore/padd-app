@@ -1,3 +1,4 @@
+import { calculateStardate } from './stardate';
 
 export const formatDateForInput = (isoString) => {
     if (!isoString) return '';
@@ -8,13 +9,13 @@ export const formatDateForInput = (isoString) => {
         // Actually, datetime-local expects local time, so we should map to local components
         // PAD with leading zeros
         const pad = (n) => n < 10 ? '0' + n : n;
-        
+
         const YYYY = date.getFullYear();
         const MM = pad(date.getMonth() + 1);
         const DD = pad(date.getDate());
         const HH = pad(date.getHours());
         const mm = pad(date.getMinutes());
-        
+
         return `${YYYY}-${MM}-${DD}T${HH}:${mm}`;
     } catch (e) {
         console.error('Date formatting error:', e);
@@ -22,8 +23,11 @@ export const formatDateForInput = (isoString) => {
     }
 };
 
-export const formatDateForDisplay = (isoString) => {
+export const formatDateForDisplay = (isoString, useStardate = false) => {
     if (!isoString) return '';
+    if (useStardate) {
+        return `Stardate ${calculateStardate(isoString)}`;
+    }
     return new Date(isoString).toLocaleString();
 };
 
