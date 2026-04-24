@@ -3,15 +3,26 @@ import './Log.css';
 import React, { useEffect, useRef, useState } from 'react';
 
 import LCARSButton from '../components/LCARSButton';
+import { formatLogDate } from '../utils/dateUtils';
 import { supabase } from '../lib/supabase';
+import { useSettings } from '../contexts/settingsContextValue';
+
+const pickRandomIndex = (length) => Math.floor(Math.random() * length);
 
 const Log = () => {
-  // Duplicate scrollToLog removed
+  // Extract toggle state from settings context
+  const settings = useSettings();
+  const isStardateEnabled = settings?.isStardateEnabled || false;
+
+  const scrollToLog = (id) => {
+    const el = document.getElementById(`log-entry-${id}`);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   // Random log handler
   const handleRandomLog = () => {
     if (!logs.length) return;
-    const randomIndex = Math.floor(Math.random() * logs.length);
+    const randomIndex = pickRandomIndex(logs.length);
     const randomLogId = logs[randomIndex].id;
     scrollToLog(randomLogId);
   };
@@ -38,11 +49,6 @@ const Log = () => {
     });
   }, []);
 
-  // Fetch Logs
-  useEffect(() => {
-    if (session) fetchLogs();
-  }, [session]);
-
   const fetchLogs = async () => {
     const { data, error } = await supabase
       .from('notes') // Keeping table name 'notes' for now to avoid DB migration complexity
@@ -52,6 +58,11 @@ const Log = () => {
     if (error) console.error('Error fetching logs:', error);
     else setLogs(data || []);
   };
+
+  // Fetch Logs
+  useEffect(() => {
+    if (session) fetchLogs();
+  }, [session]);
 
   // Filter Logs
   const filteredLogs = logs.filter((log) => {
@@ -181,19 +192,6 @@ const Log = () => {
     setEditImages((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const formatDate = (dateString) => {
-    if (!dateString) return '';
-    return new Date(dateString)
-      .toLocaleString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      })
-      .toUpperCase();
-  };
-
   return (
     <div className='log-container'>
       {/* Header Controls */}
@@ -317,12 +315,13 @@ const Log = () => {
         {filteredLogs.map((log) => (
           <div
             key={log.id}
+            id={`log-entry-${log.id}`}
             className={`log-entry ${editingId === log.id ? 'active' : ''}`}
           >
             <div className='log-entry-header'>
               <div className='log-meta'>
                 <span className='log-stardate'>
-                  {formatDate(log.created_at)}
+                  {formatLogDate(log.created_at, isStardateEnabled)}
                 </span>
                 <span className='log-title'>{log.title || 'UNKNOWN'}</span>
               </div>
