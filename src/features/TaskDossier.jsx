@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, useEffectEvent } from 'react';
 import { supabase } from '../lib/supabase';
-import { isSupportedImage, uploadImage } from '../lib/storage';
+import { alertUploadErrors, uploadImages } from '../lib/storage';
 import LCARSButton from '../components/LCARSButton';
 import './TaskDossier.css';
 
@@ -114,15 +114,8 @@ const TaskDossier = ({ task, onClose, onUpdate, initialTab = 'PROTOCOL' }) => {
     };
 
     const processFiles = async (files) => {
-        const newImageUrls = [];
-        for (const file of files) {
-            if (!isSupportedImage(file)) continue;
-            try {
-                newImageUrls.push(await uploadImage(file, `tasks/${task.id}`));
-            } catch (error) {
-                console.error('Upload failed:', error);
-            }
-        }
+        const { urls: newImageUrls, errors } = await uploadImages(files, `tasks/${task.id}`);
+        alertUploadErrors(errors);
         if (newImageUrls.length > 0) {
             setImages(prev => [...prev, ...newImageUrls]);
         }

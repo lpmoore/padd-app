@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
-import { IMAGE_BUCKET, isSupportedImage, uploadImage } from '../lib/storage';
+import { IMAGE_BUCKET, alertUploadErrors, uploadImages } from '../lib/storage';
 import LCARSButton from '../components/LCARSButton';
 import './Library.css';
 
@@ -275,17 +275,10 @@ const Library = () => {
     const uploadFiles = async (filesArray) => {
         if (!filesArray || filesArray.length === 0) return;
         setUploading(true);
-        const newImageUrls = [];
         const recordId = editFormData.id || 'new';
 
-        for (const file of filesArray) {
-            if (!isSupportedImage(file)) continue;
-            try {
-                newImageUrls.push(await uploadImage(file, `library/${recordId}`));
-            } catch (error) {
-                console.error('Upload failed:', error);
-            }
-        }
+        const { urls: newImageUrls, errors } = await uploadImages(filesArray, `library/${recordId}`);
+        alertUploadErrors(errors);
         if (newImageUrls.length > 0) {
             setEditFormData(prev => ({
                 ...prev,

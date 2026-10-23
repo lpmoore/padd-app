@@ -44,3 +44,25 @@ export const uploadImage = async (file, folder) => {
   } = supabase.storage.from(IMAGE_BUCKET).getPublicUrl(path);
   return publicUrl;
 };
+
+/**
+ * Uploads several images, continuing past failures.
+ * @returns {Promise<{ urls: string[], errors: string[] }>} errors are user-facing, one per failed file
+ */
+export const uploadImages = async (files, folder) => {
+  const urls = [];
+  const errors = [];
+  for (const file of files) {
+    try {
+      urls.push(await uploadImage(file, folder));
+    } catch (error) {
+      console.error(`Upload failed for ${file.name}:`, error);
+      errors.push(`${file.name}: ${error.message}`);
+    }
+  }
+  return { urls, errors };
+};
+
+export const alertUploadErrors = (errors) => {
+  if (errors.length > 0) alert(`IMAGE UPLOAD FAILED\n\n${errors.join('\n')}`);
+};
