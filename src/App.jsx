@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { supabase, supabaseConfigError } from './lib/supabase';
 
 import Admin from './features/Admin'; // New Admin Feature
@@ -19,6 +19,9 @@ const INITIAL_NAV_ITEMS = [
   { id: 'LOG', label: 'LOG', color: 'var(--lcars-ice-blue)' },
   { id: 'ADMIN', label: 'ADMIN', color: 'var(--lcars-orange)' },
 ];
+
+const OWN_WRITE_TTL_MS = 5000;
+const REALTIME_REFETCH_DELAY_MS = 150;
 
 const buildTaskTree = (flatTasks) => {
   const taskMap = {};
@@ -72,6 +75,25 @@ function App() {
   const [tasks, setTasks] = useState([]);
   const userId = session?.user.id;
 
+  // Writes made by this tab refetch directly, so their realtime echoes are
+  // skipped; only changes from other tabs/devices refetch via realtime.
+  const knownTaskIds = useRef(new Set());
+  const ownWrites = useRef(new Map()); // task id -> expiry timer
+  const markOwnWrite = (id) => {
+    // Re-marking resets the timer so an older expiry can't clear a newer write
+    clearTimeout(ownWrites.current.get(id));
+    // Expire in case the echo never arrives (e.g. realtime disabled)
+    const timer = setTimeout(() => ownWrites.current.delete(id), OWN_WRITE_TTL_MS);
+    ownWrites.current.set(id, timer);
+  };
+  // Returns true (and forgets the mark) if this change is our own write's echo
+  const consumeOwnWrite = (id) => {
+    if (!ownWrites.current.has(id)) return false;
+    clearTimeout(ownWrites.current.get(id));
+    ownWrites.current.delete(id);
+    return true;
+  };
+
   const fetchTasks = useCallback(async () => {
     if (!supabase || !userId) return;
 
@@ -85,6 +107,7 @@ function App() {
     if (error) {
       console.error('Error fetching tasks:', error);
     } else {
+      knownTaskIds.current = new Set(data.map((t) => t.id));
       setTasks(buildTaskTree(data));
     }
   }, [userId]);
@@ -93,6 +116,14 @@ function App() {
     if (!supabase || !userId) return;
 
     fetchTasks();
+
+    // Coalesce bursts (e.g. cascade-deleted subtasks) into one refetch
+    let refetchTimer;
+    const handleRemoteChange = (id) => {
+      if (consumeOwnWrite(id)) return;
+      clearTimeout(refetchTimer);
+      refetchTimer = setTimeout(fetchTasks, REALTIME_REFETCH_DELAY_MS);
+    };
 
     const channel = supabase
       .channel('tasks_channel')
@@ -104,21 +135,25 @@ function App() {
           table: 'tasks',
           filter: `user_id=eq.${userId}`,
         },
-        () => {
-          fetchTasks();
-        },
+        (payload) => handleRemoteChange(payload.new?.id ?? payload.old?.id),
       )
-      // Supabase Realtime can't filter DELETE events, so listen to them separately
+      // Supabase Realtime can't filter DELETE events, so listen to them
+      // separately and ignore deletes of tasks that aren't in our list.
       .on(
         'postgres_changes',
         { event: 'DELETE', schema: 'public', table: 'tasks' },
-        () => {
-          fetchTasks();
+        (payload) => {
+          const id = payload.old?.id;
+          if (knownTaskIds.current.has(id)) handleRemoteChange(id);
         },
       )
       .subscribe();
 
+    const pendingOwnWrites = ownWrites.current;
     return () => {
+      clearTimeout(refetchTimer);
+      pendingOwnWrites.forEach((timer) => clearTimeout(timer));
+      pendingOwnWrites.clear();
       supabase.removeChannel(channel);
     };
   }, [userId, fetchTasks]);
@@ -144,7 +179,11 @@ function App() {
   const addTask = async (text, parentId = null, dueDate = null) => {
     if (!supabase || !session) return;
 
+    // Client-generated id so the realtime echo of this insert can be recognised
+    const id = crypto.randomUUID();
+    markOwnWrite(id);
     const insertPayload = {
+      id,
       user_id: session.user.id,
       text,
       parent_id: parentId,
@@ -175,6 +214,7 @@ function App() {
       dbUpdates.personnel = updates.personnel;
     if (updates.images !== undefined) dbUpdates.images = updates.images;
 
+    markOwnWrite(id);
     const { error } = await supabase
       .from('tasks')
       .update(dbUpdates)
@@ -190,6 +230,12 @@ function App() {
   const deleteTask = async (id) => {
     if (!supabase) return;
 
+    // Subtasks are cascade-deleted by the database, so their echoes are ours too
+    const markTree = (task) => {
+      markOwnWrite(task.id);
+      task.subtasks?.forEach(markTree);
+    };
+    markTree(findTask(id, tasks) ?? { id });
     const { error } = await supabase.from('tasks').delete().eq('id', id);
     if (error) console.error('Error deleting task:', error);
     else fetchTasks();
@@ -198,6 +244,7 @@ function App() {
   const moveTask = async (id, newParentId) => {
     if (!supabase) return;
 
+    markOwnWrite(id);
     const { error } = await supabase
       .from('tasks')
       .update({ parent_id: newParentId })

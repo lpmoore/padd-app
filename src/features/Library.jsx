@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
-import { IMAGE_BUCKET, alertUploadErrors, uploadImages } from '../lib/storage';
+import { alertUploadErrors, removeImagesByUrl, uploadImages } from '../lib/storage';
 import LCARSButton from '../components/LCARSButton';
 import './Library.css';
 
@@ -14,9 +14,12 @@ const INITIAL_DATA = [
     { category: 'PLANETS', title: 'Q\'ONOS', subtitle: 'Sector 221', details: { population: '4 Billion' }, desc: 'Homeworld of the Klingon Empire. A dark and stormy world.' },
 ];
 
+const DEFAULT_CATEGORIES = ['SHIPS', 'PLANETS'];
+
 const Library = () => {
-    const [activeCategory, setActiveCategory] = useState('SHIPS');
-    const [availableCategories, setAvailableCategories] = useState(['SHIPS', 'PLANETS']);
+    // null until categories load, so items are fetched once for the real category
+    const [activeCategory, setActiveCategory] = useState(null);
+    const [availableCategories, setAvailableCategories] = useState(DEFAULT_CATEGORIES);
     const [items, setItems] = useState([]);
     const [selectedItem, setSelectedItem] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -29,8 +32,20 @@ const Library = () => {
     const [editFormData, setEditFormData] = useState({});
     const [uploading, setUploading] = useState(false);
     const [isDragging, setIsDragging] = useState(false);
-    const [imagesToDelete, setImagesToDelete] = useState([]);
+    const [imagesToDelete, setImagesToDelete] = useState([]); // Selected in the grid
+    const [stagedRemovals, setStagedRemovals] = useState([]); // Removed from the record, deleted on save
+    const [editUploads, setEditUploads] = useState([]); // Uploaded during this edit, deleted on cancel
     const fileInputRef = useRef(null);
+
+    // Bumped whenever an edit starts or ends, so an upload that finishes after
+    // its edit was cancelled/saved can tell and clean up after itself.
+    const editSession = useRef(0);
+
+    const resetEditImageTracking = () => {
+        editSession.current += 1;
+        setStagedRemovals([]);
+        setEditUploads([]);
+    };
 
     useEffect(() => {
         supabase.auth.getSession().then(({ data: { session } }) => setSession(session));
@@ -42,16 +57,14 @@ const Library = () => {
             .from('library_items')
             .select('category');
 
-        if (error) {
-            console.error('Error fetching library categories:', error);
-            return;
-        }
-        const cats = [...new Set(data.map(i => i.category))].sort();
-        if (cats.length > 0) {
-            setAvailableCategories(cats);
+        if (error) console.error('Error fetching library categories:', error);
+        const cats = error ? [] : [...new Set(data.map(i => i.category))].sort();
+        if (cats.length > 0) setAvailableCategories(cats);
+        setActiveCategory(prev => {
+            if (cats.length === 0) return prev ?? DEFAULT_CATEGORIES[0];
             // Fall back to the first category if the current one no longer exists
-            setActiveCategory(prev => (cats.includes(prev) ? prev : cats[0]));
-        }
+            return cats.includes(prev) ? prev : cats[0];
+        });
     }, []);
 
     // Only the most recent category request may update the view, so
@@ -82,6 +95,7 @@ const Library = () => {
     }, [refreshCategories]);
 
     useEffect(() => {
+        if (!activeCategory) return;
         fetchItemsForCategory(activeCategory);
         // Refetch only on category change; isEditing is read at call time on purpose.
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -115,7 +129,7 @@ const Library = () => {
     const handleAddNew = () => {
         setSelectedItem(null);
         setEditFormData({
-            category: activeCategory, // Default to current
+            category: activeCategory ?? DEFAULT_CATEGORIES[0], // Default to current
             title: '',
             subtitle: '',
             details: { 'DATA': '' },
@@ -125,6 +139,7 @@ const Library = () => {
         setIsCustomCategory(false);
         setIsEditing(true);
         setImagesToDelete([]);
+        resetEditImageTracking();
     };
 
     const handleEditClick = () => {
@@ -132,9 +147,15 @@ const Library = () => {
         setIsCustomCategory(!availableCategories.includes(selectedItem.category));
         setIsEditing(true);
         setImagesToDelete([]);
+        resetEditImageTracking();
     };
 
     const handleCancelEdit = () => {
+        // Discard files uploaded during this edit; the saved record never referenced them.
+        // Not awaited so the form closes immediately; uploads still in flight are
+        // handled by the editSession check in uploadFiles.
+        removeImagesByUrl(editUploads);
+        resetEditImageTracking();
         setIsEditing(false);
         setEditFormData({});
         setIsCustomCategory(false);
@@ -168,6 +189,9 @@ const Library = () => {
         if (error) {
             alert('Error saving: ' + error.message);
         } else {
+            // Only now that the record no longer references them, delete removed files
+            await removeImagesByUrl(stagedRemovals);
+            resetEditImageTracking();
             setIsEditing(false);
             // Refresh everything in case Category changed
             await refreshCategories();
@@ -191,6 +215,7 @@ const Library = () => {
             if (error) {
                 alert('Error deleting: ' + error.message);
             } else {
+                await removeImagesByUrl(selectedItem.images || []);
                 setSelectedItem(null);
                 await refreshCategories();
                 fetchItemsForCategory(activeCategory);
@@ -245,30 +270,15 @@ const Library = () => {
         );
     };
 
-    const handleDeleteSelectedImages = async () => {
-        if (!window.confirm(`Delete ${imagesToDelete.length} selected image(s)?`)) return;
-        setLoading(true);
-
-        const storagePathsToDelete = imagesToDelete
-            .filter(url => url.includes('supabase.co') && url.includes(`${IMAGE_BUCKET}/`))
-            .map(url => {
-                const parts = url.split(`${IMAGE_BUCKET}/`);
-                return parts.length === 2 ? parts[1] : null;
-            })
-            .filter(Boolean);
-
-        if (storagePathsToDelete.length > 0) {
-            const { error: deleteError } = await supabase.storage.from(IMAGE_BUCKET).remove(storagePathsToDelete);
-            if (deleteError) {
-                console.error("Error deleting images from storage:", deleteError);
-            }
-        }
+    // Removal is staged: files are only deleted from storage once the edit is saved
+    const handleDeleteSelectedImages = () => {
+        if (!window.confirm(`Remove ${imagesToDelete.length} selected image(s)? Takes effect when you save.`)) return;
 
         const remainingImages = (editFormData.images || []).filter(img => !imagesToDelete.includes(img));
-        
+
         setEditFormData(prev => ({ ...prev, images: remainingImages }));
+        setStagedRemovals(prev => [...prev, ...imagesToDelete]);
         setImagesToDelete([]);
-        setLoading(false);
     };
 
     // Image Upload
@@ -276,14 +286,22 @@ const Library = () => {
         if (!filesArray || filesArray.length === 0) return;
         setUploading(true);
         const recordId = editFormData.id || 'new';
+        const session = editSession.current;
 
         const { urls: newImageUrls, errors } = await uploadImages(filesArray, `library/${recordId}`);
+        if (session !== editSession.current) {
+            // The edit ended while uploading; nothing references these files
+            await removeImagesByUrl(newImageUrls);
+            setUploading(false);
+            return;
+        }
         alertUploadErrors(errors);
         if (newImageUrls.length > 0) {
             setEditFormData(prev => ({
                 ...prev,
                 images: [...(prev.images || []), ...newImageUrls]
             }));
+            setEditUploads(prev => [...prev, ...newImageUrls]);
         }
         setUploading(false);
     };
@@ -346,7 +364,7 @@ const Library = () => {
                 {availableCategories.map(cat => (
                      <LCARSButton 
                         key={cat}
-                        onClick={() => { setActiveCategory(cat); setIsEditing(false); }} 
+                        onClick={() => { handleCancelEdit(); setActiveCategory(cat); }} 
                         color={activeCategory === cat ? 'var(--lcars-orange)' : 'var(--lcars-tan)'} 
                         rounded="left" block
                      >{cat}</LCARSButton>
@@ -373,7 +391,7 @@ const Library = () => {
                      <div 
                        key={item.id} 
                        className={`library-list-item ${selectedItem?.id === item.id ? 'active' : ''}`}
-                       onClick={() => { setSelectedItem(item); setIsEditing(false); }}
+                       onClick={() => { handleCancelEdit(); setSelectedItem(item); }}
                      >
                        {item.title}
                      </div>
@@ -531,7 +549,7 @@ const Library = () => {
                                 </div>
                                 {imagesToDelete.length > 0 && (
                                     <LCARSButton onClick={handleDeleteSelectedImages} color="var(--lcars-red)" tiny>
-                                        DELETE SELECTED ({imagesToDelete.length})
+                                        REMOVE SELECTED ({imagesToDelete.length})
                                     </LCARSButton>
                                 )}
                             </div>

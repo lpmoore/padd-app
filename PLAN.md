@@ -31,10 +31,11 @@ Branch: `fix/security-and-cleanup`
 - [ ] **Accessibility**: labels on icon buttons, keyboard support for date picker / dossier.
 - [ ] **Housekeeping**: real README (currently Vite template); move/remove `debug_db.cjs` (writes real rows); remove leftover no-op drag handlers & hidden "HOLD SHIFT TO NEST" label in `Tasks.jsx`.
 - [ ] **Task Indicators**: marked "pending refinement" previously.
-- [ ] **Library image delete before save**: "delete selected images" removes files from storage immediately; cancelling the edit leaves the record pointing at deleted files. Defer storage removal until save. _(PR #3 review)_
-- [ ] **Double task refetch**: every CRUD call runs `fetchTasks()` and the realtime event triggers it again. Keep one refresh path. _(PR #3 review)_
-- [ ] **Library mount fetch**: fetches items for default 'SHIPS' before categories resolve, causing an extra query when the category differs. _(PR #3 review)_
-- [ ] **Realtime DELETE**: unfiltered delete listener refetches on any user's task deletes; ignore IDs not in the local tree. _(PR #3 review)_
+- [x] **PR #3 review follow-ups** _2026-10-22, branch `fix/review-followups`_
+  - [x] Library image removal staged until save; uploads discarded on cancel; record delete removes its images
+  - [x] Task writes from this tab skip their realtime echo (one refetch instead of two); remote bursts coalesced
+  - [x] Realtime DELETE ignores tasks not in the local list
+  - [x] Library loads categories first, then items once for the resolved category
 
 ## 🚀 Later — Features we hope to build
 

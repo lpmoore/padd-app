@@ -46,6 +46,25 @@ export const uploadImage = async (file, folder) => {
 };
 
 /**
+ * Maps a public URL from this bucket back to its storage path.
+ * Returns null for anything else (e.g. external image links).
+ */
+export const storagePathFromUrl = (url) => {
+  const marker = `/${IMAGE_BUCKET}/`;
+  const index = url.indexOf(marker);
+  if (!url.includes('supabase.co') || index === -1) return null;
+  return decodeURIComponent(url.slice(index + marker.length));
+};
+
+/** Deletes the bucket files behind the given public URLs. Ignores external URLs. */
+export const removeImagesByUrl = async (urls) => {
+  const paths = [...new Set(urls.map(storagePathFromUrl).filter(Boolean))];
+  if (paths.length === 0) return;
+  const { error } = await supabase.storage.from(IMAGE_BUCKET).remove(paths);
+  if (error) console.error('Error deleting images from storage:', error);
+};
+
+/**
  * Uploads several images, continuing past failures.
  * @returns {Promise<{ urls: string[], errors: string[] }>} errors are user-facing, one per failed file
  */
