@@ -8,7 +8,8 @@ Single source of truth for what's done, what's next, and what we'd like to build
 Branch: `fix/security-and-cleanup`
 
 - [x] **Storage ownership**: uploads go to `<user_id>/<folder>/...` via `src/lib/storage.js`; storage RLS scoped to owner (`supabase_rls_policies.sql`). _2026-10-22_
-  - [ ] **Run the updated storage section of `supabase_rls_policies.sql` in the Supabase SQL editor** (manual step; code change alone doesn't apply it).
+  - [x] **Ran the storage section of `supabase_rls_policies.sql` in the Supabase SQL editor.** Also dropped two dashboard-created bucket-wide policies (`Allow authenticated uploads`, `Allow authenticated update/delete`) that bypassed per-user RLS; `pg_policies` now lists only the four `Users can … own images` policies. _2026-10-23, PR #7_
+  - [ ] Smoke-test upload + delete on the live site as a normal user.
 - [x] **Dossier autosave**: debounced (700 ms) and flushed on close. _2026-10-22_
 - [x] **npm audit**: 0 vulnerabilities. _2026-10-22_
 - [x] **Lint**: 0 errors / 0 warnings. Also fixed along the way: Library category fetch race, Calendar month navigation, date picker month-overflow on the 31st, realtime subscription filtered to current user. _2026-10-22_
