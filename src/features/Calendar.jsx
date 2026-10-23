@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { FileText, Users, Image as ImageIcon } from 'lucide-react';
 import './Calendar.css';
 
@@ -12,6 +12,11 @@ const Calendar = ({ tasks = [], onOpenDossier }) => {
     const year = date.getFullYear();
     const month = date.getMonth();
     const today = new Date();
+
+    const changeMonth = (delta) => {
+        setSelectedDate(null);
+        setDate(new Date(year, month + delta, 1));
+    };
 
     const monthNames = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE",
         "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"
@@ -84,7 +89,11 @@ const Calendar = ({ tasks = [], onOpenDossier }) => {
         <div className="calendar-container">
             <div className="calendar-header">
                 <h2 className="lcars-header">STARDATE {year}.{(month + 1).toString().padStart(2, '0')}</h2>
-                <div className="month-display">{monthNames[month]}</div>
+                <div className="month-nav">
+                    <button className="month-nav-btn" aria-label="Previous month" onClick={() => changeMonth(-1)}>◀</button>
+                    <div className="month-display">{monthNames[month]}</div>
+                    <button className="month-nav-btn" aria-label="Next month" onClick={() => changeMonth(1)}>▶</button>
+                </div>
             </div>
             
             <div className="calendar-grid">

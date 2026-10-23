@@ -140,20 +140,42 @@ USING (
 -- However, creating policies usually requires unique names.
 -- We will attempt to Drop them first to be safe.
 
+-- Uploads must live under '<user_id>/...' (see src/lib/storage.js).
+-- Update/Delete also allow legacy files (uploaded before per-user folders)
+-- via owner_id, which Supabase sets to the uploader automatically.
+
 DROP POLICY IF EXISTS "Authenticated users can upload images" ON storage.objects;
-CREATE POLICY "Authenticated users can upload images"
+DROP POLICY IF EXISTS "Users can upload images to own folder" ON storage.objects;
+CREATE POLICY "Users can upload images to own folder"
 ON storage.objects FOR INSERT
 TO authenticated
-WITH CHECK ( bucket_id = 'task-images' );
+WITH CHECK (
+    bucket_id = 'task-images'
+    AND (storage.foldername(name))[1] = (SELECT auth.uid())::text
+);
 
 DROP POLICY IF EXISTS "Authenticated users can update images" ON storage.objects;
-CREATE POLICY "Authenticated users can update images"
+DROP POLICY IF EXISTS "Users can update own images" ON storage.objects;
+CREATE POLICY "Users can update own images"
 ON storage.objects FOR UPDATE
 TO authenticated
-USING ( bucket_id = 'task-images' );
+USING (
+    bucket_id = 'task-images'
+    AND (
+        (storage.foldername(name))[1] = (SELECT auth.uid())::text
+        OR owner_id = (SELECT auth.uid())::text
+    )
+);
 
 DROP POLICY IF EXISTS "Authenticated users can delete images" ON storage.objects;
-CREATE POLICY "Authenticated users can delete images"
+DROP POLICY IF EXISTS "Users can delete own images" ON storage.objects;
+CREATE POLICY "Users can delete own images"
 ON storage.objects FOR DELETE
 TO authenticated
-USING ( bucket_id = 'task-images' );
+USING (
+    bucket_id = 'task-images'
+    AND (
+        (storage.foldername(name))[1] = (SELECT auth.uid())::text
+        OR owner_id = (SELECT auth.uid())::text
+    )
+);

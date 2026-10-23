@@ -3,7 +3,7 @@ import './Settings.css';
 import React from 'react';
 import useLCARSSound from '../../hooks/useLCARSSound';
 import { useSettings } from '../../contexts/settingsContextValue';
-import { useSoundSettings } from '../../contexts/SoundContext';
+import { useSoundSettings } from '../../contexts/soundContextValue';
 
 const Settings = () => {
   const settings = useSettings();

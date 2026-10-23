@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { supabase, supabaseConfigError } from './lib/supabase';
 
 import Admin from './features/Admin'; // New Admin Feature
@@ -20,10 +20,36 @@ const INITIAL_NAV_ITEMS = [
   { id: 'ADMIN', label: 'ADMIN', color: 'var(--lcars-orange)' },
 ];
 
+const buildTaskTree = (flatTasks) => {
+  const taskMap = {};
+  const rootTasks = [];
+
+  flatTasks.forEach((t) => {
+    taskMap[t.id] = {
+      ...t,
+      dueDate: t.due_date,
+      // Map foreign key join to local property expected by TaskItem
+      personnel: t.task_personnel || [],
+      subtasks: [],
+    };
+  });
+
+  flatTasks.forEach((t) => {
+    if (t.parent_id) {
+      if (taskMap[t.parent_id]) {
+        taskMap[t.parent_id].subtasks.push(taskMap[t.id]);
+      }
+    } else {
+      rootTasks.push(taskMap[t.id]);
+    }
+  });
+
+  return rootTasks;
+};
+
 function App() {
   const [session, setSession] = useState(null);
   const [activeTab, setActiveTab] = useState('CALENDAR');
-  const [navItems, setNavItems] = useState(INITIAL_NAV_ITEMS);
 
   // Auth Session Management
   useEffect(() => {
@@ -44,9 +70,27 @@ function App() {
 
   // Data Fetching & Realtime Subscription
   const [tasks, setTasks] = useState([]);
+  const userId = session?.user.id;
+
+  const fetchTasks = useCallback(async () => {
+    if (!supabase || !userId) return;
+
+    const { data, error } = await supabase
+      .from('tasks')
+      .select('*, task_personnel(personnel_id)')
+      .eq('user_id', userId)
+      .order('due_date', { ascending: true, nullsFirst: false })
+      .order('created_at', { ascending: true });
+
+    if (error) {
+      console.error('Error fetching tasks:', error);
+    } else {
+      setTasks(buildTaskTree(data));
+    }
+  }, [userId]);
 
   useEffect(() => {
-    if (!supabase || !session) return;
+    if (!supabase || !userId) return;
 
     fetchTasks();
 
@@ -54,7 +98,12 @@ function App() {
       .channel('tasks_channel')
       .on(
         'postgres_changes',
-        { event: '*', schema: 'public', table: 'tasks' },
+        {
+          event: '*',
+          schema: 'public',
+          table: 'tasks',
+          filter: `user_id=eq.${userId}`,
+        },
         () => {
           fetchTasks();
         },
@@ -64,51 +113,7 @@ function App() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [session]);
-
-  const fetchTasks = async () => {
-    if (!supabase || !session) return;
-
-    const { data, error } = await supabase
-      .from('tasks')
-      .select('*, task_personnel(personnel_id)')
-      .eq('user_id', session.user.id)
-      .order('due_date', { ascending: true, nullsFirst: false })
-      .order('created_at', { ascending: true });
-
-    if (error) {
-      console.error('Error fetching tasks:', error);
-    } else {
-      setTasks(buildTaskTree(data));
-    }
-  };
-
-  const buildTaskTree = (flatTasks) => {
-    const taskMap = {};
-    const rootTasks = [];
-
-    flatTasks.forEach((t) => {
-      taskMap[t.id] = {
-        ...t,
-        dueDate: t.due_date,
-        // Map foreign key join to local property expected by TaskItem
-        personnel: t.task_personnel || [],
-        subtasks: [],
-      };
-    });
-
-    flatTasks.forEach((t) => {
-      if (t.parent_id) {
-        if (taskMap[t.parent_id]) {
-          taskMap[t.parent_id].subtasks.push(taskMap[t.id]);
-        }
-      } else {
-        rootTasks.push(taskMap[t.id]);
-      }
-    });
-
-    return rootTasks;
-  };
+  }, [userId, fetchTasks]);
 
   const [activeDossierTaskId, setActiveDossierTaskId] = useState(null);
   const [activeDossierTab, setActiveDossierTab] = useState('PROTOCOL');
@@ -138,7 +143,7 @@ function App() {
     };
     if (dueDate) insertPayload.due_date = formatDateForStorage(dueDate);
 
-    const { data, error } = await supabase.from('tasks').insert(insertPayload);
+    const { error } = await supabase.from('tasks').insert(insertPayload);
     if (error) console.error('Error adding task:', error);
     else fetchTasks();
   };
@@ -243,7 +248,7 @@ function App() {
     <LCARSLayout
       title='PADD 4755'
       activeTab={activeTab}
-      navItems={navItems}
+      navItems={INITIAL_NAV_ITEMS}
       onNavClick={handleNavClick}
       onLogout={handleLogout}
     >
@@ -267,6 +272,7 @@ function App() {
 
         {activeDossierTask && (
           <TaskDossier
+            key={activeDossierTask.id}
             task={activeDossierTask}
             initialTab={activeDossierTab}
             onClose={() => setActiveDossierTaskId(null)}

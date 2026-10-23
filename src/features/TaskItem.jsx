@@ -63,11 +63,12 @@ const TaskItem = ({ task, onDelete, onToggle, onAddSubtask, onUpdate, depth = 0,
     border: borderStyle,
   };
 
+  const subtaskCount = task.subtasks?.length ?? 0;
   React.useEffect(() => {
-    if (task.subtasks && task.subtasks.length > 0) {
+    if (subtaskCount > 0) {
       setIsExpanded(true);
     }
-  }, [task.subtasks?.length]);
+  }, [subtaskCount]);
 
   const handleSave = () => {
     if (editValue.trim()) {

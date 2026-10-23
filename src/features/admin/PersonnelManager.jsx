@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '../../lib/supabase';
+import { uploadImage } from '../../lib/storage';
 import LCARSButton from '../../components/LCARSButton';
 import './PersonnelManager.css';
 
@@ -15,24 +16,22 @@ const PersonnelManager = () => {
     const [loading, setLoading] = useState(false);
     const [editPerson, setEditPerson] = useState(null); // If set, editor modal is open
     const [viewPerson, setViewPerson] = useState(null); // If set, viewer modal is open
-    const fileInputRef = useRef(null);
-
-    // Initial Fetch
-    useEffect(() => {
-        fetchPersonnel();
-    }, []);
-
-    const fetchPersonnel = async () => {
+    const fetchPersonnel = useCallback(async () => {
         setLoading(true);
         const { data, error } = await supabase
             .from('personnel')
             .select('*')
             .order('name', { ascending: true });
-        
+
         if (error) console.error('Error fetching personnel:', error);
         else setPersonnel(data);
         setLoading(false);
-    };
+    }, []);
+
+    // Initial Fetch
+    useEffect(() => {
+        fetchPersonnel();
+    }, [fetchPersonnel]);
 
     // Save (Create or Update)
     const handleSave = async (personData) => {
@@ -183,26 +182,12 @@ function PersonnelEditor({ person, onSave, onCancel, onDelete }) {
         if (!file) return;
 
         setUploading(true);
-        const fileExt = file.name.split('.').pop();
-        const fileName = `personnel/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-
-        // Upload
-        const { error: uploadError } = await supabase.storage
-            .from('task-images') // Reuse bucket
-            .upload(fileName, file);
-
-        if (uploadError) {
-            alert('Upload failed: ' + uploadError.message);
-            setUploading(false);
-            return;
+        try {
+            const publicUrl = await uploadImage(file, 'personnel');
+            handleChange('image_url', publicUrl);
+        } catch (error) {
+            alert('Upload failed: ' + error.message);
         }
-
-        // Get URL
-        const { data: { publicUrl } } = supabase.storage
-            .from('task-images')
-            .getPublicUrl(fileName);
-
-        handleChange('image_url', publicUrl);
         setUploading(false);
     };
 
