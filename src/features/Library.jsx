@@ -37,7 +37,12 @@ const Library = () => {
     const [editUploads, setEditUploads] = useState([]); // Uploaded during this edit, deleted on cancel
     const fileInputRef = useRef(null);
 
+    // Bumped whenever an edit starts or ends, so an upload that finishes after
+    // its edit was cancelled/saved can tell and clean up after itself.
+    const editSession = useRef(0);
+
     const resetEditImageTracking = () => {
+        editSession.current += 1;
         setStagedRemovals([]);
         setEditUploads([]);
     };
@@ -134,6 +139,7 @@ const Library = () => {
         setIsCustomCategory(false);
         setIsEditing(true);
         setImagesToDelete([]);
+        resetEditImageTracking();
     };
 
     const handleEditClick = () => {
@@ -141,10 +147,13 @@ const Library = () => {
         setIsCustomCategory(!availableCategories.includes(selectedItem.category));
         setIsEditing(true);
         setImagesToDelete([]);
+        resetEditImageTracking();
     };
 
     const handleCancelEdit = () => {
-        // Discard files uploaded during this edit; the saved record never referenced them
+        // Discard files uploaded during this edit; the saved record never referenced them.
+        // Not awaited so the form closes immediately; uploads still in flight are
+        // handled by the editSession check in uploadFiles.
         removeImagesByUrl(editUploads);
         resetEditImageTracking();
         setIsEditing(false);
@@ -277,8 +286,15 @@ const Library = () => {
         if (!filesArray || filesArray.length === 0) return;
         setUploading(true);
         const recordId = editFormData.id || 'new';
+        const session = editSession.current;
 
         const { urls: newImageUrls, errors } = await uploadImages(filesArray, `library/${recordId}`);
+        if (session !== editSession.current) {
+            // The edit ended while uploading; nothing references these files
+            await removeImagesByUrl(newImageUrls);
+            setUploading(false);
+            return;
+        }
         alertUploadErrors(errors);
         if (newImageUrls.length > 0) {
             setEditFormData(prev => ({

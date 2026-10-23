@@ -58,7 +58,7 @@ export const storagePathFromUrl = (url) => {
 
 /** Deletes the bucket files behind the given public URLs. Ignores external URLs. */
 export const removeImagesByUrl = async (urls) => {
-  const paths = urls.map(storagePathFromUrl).filter(Boolean);
+  const paths = [...new Set(urls.map(storagePathFromUrl).filter(Boolean))];
   if (paths.length === 0) return;
   const { error } = await supabase.storage.from(IMAGE_BUCKET).remove(paths);
   if (error) console.error('Error deleting images from storage:', error);
