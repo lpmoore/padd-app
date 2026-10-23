@@ -154,6 +154,12 @@ USING (
 -- Select/Update/Delete also allow legacy files (uploaded before per-user
 -- folders) via owner_id, which Supabase sets to the uploader automatically.
 
+-- Older bucket-wide policies (created via the dashboard) that let any
+-- signed-in user touch any file. Policies are OR'd, so these must go or
+-- the per-user policies below have no effect.
+DROP POLICY IF EXISTS "Allow authenticated uploads" ON storage.objects;
+DROP POLICY IF EXISTS "Allow authenticated update/delete" ON storage.objects;
+
 -- SELECT is required by the Storage API for remove()/move(), not just reads.
 -- (Public URLs are served regardless because the bucket is public.)
 DROP POLICY IF EXISTS "Users can select own images" ON storage.objects;
