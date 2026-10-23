@@ -11,11 +11,11 @@ export const calculateStardate = (dateInput) => {
   const date = new Date(dateInput);
   const year = date.getFullYear();
 
-  // Get day of the year
-  const startOfYear = new Date(year, 0, 0);
-  const diff = date - startOfYear;
+  // Day of the year (Jan 1 = 1) from the local calendar date. Computed in UTC
+  // so DST shifts can't make a local midnight count as the previous day.
   const oneDay = 1000 * 60 * 60 * 24;
-  const dayOfYear = Math.floor(diff / oneDay);
+  const dayOfYear =
+    (Date.UTC(year, date.getMonth(), date.getDate()) - Date.UTC(year, 0, 0)) / oneDay;
 
   const trekYear = year + 377; // Shift 2024 to 2401
   const stardateYear = 1000 * (trekYear - 2323);

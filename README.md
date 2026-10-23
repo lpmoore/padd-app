@@ -1,16 +1,48 @@
-# React + Vite
+# PADD 4755
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A Star Trek LCARS-themed personal organizer: tasks, calendar, Captain's Log, a reference Library, and a Personnel roster, styled after the 24th-century Starfleet interface.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Tasks**: nested tasks and subtasks with drag-and-drop (hold Shift or toggle lock to nest), due dates, and a Task Dossier per task for protocol notes, assigned personnel, and images
+- **Calendar**: monthly view of due tasks with quick links into each Dossier
+- **Captain's Log**: searchable journal entries with image attachments
+- **Library**: custom categories of reference entries (ships, planets, …) with images
+- **Personnel**: crew roster that can be assigned to tasks
+- **Stardates**: optional global toggle to show TNG-style Stardates instead of Earth dates
+- **LCARS interface sounds** (toggle in Admin → Settings)
 
-## React Compiler
+## Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+React 19 + Vite, [Supabase](https://supabase.com) (auth, Postgres with row-level security, storage, realtime), deployed on Netlify.
 
-## Expanding the ESLint configuration
+## Getting started
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```sh
+npm install
+cp .env.example .env   # then fill in your Supabase URL and anon key
+npm run dev
+```
+
+### Supabase setup
+
+1. Create a Supabase project and copy its URL and anon key into `.env`.
+2. Create a public storage bucket named `task-images`.
+3. In the SQL editor, run `supabase_schema_personnel.sql` and then `supabase_rls_policies.sql`.
+   These are **not** applied automatically; re-run the relevant section whenever the files change.
+
+> The `tasks`, `notes` and `library_items` table definitions aren't in the repo yet (tracked in [PLAN.md](PLAN.md)).
+
+## Scripts
+
+| Command | Description |
+| --- | --- |
+| `npm run dev` | Start the dev server |
+| `npm test` | Run unit tests (Vitest) |
+| `npm run lint` | Lint with ESLint |
+| `npm run build` | Production build |
+
+## Project docs
+
+- [PLAN.md](PLAN.md): what's done, in progress, and planned
+- [CLAUDE.md](CLAUDE.md): architecture and conventions

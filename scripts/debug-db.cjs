@@ -1,3 +1,6 @@
+// DEBUG ONLY: inserts and then deletes a real row in the `tasks` table of the
+// configured Supabase project. Run manually: node scripts/debug-db.cjs
+
 const { createClient } = require('@supabase/supabase-js');
 
 const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
