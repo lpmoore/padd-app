@@ -3,6 +3,8 @@ import { Calendar, ChevronLeft, ChevronRight, Clock } from 'lucide-react';
 import LCARSButton from './LCARSButton';
 import './LCARSDatePicker.css';
 import useLCARSSound from '../hooks/useLCARSSound';
+import { formatDateForDisplay } from '../utils/dateUtils';
+import { useStardateEnabled } from '../contexts/settingsContextValue';
 
 /**
  * Custom LCARS Date Picker
@@ -15,6 +17,7 @@ import useLCARSSound from '../hooks/useLCARSSound';
  */
 const LCARSDatePicker = ({ value, onChange, label = "SELECT DATE" }) => {
     const [isOpen, setIsOpen] = useState(false);
+    const isStardateEnabled = useStardateEnabled();
     
     // Internal state for the popup (draft selection)
     // We parse the value prop into Date parts for the calendar
@@ -136,9 +139,7 @@ const LCARSDatePicker = ({ value, onChange, label = "SELECT DATE" }) => {
     };
 
     // Format display text
-    const displayValue = value ? new Date(value).toLocaleString([], { 
-        year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' 
-    }) : label;
+    const displayValue = value ? formatDateForDisplay(value, isStardateEnabled) : label;
 
     return (
         <div className="lcars-date-picker-wrapper">

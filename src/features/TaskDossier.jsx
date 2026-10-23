@@ -3,11 +3,14 @@ import { supabase } from '../lib/supabase';
 import { alertUploadErrors, uploadImages } from '../lib/storage';
 import LCARSButton from '../components/LCARSButton';
 import './TaskDossier.css';
+import { formatDateForDisplay } from '../utils/dateUtils';
+import { useStardateEnabled } from '../contexts/settingsContextValue';
 
 const AUTOSAVE_DELAY_MS = 700;
 
 const TaskDossier = ({ task, onClose, onUpdate, initialTab = 'PROTOCOL' }) => {
     const [activeTab, setActiveTab] = useState(initialTab);
+    const isStardateEnabled = useStardateEnabled();
     
     // Core Task Data
     const [protocol, setProtocol] = useState(task.details || '');
@@ -141,7 +144,12 @@ const TaskDossier = ({ task, onClose, onUpdate, initialTab = 'PROTOCOL' }) => {
         <div className="dossier-overlay" onClick={onClose}>
             <div className="dossier-panel" onClick={e => e.stopPropagation()}>
                 <div className="dossier-header">
-                    <div className="dossier-title">DOSSIER: {task.text.toUpperCase()}</div>
+                    <div>
+                        <div className="dossier-title">DOSSIER: {task.text.toUpperCase()}</div>
+                        <div className="dossier-due">
+                            DUE: {task.dueDate ? formatDateForDisplay(task.dueDate, isStardateEnabled).toUpperCase() : 'NO DATE SET'}
+                        </div>
+                    </div>
                     <button className="dossier-close-btn" onClick={onClose}>CLOSE FILE</button>
                 </div>
 

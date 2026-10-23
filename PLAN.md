@@ -17,12 +17,13 @@ Branch: `fix/security-and-cleanup`
 
 - [ ] **Decide: public vs private images.** `task-images` bucket is public; anyone with a URL can view. Option: private bucket + `createSignedUrl` (requires storing paths instead of URLs).
 - [ ] **Schema in repo**: no SQL for `tasks`, `notes`, `library_items`. Consolidate into `supabase/migrations/`. `supabase_schema_personnel.sql` and `supabase_rls_policies.sql` overlap on `task_personnel` policies.
-- [ ] **Stardate integration** (helper `formatDateForDisplay` in `src/utils/dateUtils.js` is ready):
+- [x] **Stardate integration**: all displayed dates go through `formatDateForDisplay(value, useStardateEnabled())`. _2026-10-22, branch `feat/stardate-integration`_
   - [x] Captain's Log
-  - [ ] Tasks header (double-parses the date: `Tasks.jsx` `aDate`)
-  - [ ] Task items / subtasks (`TaskItem.jsx`)
-  - [ ] Task Dossier
-  - [ ] Calendar (headers are labelled "STARDATE" but show `YYYY.MM`)
+  - [x] Tasks header (removed the double date parse)
+  - [x] Task items / subtasks / new-task picker (via `LCARSDatePicker` label)
+  - [x] Task Dossier (new DUE line in header)
+  - [x] Calendar month header + day detail header (no longer mislabelled "STARDATE")
+  - [ ] Optional: date picker popup month title and Calendar task times still use Earth format
 - [ ] **Subtask dates**: marked "needs regression fix" previously; verify.
 - [ ] **Replace `alert()` / `confirm()`** (~12 call sites) with an LCARS toast/dialog component.
 - [ ] **Tests**: add Vitest; start with `stardate.js` and `dateUtils.js`.
@@ -30,6 +31,10 @@ Branch: `fix/security-and-cleanup`
 - [ ] **Accessibility**: labels on icon buttons, keyboard support for date picker / dossier.
 - [ ] **Housekeeping**: real README (currently Vite template); move/remove `debug_db.cjs` (writes real rows); remove leftover no-op drag handlers & hidden "HOLD SHIFT TO NEST" label in `Tasks.jsx`.
 - [ ] **Task Indicators**: marked "pending refinement" previously.
+- [ ] **Library image delete before save**: "delete selected images" removes files from storage immediately; cancelling the edit leaves the record pointing at deleted files. Defer storage removal until save. _(PR #3 review)_
+- [ ] **Double task refetch**: every CRUD call runs `fetchTasks()` and the realtime event triggers it again. Keep one refresh path. _(PR #3 review)_
+- [ ] **Library mount fetch**: fetches items for default 'SHIPS' before categories resolve, causing an extra query when the category differs. _(PR #3 review)_
+- [ ] **Realtime DELETE**: unfiltered delete listener refetches on any user's task deletes; ignore IDs not in the local tree. _(PR #3 review)_
 
 ## 🚀 Later — Features we hope to build
 

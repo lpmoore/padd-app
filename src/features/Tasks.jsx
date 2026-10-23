@@ -20,9 +20,9 @@ import {
 import LCARSButton from '../components/LCARSButton';
 import LCARSDatePicker from '../components/LCARSDatePicker'; // Custom Picker
 import TaskItem from './TaskItem';
-import { calculateStardate } from '../utils/stardate';
+import { formatDateForDisplay } from '../utils/dateUtils';
 import useLCARSSound from '../hooks/useLCARSSound';
-import { useSettings } from '../contexts/settingsContextValue';
+import { useStardateEnabled } from '../contexts/settingsContextValue';
 
 /* 
    Fix: useDroppable must be used INSIDE DndContext.
@@ -36,11 +36,6 @@ const RootDroppable = ({ children }) => {
     </div>
   );
 };
-
-function formatStandardDate(dateString) {
-  if (!dateString) return null;
-  return new Date(dateString).toLocaleDateString();
-}
 
 const INITIAL_TASKS = [
   {
@@ -114,8 +109,7 @@ const Tasks = ({
 
   const { playEngage, playError } = useLCARSSound();
 
-  const { isStardateEnabled = false } = useSettings() || {};
-  const aDate = inputDate ? formatStandardDate(inputDate) : null;
+  const isStardateEnabled = useStardateEnabled();
 
   const handleAdd = () => {
     if (!inputValue.trim()) {
@@ -215,11 +209,11 @@ const Tasks = ({
         <h2 style={{ margin: 0, color: 'var(--lcars-orange)' }}>TASK LOG</h2>
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
           <span>
-            {isStardateEnabled && aDate
-              ? calculateStardate(new Date(aDate))
-              : aDate
-                ? formatStandardDate(aDate)
-                : 'NO DATE SET'}
+            {inputDate
+              ? formatDateForDisplay(inputDate, isStardateEnabled, {
+                  includeTime: false,
+                })
+              : 'NO DATE SET'}
           </span>
           <span
             style={{
