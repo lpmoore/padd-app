@@ -15,6 +15,9 @@ PADD is a Star Trek LCARS-themed personal organizer: tasks (nested, drag-and-dro
 
 There are no tests yet (see PLAN.md). Verify with lint + build, and run the app for UI changes.
 
+**Build gotcha:** without Supabase env vars, `supabase` is `null` and Vite tree-shakes nearly the whole app away, so `npm run build` "passes" without compiling most code. To verify a real build, pass placeholders:
+`VITE_SUPABASE_URL=https://placeholder.supabase.co VITE_SUPABASE_ANON_KEY=placeholder npx vite build --outDir <tmp dir>` (expect a ~470 KB JS bundle, not ~200 KB).
+
 ## Environment
 
 Copy `.env.example` to `.env` and set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`. Without them the app shows a "CONFIGURATION REQUIRED" screen.

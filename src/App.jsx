@@ -108,6 +108,14 @@ function App() {
           fetchTasks();
         },
       )
+      // Supabase Realtime can't filter DELETE events, so listen to them separately
+      .on(
+        'postgres_changes',
+        { event: 'DELETE', schema: 'public', table: 'tasks' },
+        () => {
+          fetchTasks();
+        },
+      )
       .subscribe();
 
     return () => {
@@ -148,8 +156,9 @@ function App() {
     else fetchTasks();
   };
 
+  // Resolves to true on success so callers (e.g. Dossier autosave) can retry on failure
   const updateTask = async (id, updates) => {
-    if (!supabase) return;
+    if (!supabase) return false;
 
     const dbUpdates = {};
     if (updates.text !== undefined) dbUpdates.text = updates.text;
@@ -170,8 +179,12 @@ function App() {
       .from('tasks')
       .update(dbUpdates)
       .eq('id', id);
-    if (error) console.error('Error updating task:', error);
-    else fetchTasks();
+    if (error) {
+      console.error('Error updating task:', error);
+      return false;
+    }
+    fetchTasks();
+    return true;
   };
 
   const deleteTask = async (id) => {

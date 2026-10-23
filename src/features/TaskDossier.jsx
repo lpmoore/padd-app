@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useEffectEvent } from 'react';
 import { supabase } from '../lib/supabase';
 import { isSupportedImage, uploadImage } from '../lib/storage';
 import LCARSButton from '../components/LCARSButton';
@@ -50,28 +50,34 @@ const TaskDossier = ({ task, onClose, onUpdate, initialTab = 'PROTOCOL' }) => {
 
     // Auto-save PROTOCOL & IMAGES only (Personnel is managed via join table)
     // Debounced so typing doesn't write (and refetch every task) on each keystroke.
+    // App renders the dossier with key={task.id}, so task.id is fixed for this instance.
     const lastSaved = useRef({ details: protocol, images });
-    const pendingSave = useRef(null);
-    const onUpdateRef = useRef(onUpdate);
-    useEffect(() => {
-        onUpdateRef.current = onUpdate;
+    const pendingSave = useRef(null); // Unsaved changes (kept until a save succeeds)
+
+    const save = useEffectEvent(async (changes) => {
+        const ok = await onUpdate(task.id, changes);
+        if (ok) {
+            lastSaved.current = changes;
+            if (pendingSave.current === changes) pendingSave.current = null;
+        }
     });
 
     useEffect(() => {
-        if (protocol === lastSaved.current.details && images === lastSaved.current.images) return;
-        pendingSave.current = { details: protocol, images };
-        const timer = setTimeout(() => {
-            onUpdateRef.current(task.id, pendingSave.current);
-            lastSaved.current = pendingSave.current;
+        if (protocol === lastSaved.current.details && images === lastSaved.current.images) {
+            // Edited back to the saved state: nothing left to save
             pendingSave.current = null;
-        }, AUTOSAVE_DELAY_MS);
+            return;
+        }
+        const changes = { details: protocol, images };
+        pendingSave.current = changes;
+        const timer = setTimeout(() => save(changes), AUTOSAVE_DELAY_MS);
         return () => clearTimeout(timer);
-    }, [protocol, images, task.id]);
+    }, [protocol, images]);
 
-    // Flush any unsaved edits when the dossier closes
+    // Flush unsaved (or previously failed) edits when the dossier closes
     useEffect(() => () => {
-        if (pendingSave.current) onUpdateRef.current(task.id, pendingSave.current);
-    }, [task.id]);
+        if (pendingSave.current) save(pendingSave.current);
+    }, []);
 
     // Personnel Assignment Logic
     const openAssignmentModal = async () => {
