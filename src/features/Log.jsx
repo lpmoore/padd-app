@@ -5,7 +5,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import LCARSButton from '../components/LCARSButton';
 import { formatLogDate } from '../utils/dateUtils';
 import { supabase } from '../lib/supabase';
-import { isSupportedImage, uploadImage } from '../lib/storage';
+import { alertUploadErrors, uploadImages } from '../lib/storage';
 import { useSettings } from '../contexts/settingsContextValue';
 
 const pickRandomIndex = (length) => Math.floor(Math.random() * length);
@@ -159,20 +159,13 @@ const Log = () => {
     if (!e.target.files || e.target.files.length === 0) return;
     setUploading(true);
 
-    const newImageUrls = [];
     const files = Array.from(e.target.files);
 
     // Use a temp ID for new creates if needed, or just generic folder
     const folderId = editingId || 'temp';
 
-    for (const file of files) {
-      if (!isSupportedImage(file)) continue;
-      try {
-        newImageUrls.push(await uploadImage(file, `logs/${folderId}`));
-      } catch (error) {
-        console.error('Upload failed:', error);
-      }
-    }
+    const { urls: newImageUrls, errors } = await uploadImages(files, `logs/${folderId}`);
+    alertUploadErrors(errors);
 
     setEditImages((prev) => [...prev, ...newImageUrls]);
     setUploading(false);
