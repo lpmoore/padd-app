@@ -23,12 +23,27 @@ export const formatDateForInput = (isoString) => {
     }
 };
 
-export const formatDateForDisplay = (isoString, useStardate = false) => {
-    if (!isoString) return '';
+/**
+ * Formats a date for display, respecting the Stardate setting.
+ * Use this for every user-facing date so the toggle applies app-wide.
+ *
+ * @param {Date|string} value - Date, ISO string, or local YYYY-MM-DDTHH:mm string
+ * @param {boolean} useStardate - From useStardateEnabled()
+ * @param {{ includeTime?: boolean }} options - Standard format only; Stardates already encode time of day
+ */
+export const formatDateForDisplay = (value, useStardate = false, { includeTime = true } = {}) => {
+    if (!value) return '';
+    const date = new Date(value);
+    if (isNaN(date.getTime())) return '';
     if (useStardate) {
-        return `Stardate ${calculateStardate(isoString)}`;
+        return `STARDATE ${calculateStardate(date)}`;
     }
-    return new Date(isoString).toLocaleString();
+    return date.toLocaleString([], {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        ...(includeTime && { hour: '2-digit', minute: '2-digit' }),
+    });
 };
 
 export const formatLogDate = (dateString, useStardate = false) => {

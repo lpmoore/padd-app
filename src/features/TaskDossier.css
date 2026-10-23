@@ -43,6 +43,13 @@
     text-transform: uppercase;
 }
 
+.dossier-due {
+    font-size: 0.9rem;
+    font-weight: bold;
+    letter-spacing: 1px;
+    margin-top: 2px;
+}
+
 .dossier-close-btn {
     background: none;
     border: 2px solid black;

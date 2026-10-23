@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { FileText, Users, Image as ImageIcon } from 'lucide-react';
 import './Calendar.css';
+import { formatDateForDisplay } from '../utils/dateUtils';
+import { useStardateEnabled } from '../contexts/settingsContextValue';
 
 const Calendar = ({ tasks = [], onOpenDossier }) => {
     const [date, setDate] = useState(new Date());
-    const [selectedDate, setSelectedDate] = useState(null); 
+    const [selectedDate, setSelectedDate] = useState(null);
+    const isStardateEnabled = useStardateEnabled();
 
     const daysInMonth = (year, month) => new Date(year, month + 1, 0).getDate();
     const firstDayOfMonth = (year, month) => new Date(year, month, 1).getDay();
@@ -88,7 +91,11 @@ const Calendar = ({ tasks = [], onOpenDossier }) => {
     return (
         <div className="calendar-container">
             <div className="calendar-header">
-                <h2 className="lcars-header">STARDATE {year}.{(month + 1).toString().padStart(2, '0')}</h2>
+                <h2 className="lcars-header">
+                    {isStardateEnabled
+                        ? formatDateForDisplay(new Date(year, month, 1), true)
+                        : `${year}.${(month + 1).toString().padStart(2, '0')}`}
+                </h2>
                 <div className="month-nav">
                     <button className="month-nav-btn" aria-label="Previous month" onClick={() => changeMonth(-1)}>◀</button>
                     <div className="month-display">{monthNames[month]}</div>
@@ -111,7 +118,11 @@ const Calendar = ({ tasks = [], onOpenDossier }) => {
                 <div className="calendar-overlay" onClick={closeDetail}>
                     <div className="calendar-detail-panel" onClick={e => e.stopPropagation()}>
                         <div className="detail-header">
-                            <h3>STARDATE {year}.{(month + 1).toString().padStart(2, '0')}.{selectedDate.day}</h3>
+                            <h3>
+                                {formatDateForDisplay(new Date(year, month, selectedDate.day), isStardateEnabled, {
+                                    includeTime: false,
+                                }).toUpperCase()}
+                            </h3>
                             <button className="close-btn" onClick={closeDetail}>X</button>
                         </div>
                         <div className="detail-content">
