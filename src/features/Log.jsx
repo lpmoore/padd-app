@@ -5,6 +5,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import LCARSButton from '../components/LCARSButton';
 import { formatLogDate } from '../utils/dateUtils';
 import { supabase } from '../lib/supabase';
+import { alertUploadErrors, uploadImages } from '../lib/storage';
 import { useSettings } from '../contexts/settingsContextValue';
 
 const pickRandomIndex = (length) => Math.floor(Math.random() * length);
@@ -158,31 +159,13 @@ const Log = () => {
     if (!e.target.files || e.target.files.length === 0) return;
     setUploading(true);
 
-    const newImageUrls = [];
     const files = Array.from(e.target.files);
 
     // Use a temp ID for new creates if needed, or just generic folder
     const folderId = editingId || 'temp';
 
-    for (const file of files) {
-      if (!file.type.match(/^image\/(jpeg|png|gif|webp)$/)) continue;
-
-      const fileExt = file.name.split('.').pop();
-      const fileName = `logs/${folderId}/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('task-images') // Reusing bucket
-        .upload(fileName, file);
-
-      if (!uploadError) {
-        const {
-          data: { publicUrl },
-        } = supabase.storage.from('task-images').getPublicUrl(fileName);
-        newImageUrls.push(publicUrl);
-      } else {
-        console.error('Upload failed:', uploadError);
-      }
-    }
+    const { urls: newImageUrls, errors } = await uploadImages(files, `logs/${folderId}`);
+    alertUploadErrors(errors);
 
     setEditImages((prev) => [...prev, ...newImageUrls]);
     setUploading(false);

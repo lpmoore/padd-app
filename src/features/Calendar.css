@@ -18,6 +18,26 @@
     margin: 0;
 }
 
+.month-nav {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.month-nav-btn {
+    background: var(--lcars-tan);
+    color: black;
+    border: none;
+    border-radius: 12px;
+    padding: 4px 12px;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.month-nav-btn:hover {
+    background: var(--lcars-orange);
+}
+
 .month-display {
     font-size: 2rem;
     font-weight: bold;

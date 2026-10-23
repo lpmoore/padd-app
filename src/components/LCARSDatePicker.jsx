@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Calendar, ChevronLeft, ChevronRight, Clock } from 'lucide-react';
 import LCARSButton from './LCARSButton';
 import './LCARSDatePicker.css';
@@ -21,42 +21,38 @@ const LCARSDatePicker = ({ value, onChange, label = "SELECT DATE" }) => {
     const [draftDate, setDraftDate] = useState(new Date());
     const [draftTime, setDraftTime] = useState({ hours: '12', minutes: '00' });
     
-    // Initialize internal state when opening or when value changes
-    useEffect(() => {
-        if (value) {
-            const d = new Date(value);
-            if (!isNaN(d.getTime())) {
-                setDraftDate(d);
-                setDraftTime({
-                    hours: String(d.getHours()).padStart(2, '0'),
-                    minutes: String(d.getMinutes()).padStart(2, '0')
-                });
-            }
-        }
-    }, [value, isOpen]);
-
     // Calendar Navigation State
     const [viewDate, setViewDate] = useState(new Date()); // For browsing months
 
-    useEffect(() => {
-        if (isOpen) {
-            // Sync view with current draft selection
-            setViewDate(new Date(draftDate));
+    // Initialize internal state from the current value when opening
+    const openPicker = () => {
+        let initial = draftDate;
+        const d = value ? new Date(value) : null;
+        if (d && !isNaN(d.getTime())) {
+            initial = d;
+            setDraftDate(d);
+            setDraftTime({
+                hours: String(d.getHours()).padStart(2, '0'),
+                minutes: String(d.getMinutes()).padStart(2, '0')
+            });
         }
-    }, [isOpen]);
+        setViewDate(new Date(initial));
+        setIsOpen(true);
+    };
 
     const handleDayClick = (day) => {
-        const newDate = new Date(draftDate);
-        newDate.setFullYear(viewDate.getFullYear());
-        newDate.setMonth(viewDate.getMonth());
-        newDate.setDate(day);
-        setDraftDate(newDate);
+        // Build from parts so a 31st draft doesn't overflow into the next month
+        setDraftDate(new Date(
+            viewDate.getFullYear(),
+            viewDate.getMonth(),
+            day,
+            draftDate.getHours(),
+            draftDate.getMinutes()
+        ));
     };
 
     const handleMonthChange = (delta) => {
-        const newView = new Date(viewDate);
-        newView.setMonth(newView.getMonth() + delta);
-        setViewDate(newView);
+        setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() + delta, 1));
     };
 
     const handleTimeChange = (field, val) => {
@@ -149,7 +145,7 @@ const LCARSDatePicker = ({ value, onChange, label = "SELECT DATE" }) => {
             {/* Trigger Button */}
             <div 
                 className={`lcars-date-display ${value ? 'has-date' : ''}`} 
-                onClick={() => setIsOpen(true)}
+                onClick={openPicker}
             >
                 <Calendar size={16} />
                 <span>{displayValue}</span>

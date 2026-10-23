@@ -1,7 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useEffectEvent } from 'react';
 import { supabase } from '../lib/supabase';
+import { alertUploadErrors, uploadImages } from '../lib/storage';
 import LCARSButton from '../components/LCARSButton';
 import './TaskDossier.css';
+
+const AUTOSAVE_DELAY_MS = 700;
 
 const TaskDossier = ({ task, onClose, onUpdate, initialTab = 'PROTOCOL' }) => {
     const [activeTab, setActiveTab] = useState(initialTab);
@@ -19,12 +22,7 @@ const TaskDossier = ({ task, onClose, onUpdate, initialTab = 'PROTOCOL' }) => {
     const [activeImageIndex, setActiveImageIndex] = useState(null);
     const fileInputRef = useRef(null);
 
-    // Initial Fetch
-    useEffect(() => {
-        fetchAssignedPersonnel();
-    }, [task.id]);
-
-    const fetchAssignedPersonnel = async () => {
+    const fetchAssignedPersonnel = useCallback(async () => {
         // Join task_personnel -> personnel
         const { data, error } = await supabase
             .from('task_personnel')
@@ -43,20 +41,43 @@ const TaskDossier = ({ task, onClose, onUpdate, initialTab = 'PROTOCOL' }) => {
             assignments.sort((a, b) => a.name.localeCompare(b.name));
             setAssignedPersonnel(assignments);
         }
-    };
+    }, [task.id]);
+
+    // Initial Fetch
+    useEffect(() => {
+        fetchAssignedPersonnel();
+    }, [fetchAssignedPersonnel]);
 
     // Auto-save PROTOCOL & IMAGES only (Personnel is managed via join table)
-    const isFirstRun = useRef(true);
+    // Debounced so typing doesn't write (and refetch every task) on each keystroke.
+    // App renders the dossier with key={task.id}, so task.id is fixed for this instance.
+    const lastSaved = useRef({ details: protocol, images });
+    const pendingSave = useRef(null); // Unsaved changes (kept until a save succeeds)
+
+    const save = useEffectEvent(async (changes) => {
+        const ok = await onUpdate(task.id, changes);
+        if (ok) {
+            lastSaved.current = changes;
+            if (pendingSave.current === changes) pendingSave.current = null;
+        }
+    });
+
     useEffect(() => {
-        if (isFirstRun.current) {
-            isFirstRun.current = false;
+        if (protocol === lastSaved.current.details && images === lastSaved.current.images) {
+            // Edited back to the saved state: nothing left to save
+            pendingSave.current = null;
             return;
         }
-        onUpdate(task.id, {
-            details: protocol,
-            images: images
-        });
-    }, [protocol, images]); 
+        const changes = { details: protocol, images };
+        pendingSave.current = changes;
+        const timer = setTimeout(() => save(changes), AUTOSAVE_DELAY_MS);
+        return () => clearTimeout(timer);
+    }, [protocol, images]);
+
+    // Flush unsaved (or previously failed) edits when the dossier closes
+    useEffect(() => () => {
+        if (pendingSave.current) save(pendingSave.current);
+    }, []);
 
     // Personnel Assignment Logic
     const openAssignmentModal = async () => {
@@ -93,24 +114,8 @@ const TaskDossier = ({ task, onClose, onUpdate, initialTab = 'PROTOCOL' }) => {
     };
 
     const processFiles = async (files) => {
-        const newImageUrls = [];
-        for (const file of files) {
-            if (!file.type.match(/^image\/(jpeg|png|gif|webp)$/)) continue;
-            
-            const fileExt = file.name.split('.').pop();
-            const fileName = `${task.id}/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-
-            const { error: uploadError } = await supabase.storage
-                .from('task-images')
-                .upload(fileName, file);
-
-            if (!uploadError) {
-                const { data: { publicUrl } } = supabase.storage
-                    .from('task-images')
-                    .getPublicUrl(fileName);
-                newImageUrls.push(publicUrl);
-            }
-        }
+        const { urls: newImageUrls, errors } = await uploadImages(files, `tasks/${task.id}`);
+        alertUploadErrors(errors);
         if (newImageUrls.length > 0) {
             setImages(prev => [...prev, ...newImageUrls]);
         }

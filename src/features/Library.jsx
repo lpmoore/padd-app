@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
+import { IMAGE_BUCKET, alertUploadErrors, uploadImages } from '../lib/storage';
 import LCARSButton from '../components/LCARSButton';
 import './Library.css';
 
@@ -35,67 +36,38 @@ const Library = () => {
         supabase.auth.getSession().then(({ data: { session } }) => setSession(session));
     }, []);
 
-    // 1. Fetch Categories & Items
-    useEffect(() => {
-        fetchLibraryData();
-    }, []);
-
-    const fetchLibraryData = async () => {
-        setLoading(true);
+    // Separate fetch for categories to update sidebar
+    const refreshCategories = useCallback(async () => {
         const { data, error } = await supabase
             .from('library_items')
-            .select('*')
-            .order('title');
+            .select('category');
 
         if (error) {
-            console.error('Error fetching library items:', error);
-        } else {
-            const allItems = data || [];
-            
-            // Extract unique categories
-            const cats = [...new Set(allItems.map(i => i.category))].sort();
-            if (cats.length === 0) cats.push('SHIPS', 'PLANETS'); // Defaults if empty
-            setAvailableCategories(cats);
-
-            // Filter items for current category view
-            let cleanActiveCat = activeCategory;
-            if (!cats.includes(activeCategory) && cats.length > 0) {
-                 cleanActiveCat = cats[0];
-                 setActiveCategory(cleanActiveCat);
-            }
-
-            const filtered = allItems.filter(i => i.category === cleanActiveCat);
-            setItems(filtered);
-
-            // Maintain selection if possible
-            if (filtered.length > 0) {
-                if (selectedItem) {
-                    const stillExists = filtered.find(i => i.id === selectedItem.id);
-                    if (stillExists) setSelectedItem(stillExists);
-                    else setSelectedItem(filtered[0]);
-                } else {
-                    setSelectedItem(filtered[0]);
-                }
-            } else {
-                setSelectedItem(null);
-            }
+            console.error('Error fetching library categories:', error);
+            return;
         }
-        setLoading(false);
-    };
+        const cats = [...new Set(data.map(i => i.category))].sort();
+        if (cats.length > 0) {
+            setAvailableCategories(cats);
+            // Fall back to the first category if the current one no longer exists
+            setActiveCategory(prev => (cats.includes(prev) ? prev : cats[0]));
+        }
+    }, []);
 
-    // Re-filter when category changes
-    useEffect(() => {
-        if (!loading) fetchItemsForCategory(activeCategory);
-    }, [activeCategory]);
+    // Only the most recent category request may update the view, so
+    // switching categories quickly can't leave stale items on screen.
+    const latestCategoryRequest = useRef(0);
 
     const fetchItemsForCategory = async (cat) => {
+        const requestId = ++latestCategoryRequest.current;
         setLoading(true);
         const { data } = await supabase
             .from('library_items')
             .select('*')
             .eq('category', cat)
             .order('title');
-        
+        if (requestId !== latestCategoryRequest.current) return;
+
         setItems(data || []);
         if (data && data.length > 0 && !isEditing) {
              setSelectedItem(data[0]);
@@ -105,17 +77,15 @@ const Library = () => {
         setLoading(false);
     };
 
-    // Separate fetch for categories to update sidebar
-    const refreshCategories = async () => {
-        const { data } = await supabase
-            .from('library_items')
-            .select('category');
-        
-        if (data) {
-             const cats = [...new Set(data.map(i => i.category))].sort();
-             if (cats.length > 0) setAvailableCategories(cats);
-        }
-    };
+    useEffect(() => {
+        refreshCategories();
+    }, [refreshCategories]);
+
+    useEffect(() => {
+        fetchItemsForCategory(activeCategory);
+        // Refetch only on category change; isEditing is read at call time on purpose.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [activeCategory]);
 
 
     const handleSeedData = async () => {
@@ -280,15 +250,15 @@ const Library = () => {
         setLoading(true);
 
         const storagePathsToDelete = imagesToDelete
-            .filter(url => url.includes('supabase.co') && url.includes('task-images/'))
+            .filter(url => url.includes('supabase.co') && url.includes(`${IMAGE_BUCKET}/`))
             .map(url => {
-                const parts = url.split('task-images/');
+                const parts = url.split(`${IMAGE_BUCKET}/`);
                 return parts.length === 2 ? parts[1] : null;
             })
             .filter(Boolean);
 
         if (storagePathsToDelete.length > 0) {
-            const { error: deleteError } = await supabase.storage.from('task-images').remove(storagePathsToDelete);
+            const { error: deleteError } = await supabase.storage.from(IMAGE_BUCKET).remove(storagePathsToDelete);
             if (deleteError) {
                 console.error("Error deleting images from storage:", deleteError);
             }
@@ -305,18 +275,10 @@ const Library = () => {
     const uploadFiles = async (filesArray) => {
         if (!filesArray || filesArray.length === 0) return;
         setUploading(true);
-        const newImageUrls = [];
         const recordId = editFormData.id || 'new';
 
-        for (const file of filesArray) {
-            if (!file.type.match(/^image\/(jpeg|png|gif|webp)$/)) continue;
-            const fileName = `library/${recordId}/${Date.now()}_${file.name}`;
-            const { error } = await supabase.storage.from('task-images').upload(fileName, file);
-            if (!error) {
-                const { data } = supabase.storage.from('task-images').getPublicUrl(fileName);
-                newImageUrls.push(data.publicUrl);
-            }
-        }
+        const { urls: newImageUrls, errors } = await uploadImages(filesArray, `library/${recordId}`);
+        alertUploadErrors(errors);
         if (newImageUrls.length > 0) {
             setEditFormData(prev => ({
                 ...prev,

@@ -1,0 +1,64 @@
+# PADD App Plan
+
+Single source of truth for what's done, what's next, and what we'd like to build.
+**Update this file after every fix or feature** (move items to Done with the date).
+
+## 🔧 Now — Fixes in progress
+
+Branch: `fix/security-and-cleanup`
+
+- [x] **Storage ownership**: uploads go to `<user_id>/<folder>/...` via `src/lib/storage.js`; storage RLS scoped to owner (`supabase_rls_policies.sql`). _2026-10-22_
+  - [ ] **Run the updated storage section of `supabase_rls_policies.sql` in the Supabase SQL editor** (manual step; code change alone doesn't apply it).
+- [x] **Dossier autosave**: debounced (700 ms) and flushed on close. _2026-10-22_
+- [x] **npm audit**: 0 vulnerabilities. _2026-10-22_
+- [x] **Lint**: 0 errors / 0 warnings. Also fixed along the way: Library category fetch race, Calendar month navigation, date picker month-overflow on the 31st, realtime subscription filtered to current user. _2026-10-22_
+
+## 📋 Next — Known issues & cleanup
+
+- [ ] **Decide: public vs private images.** `task-images` bucket is public; anyone with a URL can view. Option: private bucket + `createSignedUrl` (requires storing paths instead of URLs).
+- [ ] **Schema in repo**: no SQL for `tasks`, `notes`, `library_items`. Consolidate into `supabase/migrations/`. `supabase_schema_personnel.sql` and `supabase_rls_policies.sql` overlap on `task_personnel` policies.
+- [ ] **Stardate integration** (helper `formatDateForDisplay` in `src/utils/dateUtils.js` is ready):
+  - [x] Captain's Log
+  - [ ] Tasks header (double-parses the date: `Tasks.jsx` `aDate`)
+  - [ ] Task items / subtasks (`TaskItem.jsx`)
+  - [ ] Task Dossier
+  - [ ] Calendar (headers are labelled "STARDATE" but show `YYYY.MM`)
+- [ ] **Subtask dates**: marked "needs regression fix" previously; verify.
+- [ ] **Replace `alert()` / `confirm()`** (~12 call sites) with an LCARS toast/dialog component.
+- [ ] **Tests**: add Vitest; start with `stardate.js` and `dateUtils.js`.
+- [ ] **Stardate accuracy** (optional): current formula isn't TNG-canon (2364 ≈ 41000).
+- [ ] **Accessibility**: labels on icon buttons, keyboard support for date picker / dossier.
+- [ ] **Housekeeping**: real README (currently Vite template); move/remove `debug_db.cjs` (writes real rows); remove leftover no-op drag handlers & hidden "HOLD SHIFT TO NEST" label in `Tasks.jsx`.
+- [ ] **Task Indicators**: marked "pending refinement" previously.
+
+## 🚀 Later — Features we hope to build
+
+Roughly ordered by value for effort.
+
+1. [ ] **Home Dashboard**: overdue / due today, latest log, active personnel. Candidate default landing tab.
+2. [ ] **Global "Computer" search** (Ctrl+K) across Tasks, Personnel, Logs, Library. Pairs with **keyboard shortcuts** (Ctrl+N, Ctrl+L) + LCARS audio.
+3. [ ] **"Red Alert" mode**: critical tasks flash LCARS borders red + klaxon.
+4. [ ] **Tags & filtering** (#engineering, #diplomacy).
+5. [ ] **Markdown / rich text** in Logs and Dossiers.
+6. [ ] **Duty Roster / Status** for Personnel (On Duty, Away Mission, shifts).
+7. [ ] **Reminders**: browser/email alerts for due dates.
+8. [ ] **Data export**: Logs / Tasks to PDF or JSON.
+9. [ ] **Voice commands**: Web Speech API dictation for Logs and Tasks.
+10. [ ] **Offline mode (PWA)** with background sync.
+11. [ ] **Real-time collaboration** across crew members.
+
+## ✅ Done
+
+### 2026-04 — Stardate groundwork
+- Global `SettingsContext` + Settings panel toggle (persisted to localStorage).
+- `stardate.js` converter; Stardate shown in Captain's Log.
+- `formatLogDate` centralized in `dateUtils.js`.
+
+### 2026-02 and earlier
+- **Supabase migration**: email/password auth; Tasks, Notes (Captain's Log), Library, Personnel in Postgres; images in Storage (`task-images`).
+- **Security**: RLS on all public tables; Security tab for password changes.
+- **Tasks**: drag-and-drop reorder; Shift (or lock toggle) to nest; nesting visual feedback; due dates with UTC/local handling; interactive indicator pills linking to Dossier tabs; LCARS tooltips.
+- **Captain's Log**: chronological feed, auto-save, search, image attachments, header layout.
+- **Library**: Supabase-backed, add entries, dynamic categories, image upload.
+- **Personnel**: manager with LCARS file-folder frame, alphabetical sort, demo data seeding.
+- **UI**: LCARS layout + dynamic colors, static sidebar geometry, TNG palette, custom `LCARSDatePicker` with ENGAGE button, interface sounds, touch-friendly drag tolerances, "USS CERRITOS" elbow.

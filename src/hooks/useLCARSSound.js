@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { useSoundSettings } from '../contexts/SoundContext';
+import { useSoundSettings } from '../contexts/soundContextValue';
 
 const useLCARSSound = () => {
     const { soundEnabled } = useSoundSettings();

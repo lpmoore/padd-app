@@ -1,10 +1,6 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 
-const SoundContext = createContext();
-
-export const useSoundSettings = () => {
-    return useContext(SoundContext);
-};
+import { SoundContext } from './soundContextValue';
 
 export const SoundProvider = ({ children }) => {
     // Check local storage for initial state, default to true if not set

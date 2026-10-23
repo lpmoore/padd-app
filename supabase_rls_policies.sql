@@ -135,25 +135,76 @@ USING (
 );
 
 
+-- =====================================================================
 -- 6. Storage Security (Bucket: 'task-images')
+--
+-- !!! MUST BE RUN MANUALLY IN THE SUPABASE SQL EDITOR !!!
+-- Deploying the app does NOT apply these policies. Until this section is
+-- run, the old bucket-wide policies (any user can modify any file) stay live.
+--
+-- After running, verify with a real upload AND delete as a normal user.
+-- =====================================================================
 -- Note: 'storage.objects' is a system table. We cannot easily 'DROP IF EXISTS' on it without risking system policies.
 -- However, creating policies usually requires unique names.
 -- We will attempt to Drop them first to be safe.
 
+-- Uploads must live under '<user_id>/...' (see src/lib/storage.js).
+-- storage.foldername('<uid>/tasks/x.png') returns {<uid>,tasks}. Postgres
+-- arrays are 1-based, so [1] is the user id ([0] would be NULL and deny all).
+-- Select/Update/Delete also allow legacy files (uploaded before per-user
+-- folders) via owner_id, which Supabase sets to the uploader automatically.
+
+-- SELECT is required by the Storage API for remove()/move(), not just reads.
+-- (Public URLs are served regardless because the bucket is public.)
+DROP POLICY IF EXISTS "Users can select own images" ON storage.objects;
+CREATE POLICY "Users can select own images"
+ON storage.objects FOR SELECT
+TO authenticated
+USING (
+    bucket_id = 'task-images'
+    AND (
+        (storage.foldername(name))[1] = (SELECT auth.uid())::text
+        OR owner_id = (SELECT auth.uid())::text
+    )
+);
+
 DROP POLICY IF EXISTS "Authenticated users can upload images" ON storage.objects;
-CREATE POLICY "Authenticated users can upload images"
+DROP POLICY IF EXISTS "Users can upload images to own folder" ON storage.objects;
+CREATE POLICY "Users can upload images to own folder"
 ON storage.objects FOR INSERT
 TO authenticated
-WITH CHECK ( bucket_id = 'task-images' );
+WITH CHECK (
+    bucket_id = 'task-images'
+    AND (storage.foldername(name))[1] = (SELECT auth.uid())::text
+);
 
 DROP POLICY IF EXISTS "Authenticated users can update images" ON storage.objects;
-CREATE POLICY "Authenticated users can update images"
+DROP POLICY IF EXISTS "Users can update own images" ON storage.objects;
+CREATE POLICY "Users can update own images"
 ON storage.objects FOR UPDATE
 TO authenticated
-USING ( bucket_id = 'task-images' );
+USING (
+    bucket_id = 'task-images'
+    AND (
+        (storage.foldername(name))[1] = (SELECT auth.uid())::text
+        OR owner_id = (SELECT auth.uid())::text
+    )
+)
+-- The updated row (e.g. a move/rename target) must land in the user's own folder
+WITH CHECK (
+    bucket_id = 'task-images'
+    AND (storage.foldername(name))[1] = (SELECT auth.uid())::text
+);
 
 DROP POLICY IF EXISTS "Authenticated users can delete images" ON storage.objects;
-CREATE POLICY "Authenticated users can delete images"
+DROP POLICY IF EXISTS "Users can delete own images" ON storage.objects;
+CREATE POLICY "Users can delete own images"
 ON storage.objects FOR DELETE
 TO authenticated
-USING ( bucket_id = 'task-images' );
+USING (
+    bucket_id = 'task-images'
+    AND (
+        (storage.foldername(name))[1] = (SELECT auth.uid())::text
+        OR owner_id = (SELECT auth.uid())::text
+    )
+);
