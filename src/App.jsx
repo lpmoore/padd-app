@@ -78,11 +78,20 @@ function App() {
   // Writes made by this tab refetch directly, so their realtime echoes are
   // skipped; only changes from other tabs/devices refetch via realtime.
   const knownTaskIds = useRef(new Set());
-  const ownWriteIds = useRef(new Set());
+  const ownWrites = useRef(new Map()); // task id -> expiry timer
   const markOwnWrite = (id) => {
-    ownWriteIds.current.add(id);
+    // Re-marking resets the timer so an older expiry can't clear a newer write
+    clearTimeout(ownWrites.current.get(id));
     // Expire in case the echo never arrives (e.g. realtime disabled)
-    setTimeout(() => ownWriteIds.current.delete(id), OWN_WRITE_TTL_MS);
+    const timer = setTimeout(() => ownWrites.current.delete(id), OWN_WRITE_TTL_MS);
+    ownWrites.current.set(id, timer);
+  };
+  // Returns true (and forgets the mark) if this change is our own write's echo
+  const consumeOwnWrite = (id) => {
+    if (!ownWrites.current.has(id)) return false;
+    clearTimeout(ownWrites.current.get(id));
+    ownWrites.current.delete(id);
+    return true;
   };
 
   const fetchTasks = useCallback(async () => {
@@ -111,7 +120,7 @@ function App() {
     // Coalesce bursts (e.g. cascade-deleted subtasks) into one refetch
     let refetchTimer;
     const handleRemoteChange = (id) => {
-      if (ownWriteIds.current.has(id)) return;
+      if (consumeOwnWrite(id)) return;
       clearTimeout(refetchTimer);
       refetchTimer = setTimeout(fetchTasks, REALTIME_REFETCH_DELAY_MS);
     };
@@ -140,8 +149,11 @@ function App() {
       )
       .subscribe();
 
+    const pendingOwnWrites = ownWrites.current;
     return () => {
       clearTimeout(refetchTimer);
+      pendingOwnWrites.forEach((timer) => clearTimeout(timer));
+      pendingOwnWrites.clear();
       supabase.removeChannel(channel);
     };
   }, [userId, fetchTasks]);
