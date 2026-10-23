@@ -26,10 +26,12 @@ Branch: `fix/security-and-cleanup`
   - [ ] Optional: date picker popup month title and Calendar task times still use Earth format
 - [ ] **Subtask dates**: marked "needs regression fix" previously; verify.
 - [ ] **Replace `alert()` / `confirm()`** (~12 call sites) with an LCARS toast/dialog component.
-- [ ] **Tests**: add Vitest; start with `stardate.js` and `dateUtils.js`.
+- [x] **Tests**: Vitest added; 20 tests for `stardate.js`, `dateUtils.js`, `storage.js`. Found and fixed a DST bug: the first hour after midnight showed the previous day's Stardate. _2026-10-22, branch `chore/tests-and-housekeeping`_
+- [ ] **Component tests**: none yet (Testing Library + jsdom) — start with Dossier autosave and Library edit/cancel flows.
 - [ ] **Stardate accuracy** (optional): current formula isn't TNG-canon (2364 ≈ 41000).
 - [ ] **Accessibility**: labels on icon buttons, keyboard support for date picker / dossier.
-- [ ] **Housekeeping**: real README (currently Vite template); move/remove `debug_db.cjs` (writes real rows); remove leftover no-op drag handlers & hidden "HOLD SHIFT TO NEST" label in `Tasks.jsx`.
+- [x] **Housekeeping**: real README; `debug_db.cjs` → `scripts/debug-db.cjs` with a warning header; removed dead `RootDroppable`, no-op drag handlers, and hidden "HOLD SHIFT TO NEST" label in `Tasks.jsx`. _2026-10-22_
+- [ ] **Demo task seeding**: `INITIAL_TASKS` subtasks are never created (only top-level tasks are seeded).
 - [ ] **Task Indicators**: marked "pending refinement" previously.
 - [x] **PR #3 review follow-ups** _2026-10-22, branch `fix/review-followups`_
   - [x] Library image removal staged until save; uploads discarded on cancel; record delete removes its images

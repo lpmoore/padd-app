@@ -24,19 +24,6 @@ import { formatDateForDisplay } from '../utils/dateUtils';
 import useLCARSSound from '../hooks/useLCARSSound';
 import { useStardateEnabled } from '../contexts/settingsContextValue';
 
-/* 
-   Fix: useDroppable must be used INSIDE DndContext.
-   We extract a simple wrapper component for the root drop zone.
-*/
-const RootDroppable = ({ children }) => {
-  const { setNodeRef } = useDroppable({ id: 'root-droppable' });
-  return (
-    <div className='tasks-scroll-area' ref={setNodeRef}>
-      {children}
-    </div>
-  );
-};
-
 const INITIAL_TASKS = [
   {
     title: 'DIAGNOSTIC: WARP CORE',
@@ -186,14 +173,6 @@ const Tasks = ({
     }
   };
 
-  const handleDragStart = () => {
-    // No backup needed
-  };
-
-  const handleDragCancel = () => {
-    // No backup needed
-  };
-
   return (
     <div className='tasks-container'>
       <div
@@ -214,15 +193,6 @@ const Tasks = ({
                   includeTime: false,
                 })
               : 'NO DATE SET'}
-          </span>
-          <span
-            style={{
-              color: 'var(--lcars-tan)',
-              fontSize: '0.8rem',
-              display: 'none',
-            }}
-          >
-            HOLD SHIFT TO NEST
           </span>
           <button
             onClick={() => setIsNestingLocked(!isNestingLocked)}
@@ -275,9 +245,7 @@ const Tasks = ({
       <DndContext
         sensors={sensors}
         collisionDetection={pointerWithin}
-        onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
-        onDragCancel={handleDragCancel}
       >
         <div className='tasks-scroll-area'>
           <SortableContext
