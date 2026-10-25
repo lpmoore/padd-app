@@ -242,6 +242,7 @@ function App() {
     const { error } = await supabase.from('tasks').delete().eq('id', id);
     if (error) {
       console.error('Error deleting task:', error);
+      alert('Error deleting task: ' + error.message);
     } else {
       fetchTasks();
       removeImagesByUrl(images);
