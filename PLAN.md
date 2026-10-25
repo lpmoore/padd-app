@@ -22,6 +22,9 @@ Branch: `fix/security-and-cleanup`
   - [x] Personnel: replaced photo deleted on save, unsaved uploads discarded on cancel, record delete removes the photo
   - [x] `removeImagesByUrl` alerts when storage skips files (RLS) or fails
   - [x] `supabase_orphaned_images.sql`: lists unreferenced files (SQL can't delete storage objects; delete via dashboard)
+  - [x] Tasks: `parent_id` FK had no `ON DELETE CASCADE`, so deleting a parent task failed (silently). Added `supabase_schema_tasks.sql`; delete failures now alert. _2026-10-25_
+  - [ ] Run `supabase_schema_tasks.sql` in the Supabase SQL editor
+  - [ ] Log: attach then cancel didn't delete the upload in testing; investigating
   - [ ] Run the orphan report once to clear out pre-fix leftovers
   - [ ] Optional: Admin button that deletes the current user's orphans via an RPC + Storage API
 - [ ] **Decide: public vs private images.** `task-images` bucket is public; anyone with a URL can view. Option: private bucket + `createSignedUrl` (requires storing paths instead of URLs).
