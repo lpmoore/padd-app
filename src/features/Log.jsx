@@ -209,6 +209,14 @@ const Log = () => {
   };
 
   const removeImage = (index) => {
+    // Uploaded during this edit, so nothing saved uses it: delete it now.
+    // Saved images wait for save, so cancel can still restore them.
+    const url = editImages[index];
+    const { uploads } = editTracking.current;
+    if (uploads.includes(url)) {
+      editTracking.current.uploads = uploads.filter((u) => u !== url);
+      removeImagesByUrl([url]);
+    }
     setEditImages((prev) => prev.filter((_, i) => i !== index));
   };
 
