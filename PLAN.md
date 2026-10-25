@@ -23,7 +23,8 @@ Branch: `fix/security-and-cleanup`
   - [x] `removeImagesByUrl` alerts when storage skips files (RLS) or fails
   - [x] `supabase_orphaned_images.sql`: lists unreferenced files (SQL can't delete storage objects; delete via dashboard)
   - [x] Tasks: `parent_id` FK had no `ON DELETE CASCADE`, so deleting a parent task failed (silently). Added `supabase_schema_tasks.sql`; delete failures now alert. _2026-10-25_
-  - [ ] Run `supabase_schema_tasks.sql` in the Supabase SQL editor
+  - [x] Ran `supabase_schema_tasks.sql` in the Supabase SQL editor _2026-10-25_
+  - [x] Verified on the PR #9 deploy preview: task + subtask delete, Log, Library, Personnel _2026-10-25_
   - [x] Log + Library: removing an image uploaded during the current edit now deletes it immediately (before, it waited for save/cancel). Saved images still wait for save so cancel can restore them. _2026-10-25_
   - [ ] Run the orphan report once to clear out pre-fix leftovers
   - [ ] Optional: Admin button that deletes the current user's orphans via an RPC + Storage API
