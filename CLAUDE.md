@@ -29,9 +29,9 @@ Copy `.env.example` to `.env` and set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANO
 - `src/features/`: one component (+ CSS) per tab: `Tasks`/`TaskItem`/`TaskDossier`, `Calendar`, `Log`, `Library`, `Admin` (→ `admin/PersonnelManager`, `Security`, `Settings`), `Auth`.
 - `src/components/`: LCARS primitives (`LCARSLayout`, `LCARSButton`, `LCARSDatePicker`).
 - `src/contexts/`: providers in `*Context.jsx`; the context object + hook live in `*ContextValue.js` (keeps Fast Refresh happy). `useSettings()` → `isStardateEnabled`; `useSoundSettings()` → sound toggle.
-- `src/lib/supabase.js`: client (null when env vars are missing). `src/lib/storage.js`: **all image uploads go through `uploadImage(file, folder)`**.
+- `src/lib/supabase.js`: client (null when env vars are missing). `src/lib/storage.js`: **all image uploads go through `uploadImage(file, folder)`**, and removed images are deleted with `removeImagesByUrl(urls)` (only after the record no longer references them; it alerts on failure).
 - `src/utils/dateUtils.js`: date conversions. Store UTC ISO (`formatDateForStorage`), edit as local `YYYY-MM-DDTHH:mm` (`formatDateForInput`), display with `formatDateForDisplay` / `formatLogDate` (Stardate-aware).
-- SQL: `supabase_rls_policies.sql`, `supabase_schema_personnel.sql`. These are applied manually in the Supabase SQL editor; code changes don't apply them.
+- SQL: `supabase_rls_policies.sql`, `supabase_schema_personnel.sql`, `supabase_orphaned_images.sql` (read-only report of unreferenced storage files). These are applied manually in the Supabase SQL editor; code changes don't apply them.
 
 ## Conventions
 

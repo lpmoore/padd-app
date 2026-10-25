@@ -56,12 +56,26 @@ export const storagePathFromUrl = (url) => {
   return decodeURIComponent(url.slice(index + marker.length));
 };
 
-/** Deletes the bucket files behind the given public URLs. Ignores external URLs. */
+/** URLs in `before` that are no longer in `after`, i.e. images a save dropped. */
+export const imagesNoLongerUsed = (before = [], after = []) =>
+  before.filter((url) => !after.includes(url));
+
+/**
+ * Deletes the bucket files behind the given public URLs. Ignores external URLs.
+ * Alerts the user if any file couldn't be deleted.
+ */
 export const removeImagesByUrl = async (urls) => {
   const paths = [...new Set(urls.map(storagePathFromUrl).filter(Boolean))];
   if (paths.length === 0) return;
-  const { error } = await supabase.storage.from(IMAGE_BUCKET).remove(paths);
-  if (error) console.error('Error deleting images from storage:', error);
+  const { data, error } = await supabase.storage.from(IMAGE_BUCKET).remove(paths);
+  // remove() silently skips files RLS won't let us delete, so compare counts too
+  const removed = error ? 0 : (data?.length ?? 0);
+  if (removed < paths.length) {
+    console.error('Error deleting images from storage:', error ?? { paths, removed: data });
+    alert(
+      `IMAGE DELETE FAILED\n\n${paths.length - removed} of ${paths.length} image file(s) could not be removed from storage.`,
+    );
+  }
 };
 
 /**

@@ -1,8 +1,17 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { isSupportedImage, storagePathFromUrl, uploadImage } from './storage';
+import {
+  imagesNoLongerUsed,
+  isSupportedImage,
+  removeImagesByUrl,
+  storagePathFromUrl,
+  uploadImage,
+} from './storage';
 
-vi.mock('./supabase', () => ({ supabase: null }));
+const { remove } = vi.hoisted(() => ({ remove: vi.fn() }));
+vi.mock('./supabase', () => ({
+  supabase: { storage: { from: () => ({ remove }) } },
+}));
 
 const BASE = 'https://abc.supabase.co/storage/v1/object/public/task-images';
 
@@ -43,5 +52,48 @@ describe('uploadImage', () => {
     await expect(
       uploadImage({ name: 'evil.svg', type: 'image/svg+xml' }, 'personnel'),
     ).rejects.toThrow(/Unsupported file type/);
+  });
+});
+
+describe('imagesNoLongerUsed', () => {
+  it('returns images dropped between two versions of a record', () => {
+    expect(imagesNoLongerUsed(['a', 'b', 'c'], ['b'])).toEqual(['a', 'c']);
+    expect(imagesNoLongerUsed(['a'], ['a', 'new'])).toEqual([]);
+    expect(imagesNoLongerUsed(undefined, ['a'])).toEqual([]);
+  });
+});
+
+describe('removeImagesByUrl', () => {
+  const alert = vi.fn();
+  vi.stubGlobal('alert', alert);
+  vi.spyOn(console, 'error').mockImplementation(() => {});
+
+  afterEach(() => {
+    remove.mockReset();
+    alert.mockReset();
+  });
+
+  it('deletes each bucket file once and skips external URLs', async () => {
+    remove.mockResolvedValue({ data: [{}], error: null });
+    await removeImagesByUrl([`${BASE}/u/a.png`, `${BASE}/u/a.png`, 'https://example.com/x.png']);
+    expect(remove).toHaveBeenCalledWith(['u/a.png']);
+    expect(alert).not.toHaveBeenCalled();
+  });
+
+  it('does nothing when no URLs are in the bucket', async () => {
+    await removeImagesByUrl(['https://example.com/x.png']);
+    expect(remove).not.toHaveBeenCalled();
+  });
+
+  it('alerts when storage silently skips files (blocked by RLS)', async () => {
+    remove.mockResolvedValue({ data: [{}], error: null });
+    await removeImagesByUrl([`${BASE}/u/a.png`, `${BASE}/u/b.png`]);
+    expect(alert).toHaveBeenCalledWith(expect.stringMatching(/1 of 2 image file/));
+  });
+
+  it('alerts when the request fails', async () => {
+    remove.mockResolvedValue({ data: null, error: new Error('network') });
+    await removeImagesByUrl([`${BASE}/u/a.png`]);
+    expect(alert).toHaveBeenCalledWith(expect.stringMatching(/1 of 1 image file/));
   });
 });

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '../../lib/supabase';
-import { uploadImage } from '../../lib/storage';
+import { imagesNoLongerUsed, removeImagesByUrl, uploadImage } from '../../lib/storage';
 import LCARSButton from '../../components/LCARSButton';
 import './PersonnelManager.css';
 
@@ -56,6 +56,7 @@ const PersonnelManager = () => {
 
         if (error) {
             alert('Error saving personnel record: ' + error.message);
+            return false;
         } else {
             fetchPersonnel();
             setEditPerson(null);
@@ -65,15 +66,21 @@ const PersonnelManager = () => {
                 // User requirement implies "clicking profile -> view -> edit". 
                 // After save, usually nice to go back to list or view. Let's go back to null (list) as per existing behavior.
             }
+            return true;
         }
     };
 
     const handleDelete = async (id) => {
         if (!confirm('DELETE PERSONNEL RECORD?')) return;
         
+        const savedPhoto = personnel.find(p => p.id === id)?.image_url;
         const { error } = await supabase.from('personnel').delete().eq('id', id);
-        if (error) alert('Error deleting: ' + error.message);
-        else fetchPersonnel();
+        if (error) {
+            alert('Error deleting: ' + error.message);
+        } else {
+            if (savedPhoto) removeImagesByUrl([savedPhoto]);
+            fetchPersonnel();
+        }
     };
 
     const handleSeedPersonnel = async () => {
@@ -172,6 +179,29 @@ function PersonnelEditor({ person, onSave, onCancel, onDelete }) {
     const [formData, setFormData] = useState({ ...person });
     const fileRef = useRef(null);
     const [uploading, setUploading] = useState(false);
+    const uploads = useRef([]); // Photos uploaded in this editor, not yet saved
+
+    // Lets an upload that finishes after the editor closed delete its file
+    const isOpen = useRef(false);
+    useEffect(() => {
+        isOpen.current = true;
+        return () => { isOpen.current = false; };
+    }, []);
+
+    const handleSaveClick = async () => {
+        if (await onSave(formData)) {
+            // Delete the replaced photo and any uploads that didn't end up on the record
+            const candidates = [person.image_url, ...uploads.current].filter(Boolean);
+            removeImagesByUrl(imagesNoLongerUsed(candidates, [formData.image_url]));
+            uploads.current = [];
+        }
+    };
+
+    const handleCancel = () => {
+        removeImagesByUrl(uploads.current);
+        uploads.current = [];
+        onCancel();
+    };
 
     const handleChange = (field, value) => {
         setFormData(prev => ({ ...prev, [field]: value }));
@@ -184,6 +214,11 @@ function PersonnelEditor({ person, onSave, onCancel, onDelete }) {
         setUploading(true);
         try {
             const publicUrl = await uploadImage(file, 'personnel');
+            if (!isOpen.current) {
+                removeImagesByUrl([publicUrl]);
+                return;
+            }
+            uploads.current.push(publicUrl);
             handleChange('image_url', publicUrl);
         } catch (error) {
             alert('Upload failed: ' + error.message);
@@ -192,7 +227,7 @@ function PersonnelEditor({ person, onSave, onCancel, onDelete }) {
     };
 
     return (
-        <div className="dossier-overlay" onClick={onCancel}>
+        <div className="dossier-overlay" onClick={handleCancel}>
             <div className="pm-lcars-container" onClick={e => e.stopPropagation()}>
                 
                 {/* 1. Top Bar */}
@@ -208,10 +243,10 @@ function PersonnelEditor({ person, onSave, onCancel, onDelete }) {
                     <div className="pm-lcars-elbow-top"></div>
                     <div className="pm-lcars-sidebar-content">
                          <div style={{display:'flex', flexDirection:'column', gap:'10px'}}>
-                            <LCARSButton onClick={() => onSave(formData)} color="var(--lcars-orange)" className="pm-lcars-sidebar-btn">SAVE</LCARSButton>
-                            <LCARSButton onClick={onCancel} color="white" className="pm-lcars-sidebar-btn">CANCEL</LCARSButton>
+                            <LCARSButton onClick={handleSaveClick} color="var(--lcars-orange)" className="pm-lcars-sidebar-btn">SAVE</LCARSButton>
+                            <LCARSButton onClick={handleCancel} color="white" className="pm-lcars-sidebar-btn">CANCEL</LCARSButton>
                              {formData.id && (
-                                <LCARSButton onClick={() => { onDelete(formData.id); onCancel(); }} color="var(--lcars-red)" className="pm-lcars-sidebar-btn">DELETE</LCARSButton>
+                                <LCARSButton onClick={() => { onDelete(formData.id); handleCancel(); }} color="var(--lcars-red)" className="pm-lcars-sidebar-btn">DELETE</LCARSButton>
                             )}
                          </div>
                          <div className="pm-lcars-sidebar-fill"></div>
