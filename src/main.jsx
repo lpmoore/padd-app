@@ -1,6 +1,7 @@
 import './index.css';
 
 import App from './App.jsx';
+import LCARSDialogHost from './components/LCARSDialogHost';
 import { SettingsProvider } from './contexts/SettingsContext';
 import { SoundProvider } from './contexts/SoundContext';
 import { StrictMode } from 'react';
@@ -11,6 +12,7 @@ createRoot(document.getElementById('root')).render(
     <SoundProvider>
       <SettingsProvider>
         <App />
+        <LCARSDialogHost />
       </SettingsProvider>
     </SoundProvider>
   </StrictMode>,

@@ -38,7 +38,8 @@ Branch: `fix/security-and-cleanup`
   - [x] Calendar month header + day detail header (no longer mislabelled "STARDATE")
   - [ ] Optional: date picker popup month title and Calendar task times still use Earth format
 - [ ] **Subtask dates**: marked "needs regression fix" previously; verify.
-- [ ] **Replace `alert()` / `confirm()`** (~12 call sites) with an LCARS toast/dialog component.
+- [x] **Replace `alert()` / `confirm()`** (21 call sites) with LCARS toasts + confirm modal (`src/lib/dialogs.js`, `LCARSDialogHost`). Errors persist until dismissed and play the error sound; destructive confirms are red and focus CANCEL; Escape cancels. Log delete failures now show an error (previously console only). _2026-10-25, branch `feat/lcars-dialogs`_
+- [ ] **Confirm before deleting a task?** The trash icon deletes immediately, and now also deletes subtasks and images.
 - [x] **Tests**: Vitest added; 20 tests for `stardate.js`, `dateUtils.js`, `storage.js`. Found and fixed a DST bug: the first hour after midnight showed the previous day's Stardate. _2026-10-22, branch `chore/tests-and-housekeeping`_
 - [ ] **Component tests**: none yet (Testing Library + jsdom) — start with Dossier autosave and Library edit/cancel flows.
 - [ ] **Stardate accuracy** (optional): current formula isn't TNG-canon (2364 ≈ 41000).
