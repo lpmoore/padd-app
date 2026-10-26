@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, useEffectEvent } from 'react';
 import { supabase } from '../lib/supabase';
-import { alertUploadErrors, uploadImages } from '../lib/storage';
+import { alertUploadErrors, imagesNoLongerUsed, removeImagesByUrl, uploadImages } from '../lib/storage';
 import LCARSButton from '../components/LCARSButton';
 import './TaskDossier.css';
 import { formatDateForDisplay } from '../utils/dateUtils';
@@ -60,6 +60,8 @@ const TaskDossier = ({ task, onClose, onUpdate, initialTab = 'PROTOCOL' }) => {
     const save = useEffectEvent(async (changes) => {
         const ok = await onUpdate(task.id, changes);
         if (ok) {
+            // Images can't be re-added once removed, so files the saved task no longer references can go
+            removeImagesByUrl(imagesNoLongerUsed(lastSaved.current.images, changes.images));
             lastSaved.current = changes;
             if (pendingSave.current === changes) pendingSave.current = null;
         }
@@ -78,8 +80,13 @@ const TaskDossier = ({ task, onClose, onUpdate, initialTab = 'PROTOCOL' }) => {
     }, [protocol, images]);
 
     // Flush unsaved (or previously failed) edits when the dossier closes
-    useEffect(() => () => {
-        if (pendingSave.current) save(pendingSave.current);
+    const isOpen = useRef(false);
+    useEffect(() => {
+        isOpen.current = true;
+        return () => {
+            isOpen.current = false;
+            if (pendingSave.current) save(pendingSave.current);
+        };
     }, []);
 
     // Personnel Assignment Logic
@@ -118,6 +125,11 @@ const TaskDossier = ({ task, onClose, onUpdate, initialTab = 'PROTOCOL' }) => {
 
     const processFiles = async (files) => {
         const { urls: newImageUrls, errors } = await uploadImages(files, `tasks/${task.id}`);
+        if (!isOpen.current) {
+            // Closed while uploading; these files will never be saved to the task
+            removeImagesByUrl(newImageUrls);
+            return;
+        }
         alertUploadErrors(errors);
         if (newImageUrls.length > 0) {
             setImages(prev => [...prev, ...newImageUrls]);

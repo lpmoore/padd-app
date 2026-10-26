@@ -270,14 +270,18 @@ const Library = () => {
         );
     };
 
-    // Removal is staged: files are only deleted from storage once the edit is saved
+    // Saved images are staged and only deleted from storage once the edit is saved.
+    // Images uploaded during this edit aren't saved anywhere, so they're deleted now.
     const handleDeleteSelectedImages = () => {
         if (!window.confirm(`Remove ${imagesToDelete.length} selected image(s)? Takes effect when you save.`)) return;
 
         const remainingImages = (editFormData.images || []).filter(img => !imagesToDelete.includes(img));
+        const unsaved = imagesToDelete.filter(img => editUploads.includes(img));
 
         setEditFormData(prev => ({ ...prev, images: remainingImages }));
-        setStagedRemovals(prev => [...prev, ...imagesToDelete]);
+        removeImagesByUrl(unsaved);
+        setEditUploads(prev => prev.filter(img => !unsaved.includes(img)));
+        setStagedRemovals(prev => [...prev, ...imagesToDelete.filter(img => !unsaved.includes(img))]);
         setImagesToDelete([]);
     };
 

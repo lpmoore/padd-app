@@ -11,6 +11,7 @@ import Log from './features/Log';
 import TaskDossier from './features/TaskDossier';
 import Tasks from './features/Tasks';
 import { formatDateForStorage } from './utils/dateUtils';
+import { removeImagesByUrl } from './lib/storage';
 
 const INITIAL_NAV_ITEMS = [
   { id: 'CALENDAR', label: 'CALENDAR', color: 'var(--lcars-teal)' },
@@ -230,15 +231,22 @@ function App() {
   const deleteTask = async (id) => {
     if (!supabase) return;
 
-    // Subtasks are cascade-deleted by the database, so their echoes are ours too
+    // Subtasks are cascade-deleted by the database, so their echoes (and images) are ours too
+    const images = [];
     const markTree = (task) => {
       markOwnWrite(task.id);
+      images.push(...(task.images || []));
       task.subtasks?.forEach(markTree);
     };
     markTree(findTask(id, tasks) ?? { id });
     const { error } = await supabase.from('tasks').delete().eq('id', id);
-    if (error) console.error('Error deleting task:', error);
-    else fetchTasks();
+    if (error) {
+      console.error('Error deleting task:', error);
+      alert('Error deleting task: ' + error.message);
+    } else {
+      fetchTasks();
+      removeImagesByUrl(images);
+    }
   };
 
   const moveTask = async (id, newParentId) => {

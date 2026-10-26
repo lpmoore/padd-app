@@ -5,7 +5,12 @@ import React, { useEffect, useRef, useState } from 'react';
 import LCARSButton from '../components/LCARSButton';
 import { formatLogDate } from '../utils/dateUtils';
 import { supabase } from '../lib/supabase';
-import { alertUploadErrors, uploadImages } from '../lib/storage';
+import {
+  alertUploadErrors,
+  imagesNoLongerUsed,
+  removeImagesByUrl,
+  uploadImages,
+} from '../lib/storage';
 import { useSettings } from '../contexts/settingsContextValue';
 
 const pickRandomIndex = (length) => Math.floor(Math.random() * length);
@@ -42,6 +47,16 @@ const Log = () => {
   const [editImages, setEditImages] = useState([]);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef(null);
+
+  // The entry's saved images and the files uploaded since the edit started, so
+  // save can delete what was dropped and cancel can delete what was added.
+  // The session counter lets an upload that outlives its edit clean up after itself.
+  const editTracking = useRef({ images: [], uploads: [] });
+  const editSession = useRef(0);
+  const startEditTracking = (images = []) => {
+    editSession.current += 1;
+    editTracking.current = { images, uploads: [] };
+  };
 
   // Get Session
   useEffect(() => {
@@ -81,6 +96,7 @@ const Log = () => {
     setEditTitle('');
     setEditContent('');
     setEditImages([]);
+    startEditTracking();
     // Auto-generate title with Stardate?
     // For now, let's just leave blank or "CAPTAIN'S LOG"
   };
@@ -91,9 +107,12 @@ const Log = () => {
     setEditTitle(log.title);
     setEditContent(log.content);
     setEditImages(log.images || []);
+    startEditTracking(log.images || []);
   };
 
   const handleCancel = () => {
+    removeImagesByUrl(editTracking.current.uploads);
+    startEditTracking();
     setIsCreating(false);
     setEditingId(null);
     setEditTitle('');
@@ -103,6 +122,13 @@ const Log = () => {
 
   const handleSave = async () => {
     if (!editTitle.trim() && !editContent.trim()) return;
+
+    // Once saved, files the entry no longer references can go
+    const cleanUpAfterSave = () => {
+      const { images, uploads } = editTracking.current;
+      removeImagesByUrl(imagesNoLongerUsed([...images, ...uploads], editImages));
+      startEditTracking();
+    };
 
     const logData = {
       user_id: session.user.id,
@@ -124,6 +150,7 @@ const Log = () => {
         alert('Failed to record log entry.');
       } else {
         setLogs([data, ...logs]);
+        cleanUpAfterSave();
         setIsCreating(false);
       }
     } else if (editingId) {
@@ -139,6 +166,7 @@ const Log = () => {
         setLogs(
           logs.map((l) => (l.id === editingId ? { ...l, ...logData } : l)),
         );
+        cleanUpAfterSave();
         setEditingId(null);
       }
     }
@@ -151,6 +179,7 @@ const Log = () => {
     if (error) {
       console.error('Error deleting log:', error);
     } else {
+      removeImagesByUrl(logs.find((l) => l.id === id)?.images || []);
       setLogs(logs.filter((l) => l.id !== id));
     }
   };
@@ -164,14 +193,30 @@ const Log = () => {
     // Use a temp ID for new creates if needed, or just generic folder
     const folderId = editingId || 'temp';
 
+    const session = editSession.current;
     const { urls: newImageUrls, errors } = await uploadImages(files, `logs/${folderId}`);
+    if (session !== editSession.current) {
+      // The edit ended while uploading; nothing references these files
+      removeImagesByUrl(newImageUrls);
+      setUploading(false);
+      return;
+    }
     alertUploadErrors(errors);
+    editTracking.current.uploads.push(...newImageUrls);
 
     setEditImages((prev) => [...prev, ...newImageUrls]);
     setUploading(false);
   };
 
   const removeImage = (index) => {
+    // Uploaded during this edit, so nothing saved uses it: delete it now.
+    // Saved images wait for save, so cancel can still restore them.
+    const url = editImages[index];
+    const { uploads } = editTracking.current;
+    if (uploads.includes(url)) {
+      editTracking.current.uploads = uploads.filter((u) => u !== url);
+      removeImagesByUrl([url]);
+    }
     setEditImages((prev) => prev.filter((_, i) => i !== index));
   };
 

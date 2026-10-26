@@ -9,13 +9,25 @@ Branch: `fix/security-and-cleanup`
 
 - [x] **Storage ownership**: uploads go to `<user_id>/<folder>/...` via `src/lib/storage.js`; storage RLS scoped to owner (`supabase_rls_policies.sql`). _2026-10-22_
   - [x] **Ran the storage section of `supabase_rls_policies.sql` in the Supabase SQL editor.** Also dropped two dashboard-created bucket-wide policies (`Allow authenticated uploads`, `Allow authenticated update/delete`) that bypassed per-user RLS; `pg_policies` now lists only the four `Users can … own images` policies. _2026-10-23, PR #7_
-  - [ ] Smoke-test upload + delete on the live site as a normal user.
+  - [x] Smoke-test upload + delete on the live site as a normal user. _2026-10-23_
 - [x] **Dossier autosave**: debounced (700 ms) and flushed on close. _2026-10-22_
 - [x] **npm audit**: 0 vulnerabilities. _2026-10-22_
 - [x] **Lint**: 0 errors / 0 warnings. Also fixed along the way: Library category fetch race, Calendar month navigation, date picker month-overflow on the 31st, realtime subscription filtered to current user. _2026-10-22_
 
 ## 📋 Next — Known issues & cleanup
 
+- [x] **Delete image files when they're removed** (previously only Library did). _2026-10-24, branch `fix/storage-image-cleanup`_
+  - [x] Tasks: removed images deleted after autosave succeeds; deleting a task deletes its and its subtasks' images; uploads finishing after the dossier closes are discarded
+  - [x] Captain's Log: removed images deleted on save, uploads discarded on cancel, entry delete removes its images
+  - [x] Personnel: replaced photo deleted on save, unsaved uploads discarded on cancel, record delete removes the photo
+  - [x] `removeImagesByUrl` alerts when storage skips files (RLS) or fails
+  - [x] `supabase_orphaned_images.sql`: lists unreferenced files (SQL can't delete storage objects; delete via dashboard)
+  - [x] Tasks: `parent_id` FK had no `ON DELETE CASCADE`, so deleting a parent task failed (silently). Added `supabase_schema_tasks.sql`; delete failures now alert. _2026-10-25_
+  - [x] Ran `supabase_schema_tasks.sql` in the Supabase SQL editor _2026-10-25_
+  - [x] Verified on the PR #9 deploy preview: task + subtask delete, Log, Library, Personnel _2026-10-25_
+  - [x] Log + Library: removing an image uploaded during the current edit now deletes it immediately (before, it waited for save/cancel). Saved images still wait for save so cancel can restore them. _2026-10-25_
+  - [ ] Run the orphan report once to clear out pre-fix leftovers
+  - [ ] Optional: Admin button that deletes the current user's orphans via an RPC + Storage API
 - [ ] **Decide: public vs private images.** `task-images` bucket is public; anyone with a URL can view. Option: private bucket + `createSignedUrl` (requires storing paths instead of URLs).
 - [ ] **Schema in repo**: no SQL for `tasks`, `notes`, `library_items`. Consolidate into `supabase/migrations/`. `supabase_schema_personnel.sql` and `supabase_rls_policies.sql` overlap on `task_personnel` policies.
 - [x] **Stardate integration**: all displayed dates go through `formatDateForDisplay(value, useStardateEnabled())`. _2026-10-22, branch `feat/stardate-integration`_
