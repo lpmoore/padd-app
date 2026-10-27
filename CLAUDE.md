@@ -6,6 +6,8 @@ PADD is a Star Trek LCARS-themed personal organizer: tasks (nested, drag-and-dro
 
 **`PLAN.md` is the tracker.** Read it at the start of a session. After every fix or feature, update it: check the item off with the date, move finished work to **Done**, and add anything new you discover to **Next** or **Later**.
 
+**`RISKS.md` is the risk register.** Update it in any PR that adds, changes or closes a security/privacy/legal risk, and call out open High risks in bold in the PR description.
+
 ## Commands
 
 - `npm run dev`: Vite dev server

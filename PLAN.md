@@ -16,6 +16,10 @@ Branch: `fix/security-and-cleanup`
 
 ## 📋 Next — Known issues & cleanup
 
+- [ ] **Risk register** (`RISKS.md`): created 2026-10-27. Open High risks: public images (R1), no age gate/moderation before social features (R2), no security headers (R3), live DB unverified vs repo (R4).
+  - [ ] Run the R4 verification query in the Supabase SQL editor and report the result
+  - [ ] Add Netlify security headers + CSP (R3)
+
 - [x] **Delete image files when they're removed** (previously only Library did). _2026-10-24, branch `fix/storage-image-cleanup`_
   - [x] Tasks: removed images deleted after autosave succeeds; deleting a task deletes its and its subtasks' images; uploads finishing after the dossier closes are discarded
   - [x] Captain's Log: removed images deleted on save, uploads discarded on cancel, entry delete removes its images
