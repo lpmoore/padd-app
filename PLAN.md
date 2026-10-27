@@ -39,7 +39,7 @@ Branch: `fix/security-and-cleanup`
   - [ ] Optional: date picker popup month title and Calendar task times still use Earth format
 - [ ] **Subtask dates**: marked "needs regression fix" previously; verify.
 - [x] **Replace `alert()` / `confirm()`** (23 call sites) with an LCARS toast/dialog: `notify()` / `confirmAction()` from `src/lib/notify.js`, rendered by `NotificationHost`. _2026-10-27, branch `feat/lcars-toast-dialog`_
-  - [ ] Visual check on the deploy preview (toast/dialog look and mobile layout were not seen in a browser)
+  - [x] Visual check in headless Chromium at desktop (1280x800) and phone (390x844) widths: dialog (focus starts on CANCEL for delete), error toast, no page errors. _2026-10-27_
 - [x] **Tests**: Vitest added; 20 tests for `stardate.js`, `dateUtils.js`, `storage.js`. Found and fixed a DST bug: the first hour after midnight showed the previous day's Stardate. _2026-10-22, branch `chore/tests-and-housekeeping`_
 - [x] **Component tests**: Testing Library + jsdom added; 10 tests for Dossier autosave/image cleanup and 10 for Library edit/cancel/save/delete image handling. _2026-10-27, branch `test/component-tests`_
   - [ ] Next component tests: Log and Personnel image flows, Tasks delete cascade
