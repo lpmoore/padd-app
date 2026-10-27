@@ -430,7 +430,7 @@ const Library = () => {
                         {selectedItem.images && selectedItem.images.length > 0 && (
                             <div className="library-gallery">
                                 {selectedItem.images.map((img, idx) => (
-                                    <div key={idx} className="library-image-view" style={{backgroundImage:`url(${img})`}} onClick={() => window.open(img, '_blank')}></div>
+                                    <div key={idx} className="library-image-view" style={{backgroundImage:`url(${img})`}} onClick={() => window.open(img, '_blank', 'noopener,noreferrer')}></div>
                                 ))}
                             </div>
                         )}

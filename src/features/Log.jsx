@@ -376,7 +376,7 @@ const Log = () => {
                     key={idx}
                     className='log-image-thumb'
                     style={{ backgroundImage: `url(${img})` }}
-                    onClick={() => window.open(img, '_blank')}
+                    onClick={() => window.open(img, '_blank', 'noopener,noreferrer')}
                   />
                 ))}
               </div>

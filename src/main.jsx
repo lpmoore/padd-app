@@ -1,3 +1,5 @@
+import '@fontsource/antonio/latin-400.css';
+import '@fontsource/antonio/latin-700.css';
 import './index.css';
 
 import App from './App.jsx';

@@ -18,7 +18,8 @@ Branch: `fix/security-and-cleanup`
 
 - [ ] **Risk register** (`RISKS.md`): created 2026-10-27. Open High risks: public images (R1), no age gate/moderation before social features (R2), no security headers (R3), live DB unverified vs repo (R4).
   - [ ] Run the R4 verification query in the Supabase SQL editor and report the result
-  - [ ] Add Netlify security headers + CSP (R3)
+  - [x] Add Netlify security headers + CSP (R3), self-host the font, cache hashed assets forever, `noopener` on `window.open`, fix zod audit finding. Perf: render-blocking Google Fonts stylesheet replaced by self-hosted Antonio; hashed assets cached 1 year. Build: JS 476.71 kB / 140.58 kB gzip, CSS 34.70 kB. _2026-10-27, branch `feat/security-headers`_
+    - [ ] Confirm headers on the Netlify deploy preview (`curl -I` or browser dev tools), and that no CSP errors appear in the console while using every tab
 
 - [x] **Delete image files when they're removed** (previously only Library did). _2026-10-24, branch `fix/storage-image-cleanup`_
   - [x] Tasks: removed images deleted after autosave succeeds; deleting a task deletes its and its subtasks' images; uploads finishing after the dossier closes are discarded
