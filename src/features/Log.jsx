@@ -12,6 +12,7 @@ import {
   uploadImages,
 } from '../lib/storage';
 import { useSettings } from '../contexts/settingsContextValue';
+import { confirmAction, notify } from '../lib/notify';
 
 const pickRandomIndex = (length) => Math.floor(Math.random() * length);
 
@@ -147,7 +148,7 @@ const Log = () => {
 
       if (error) {
         console.error('Error creating log:', error);
-        alert('Failed to record log entry.');
+        notify('Failed to record log entry.', { type: 'error' });
       } else {
         setLogs([data, ...logs]);
         cleanUpAfterSave();
@@ -161,7 +162,7 @@ const Log = () => {
 
       if (error) {
         console.error('Error updating log:', error);
-        alert('Failed to update log entry.');
+        notify('Failed to update log entry.', { type: 'error' });
       } else {
         setLogs(
           logs.map((l) => (l.id === editingId ? { ...l, ...logData } : l)),
@@ -173,7 +174,7 @@ const Log = () => {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm('Are you sure you want to purge this log entry?')) return;
+    if (!(await confirmAction('Are you sure you want to purge this log entry?', { title: 'PURGE LOG ENTRY', confirmLabel: 'PURGE', danger: true }))) return;
 
     const { error } = await supabase.from('notes').delete().eq('id', id);
     if (error) {

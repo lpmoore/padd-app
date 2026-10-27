@@ -3,6 +3,7 @@ import { supabase } from '../../lib/supabase';
 import { imagesNoLongerUsed, removeImagesByUrl, uploadImage } from '../../lib/storage';
 import LCARSButton from '../../components/LCARSButton';
 import './PersonnelManager.css';
+import { confirmAction, notify } from '../../lib/notify';
 
 const INITIAL_CREW = [
     { name: 'BECKETT MARINER', rank: 'ENSIGN', birthplace: 'Earth', education: 'Starfleet Academy', expertise: 'Command / Ops', bio: 'Extremely capable but insubordinate. Daughter of Captain Freeman.' },
@@ -55,7 +56,7 @@ const PersonnelManager = () => {
         }
 
         if (error) {
-            alert('Error saving personnel record: ' + error.message);
+            notify('Error saving personnel record: ' + error.message, { type: 'error' });
             return false;
         } else {
             fetchPersonnel();
@@ -71,12 +72,12 @@ const PersonnelManager = () => {
     };
 
     const handleDelete = async (id) => {
-        if (!confirm('DELETE PERSONNEL RECORD?')) return;
+        if (!(await confirmAction('DELETE PERSONNEL RECORD?', { title: 'DELETE RECORD', confirmLabel: 'DELETE', danger: true }))) return;
         
         const savedPhoto = personnel.find(p => p.id === id)?.image_url;
         const { error } = await supabase.from('personnel').delete().eq('id', id);
         if (error) {
-            alert('Error deleting: ' + error.message);
+            notify('Error deleting: ' + error.message, { type: 'error' });
         } else {
             if (savedPhoto) removeImagesByUrl([savedPhoto]);
             fetchPersonnel();
@@ -84,14 +85,14 @@ const PersonnelManager = () => {
     };
 
     const handleSeedPersonnel = async () => {
-        if (!confirm('INITIALIZE CREW MANIFEST WITH DEMO DATA?')) return;
+        if (!(await confirmAction('INITIALIZE CREW MANIFEST WITH DEMO DATA?', { title: 'DEMO DATA' }))) return;
         setLoading(true);
         const user = (await supabase.auth.getUser()).data.user;
         
         const rows = INITIAL_CREW.map(p => ({ ...p, user_id: user.id }));
         const { error } = await supabase.from('personnel').insert(rows);
         
-        if (error) alert('Seed failed: ' + error.message);
+        if (error) notify('Seed failed: ' + error.message, { type: 'error' });
         else fetchPersonnel();
         setLoading(false);
     };
@@ -221,7 +222,7 @@ function PersonnelEditor({ person, onSave, onCancel, onDelete }) {
             uploads.current.push(publicUrl);
             handleChange('image_url', publicUrl);
         } catch (error) {
-            alert('Upload failed: ' + error.message);
+            notify('Upload failed: ' + error.message, { type: 'error' });
         }
         setUploading(false);
     };

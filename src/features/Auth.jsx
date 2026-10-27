@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabase';
 import LCARSButton from '../components/LCARSButton';
+import { notify } from '../lib/notify';
 
 const Auth = () => {
     const [loading, setLoading] = useState(false);
@@ -16,13 +17,13 @@ const Auth = () => {
             if (mode === 'SIGNUP') {
                 const { error } = await supabase.auth.signUp({ email, password });
                 if (error) throw error;
-                alert('Success! Check your email for the confirmation link.');
+                notify('Check your email for the confirmation link.', { type: 'success', title: 'ACCOUNT CREATED' });
             } else {
                 const { error } = await supabase.auth.signInWithPassword({ email, password });
                 if (error) throw error;
             }
         } catch (error) {
-            alert(error.error_description || error.message);
+            notify(error.error_description || error.message, { type: 'error', title: 'ACCESS DENIED' });
         } finally {
             setLoading(false);
         }

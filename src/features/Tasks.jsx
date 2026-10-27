@@ -23,6 +23,7 @@ import TaskItem from './TaskItem';
 import { formatDateForDisplay } from '../utils/dateUtils';
 import useLCARSSound from '../hooks/useLCARSSound';
 import { useStardateEnabled } from '../contexts/settingsContextValue';
+import { confirmAction } from '../lib/notify';
 
 const INITIAL_TASKS = [
   {
@@ -142,8 +143,8 @@ const Tasks = ({
   };
 
   // Custom Seed Function for Demo
-  const handleSeedTasks = () => {
-    if (!confirm('INITIALIZE TASK PROTOCOLS WITH DEMO DATA?')) return;
+  const handleSeedTasks = async () => {
+    if (!(await confirmAction('INITIALIZE TASK PROTOCOLS WITH DEMO DATA?', { title: 'DEMO DATA' }))) return;
     INITIAL_TASKS.forEach((t) => {
       onAddTask(t.title, null, t.date);
     });

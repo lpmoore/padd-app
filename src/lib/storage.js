@@ -1,3 +1,4 @@
+import { notify } from './notify';
 import { supabase } from './supabase';
 
 export const IMAGE_BUCKET = 'task-images';
@@ -72,8 +73,9 @@ export const removeImagesByUrl = async (urls) => {
   const removed = error ? 0 : (data?.length ?? 0);
   if (removed < paths.length) {
     console.error('Error deleting images from storage:', error ?? { paths, removed: data });
-    alert(
-      `IMAGE DELETE FAILED\n\n${paths.length - removed} of ${paths.length} image file(s) could not be removed from storage.`,
+    notify(
+      `${paths.length - removed} of ${paths.length} image file(s) could not be removed from storage.`,
+      { type: 'error', title: 'IMAGE DELETE FAILED' },
     );
   }
 };
@@ -97,5 +99,5 @@ export const uploadImages = async (files, folder) => {
 };
 
 export const alertUploadErrors = (errors) => {
-  if (errors.length > 0) alert(`IMAGE UPLOAD FAILED\n\n${errors.join('\n')}`);
+  if (errors.length > 0) notify(errors.join('\n'), { type: 'error', title: 'IMAGE UPLOAD FAILED' });
 };
