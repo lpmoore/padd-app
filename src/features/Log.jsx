@@ -8,10 +8,12 @@ import { supabase } from '../lib/supabase';
 import {
   alertUploadErrors,
   imagesNoLongerUsed,
+  openStoredImage,
   removeImagesByUrl,
   uploadImages,
 } from '../lib/storage';
 import { useSettings } from '../contexts/settingsContextValue';
+import { StoredBackground } from '../components/StoredImage';
 
 const pickRandomIndex = (length) => Math.floor(Math.random() * length);
 
@@ -280,10 +282,10 @@ const Log = () => {
           {/* Image Previews */}
           <div className='log-images'>
             {editImages.map((img, idx) => (
-              <div
+              <StoredBackground
                 key={idx}
                 className='log-image-thumb'
-                style={{ backgroundImage: `url(${img})` }}
+                value={img}
               >
                 <div
                   style={{
@@ -300,7 +302,7 @@ const Log = () => {
                 >
                   X
                 </div>
-              </div>
+              </StoredBackground>
             ))}
           </div>
 
@@ -372,11 +374,11 @@ const Log = () => {
             {log.images && log.images.length > 0 && (
               <div className='log-images'>
                 {log.images.map((img, idx) => (
-                  <div
+                  <StoredBackground
                     key={idx}
                     className='log-image-thumb'
-                    style={{ backgroundImage: `url(${img})` }}
-                    onClick={() => window.open(img, '_blank', 'noopener,noreferrer')}
+                    value={img}
+                    onClick={() => openStoredImage(img)}
                   />
                 ))}
               </div>

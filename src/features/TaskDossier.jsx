@@ -5,6 +5,7 @@ import LCARSButton from '../components/LCARSButton';
 import './TaskDossier.css';
 import { formatDateForDisplay } from '../utils/dateUtils';
 import { useStardateEnabled } from '../contexts/settingsContextValue';
+import { StoredBackground, StoredImg } from '../components/StoredImage';
 
 const AUTOSAVE_DELAY_MS = 700;
 
@@ -202,12 +203,12 @@ const TaskDossier = ({ task, onClose, onUpdate, initialTab = 'PROTOCOL' }) => {
                              <div className="personnel-grid">
                                 {assignedPersonnel.map(p => (
                                     <div key={p.id} className="personnel-card" onClick={() => setActivePerson(p)}>
-                                        <div 
+                                        <StoredBackground 
                                             className="personnel-avatar-placeholder"
-                                            style={p.image_url ? { backgroundImage: `url(${p.image_url})` } : {}}
+                                            value={p.image_url}
                                         >
                                             {!p.image_url && <span style={{fontSize: '3rem'}}>?</span>}
-                                        </div>
+                                        </StoredBackground>
                                         <div className="personnel-card-info">
                                             <div className="personnel-name">{p.name || 'UNKNOWN'}</div>
                                             <div className="personnel-role">{p.rank || 'UNASSIGNED'}</div>
@@ -226,14 +227,14 @@ const TaskDossier = ({ task, onClose, onUpdate, initialTab = 'PROTOCOL' }) => {
                         <>
                             <div className="visuals-grid">
                                 {images.map((img, idx) => (
-                                    <div key={idx} className="visual-item" style={{ backgroundImage: `url(${img})` }} onClick={() => setActiveImageIndex(idx)}>
+                                    <StoredBackground key={idx} className="visual-item" value={img} onClick={() => setActiveImageIndex(idx)}>
                                          <div 
                                             style={{ position: 'absolute', top: 0, right: 0, background: 'black', cursor: 'pointer', padding: '5px', zIndex: 5 }} 
                                             onClick={(e) => { e.stopPropagation(); setImages(images.filter((_, i) => i !== idx)); }}
                                         >
                                             X
                                         </div>
-                                    </div>
+                                    </StoredBackground>
                                 ))}
                                 <div className="visual-add-btn" onClick={handleAddImageClick}>
                                     <span>+ UPLOAD VISUAL</span>
@@ -252,17 +253,16 @@ const TaskDossier = ({ task, onClose, onUpdate, initialTab = 'PROTOCOL' }) => {
                              <p style={{color:'var(--lcars-blue)', fontSize: '1.8rem'}}>{activePerson.rank}</p>
                              <hr style={{borderColor:'var(--lcars-tan)'}}/>
                              <div style={{display:'flex', gap:'30px', marginTop:'20px', alignItems: 'flex-start'}}>
-                                <div style={{
+                                <StoredBackground value={activePerson.image_url} style={{
                                     width:'300px', 
                                     height:'400px', 
                                     background:'#111', 
-                                    backgroundImage: `url(${activePerson.image_url})`, 
                                     backgroundSize:'contain', 
                                     backgroundRepeat: 'no-repeat',
                                     backgroundPosition: 'center',
                                     border: '1px solid var(--lcars-blue)',
                                     flexShrink: 0
-                                }}></div>
+                                }} />
                                 <div style={{
                                     flex:1, 
                                     color:'var(--lcars-tan)', 
@@ -303,16 +303,15 @@ const TaskDossier = ({ task, onClose, onUpdate, initialTab = 'PROTOCOL' }) => {
                                                 style={{width:'25px', height:'25px', flexShrink: 0, cursor: 'pointer'}}
                                              />
                                              {/* Thumbnail */}
-                                             <div style={{
+                                             <StoredBackground value={person.image_url} style={{
                                                  width: '50px', 
                                                  height: '50px', 
                                                  background: '#222', 
-                                                 backgroundImage: `url(${person.image_url})`, 
                                                  backgroundSize: 'cover', 
                                                  backgroundPosition: 'center',
                                                  border: '1px solid var(--lcars-tan)',
                                                  flexShrink: 0
-                                             }}></div>
+                                             }} />
 
                                              <div style={{fontWeight:'bold', color: isAssigned ? 'var(--lcars-orange)' : 'var(--lcars-gray)', flex: 1}}>
                                                  {person.name} <span style={{fontWeight:'normal', fontSize:'0.8em', color: 'var(--lcars-blue)'}}>({person.rank})</span>
@@ -332,7 +331,7 @@ const TaskDossier = ({ task, onClose, onUpdate, initialTab = 'PROTOCOL' }) => {
                  {activeImageIndex !== null && (
                     <div className="lightbox-overlay" onClick={() => setActiveImageIndex(null)}>
                         <div className="lightbox-content" onClick={e => e.stopPropagation()}>
-                             <img src={images[activeImageIndex]} className="lightbox-image" alt="Visual" />
+                             <StoredImg value={images[activeImageIndex]} className="lightbox-image" alt="Visual" />
                         </div>
                     </div>
                 )}
