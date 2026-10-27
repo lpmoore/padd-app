@@ -14,7 +14,7 @@ PADD is a Star Trek LCARS-themed personal organizer: tasks (nested, drag-and-dro
 - `npm run build`: production build
 - `npm run chat`: `scripts/chat-local.js` helper
 
-Tests live next to the code (`*.test.js`) and cover pure helpers (`src/utils/`, `src/lib/storage.js`). There are no component tests yet. Verify with tests + lint + build, and run the app for UI changes.
+Tests live next to the code. Pure helpers (`src/utils/`, `src/lib/storage.js`) are `*.test.js` and run in Node. Component tests are `*.test.jsx`, start with `// @vitest-environment jsdom`, and use Testing Library; mock `../lib/supabase` with `createFakeSupabase` from `src/test/fakeSupabase.js` and mock `../hooks/useLCARSSound` (the real hook needs a provider). Current coverage: TaskDossier autosave/images and Library edit/cancel/save/delete. Verify with tests + lint + build, and run the app for UI changes.
 
 **Build gotcha:** without Supabase env vars, `supabase` is `null` and Vite tree-shakes nearly the whole app away, so `npm run build` "passes" without compiling most code. To verify a real build, pass placeholders:
 `VITE_SUPABASE_URL=https://placeholder.supabase.co VITE_SUPABASE_ANON_KEY=placeholder npx vite build --outDir <tmp dir>` (expect a ~470 KB JS bundle, not ~200 KB).
