@@ -46,9 +46,12 @@ Branch: `fix/security-and-cleanup`
   - [x] Calendar month header + day detail header (no longer mislabelled "STARDATE")
   - [ ] Optional: date picker popup month title and Calendar task times still use Earth format
 - [ ] **Subtask dates**: marked "needs regression fix" previously; verify.
-- [ ] **Replace `alert()` / `confirm()`** (~12 call sites) with an LCARS toast/dialog component.
+- [x] **Replace `alert()` / `confirm()`** (23 call sites) with an LCARS toast/dialog: `notify()` / `confirmAction()` from `src/lib/notify.js`, rendered by `NotificationHost`. _2026-10-27, branch `feat/lcars-toast-dialog`_
+  - [x] Visual check in headless Chromium at desktop (1280x800) and phone (390x844) widths: dialog (focus starts on CANCEL for delete), error toast, no page errors. _2026-10-27_
 - [x] **Tests**: Vitest added; 20 tests for `stardate.js`, `dateUtils.js`, `storage.js`. Found and fixed a DST bug: the first hour after midnight showed the previous day's Stardate. _2026-10-22, branch `chore/tests-and-housekeeping`_
-- [ ] **Component tests**: none yet (Testing Library + jsdom) — start with Dossier autosave and Library edit/cancel flows.
+- [x] **Component tests**: Testing Library + jsdom added; 10 tests for Dossier autosave/image cleanup and 10 for Library edit/cancel/save/delete image handling. _2026-10-27, branch `test/component-tests`_
+  - [ ] Next component tests: Log and Personnel image flows, Tasks delete cascade
+  - [ ] Once icon buttons / image thumbnails get accessible labels (see Accessibility), switch the thumbnail queries from CSS classes to roles
 - [ ] **Stardate accuracy** (optional): current formula isn't TNG-canon (2364 ≈ 41000).
 - [ ] **Accessibility**: labels on icon buttons, keyboard support for date picker / dossier.
 - [x] **Housekeeping**: real README; `debug_db.cjs` → `scripts/debug-db.cjs` with a warning header; removed dead `RootDroppable`, no-op drag handlers, and hidden "HOLD SHIFT TO NEST" label in `Tasks.jsx`. _2026-10-22_
@@ -75,6 +78,10 @@ Roughly ordered by value for effort.
 9. [ ] **Voice commands**: Web Speech API dictation for Logs and Tasks.
 10. [ ] **Offline mode (PWA)** with background sync.
 11. [ ] **Real-time collaboration** across crew members.
+
+## 📏 Performance baselines
+
+Real build (with placeholder env vars, see CLAUDE.md): **476.66 kB JS / 140.56 kB gzip, 34.34 kB CSS** (2026-10-27, before any optimization work). After the toast/dialog PR: 480.34 kB JS / 141.69 kB gzip, 36.67 kB CSS. Keep new PRs at or below this unless a feature justifies it, and note the size change in the PR.
 
 ## ✅ Done
 

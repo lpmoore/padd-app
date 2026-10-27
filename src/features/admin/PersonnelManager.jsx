@@ -3,6 +3,8 @@ import { supabase } from '../../lib/supabase';
 import { imagesNoLongerUsed, removeImagesByUrl, uploadImage } from '../../lib/storage';
 import LCARSButton from '../../components/LCARSButton';
 import './PersonnelManager.css';
+import { confirmAction, notify } from '../../lib/notify';
+import { StoredBackground } from '../../components/StoredImage';
 
 const INITIAL_CREW = [
     { name: 'BECKETT MARINER', rank: 'ENSIGN', birthplace: 'Earth', education: 'Starfleet Academy', expertise: 'Command / Ops', bio: 'Extremely capable but insubordinate. Daughter of Captain Freeman.' },
@@ -55,7 +57,7 @@ const PersonnelManager = () => {
         }
 
         if (error) {
-            alert('Error saving personnel record: ' + error.message);
+            notify('Error saving personnel record: ' + error.message, { type: 'error' });
             return false;
         } else {
             fetchPersonnel();
@@ -71,12 +73,12 @@ const PersonnelManager = () => {
     };
 
     const handleDelete = async (id) => {
-        if (!confirm('DELETE PERSONNEL RECORD?')) return;
+        if (!(await confirmAction('DELETE PERSONNEL RECORD?', { title: 'DELETE RECORD', confirmLabel: 'DELETE', danger: true }))) return;
         
         const savedPhoto = personnel.find(p => p.id === id)?.image_url;
         const { error } = await supabase.from('personnel').delete().eq('id', id);
         if (error) {
-            alert('Error deleting: ' + error.message);
+            notify('Error deleting: ' + error.message, { type: 'error' });
         } else {
             if (savedPhoto) removeImagesByUrl([savedPhoto]);
             fetchPersonnel();
@@ -84,14 +86,14 @@ const PersonnelManager = () => {
     };
 
     const handleSeedPersonnel = async () => {
-        if (!confirm('INITIALIZE CREW MANIFEST WITH DEMO DATA?')) return;
+        if (!(await confirmAction('INITIALIZE CREW MANIFEST WITH DEMO DATA?', { title: 'DEMO DATA' }))) return;
         setLoading(true);
         const user = (await supabase.auth.getUser()).data.user;
         
         const rows = INITIAL_CREW.map(p => ({ ...p, user_id: user.id }));
         const { error } = await supabase.from('personnel').insert(rows);
         
-        if (error) alert('Seed failed: ' + error.message);
+        if (error) notify('Seed failed: ' + error.message, { type: 'error' });
         else fetchPersonnel();
         setLoading(false);
     };
@@ -133,12 +135,9 @@ const PersonnelManager = () => {
 
                 {personnel.map(p => (
                     <div key={p.id} className="pm-card" onClick={() => setViewPerson(p)}>
-                        <div 
-                            className="pm-avatar"
-                            style={p.image_url ? { backgroundImage: `url(${p.image_url})` } : {}}
-                        >
+                        <StoredBackground className="pm-avatar" value={p.image_url}>
                             {!p.image_url && <span>?</span>}
-                        </div>
+                        </StoredBackground>
                         <div className="pm-info">
                             <div className="pm-name">{p.name || 'UNKNOWN'}</div>
                             <div className="pm-rank">{p.rank || 'UNASSIGNED'}</div>
@@ -213,15 +212,15 @@ function PersonnelEditor({ person, onSave, onCancel, onDelete }) {
 
         setUploading(true);
         try {
-            const publicUrl = await uploadImage(file, 'personnel');
+            const path = await uploadImage(file, 'personnel');
             if (!isOpen.current) {
-                removeImagesByUrl([publicUrl]);
+                removeImagesByUrl([path]);
                 return;
             }
-            uploads.current.push(publicUrl);
-            handleChange('image_url', publicUrl);
+            uploads.current.push(path);
+            handleChange('image_url', path);
         } catch (error) {
-            alert('Upload failed: ' + error.message);
+            notify('Upload failed: ' + error.message, { type: 'error' });
         }
         setUploading(false);
     };
@@ -260,13 +259,13 @@ function PersonnelEditor({ person, onSave, onCancel, onDelete }) {
                             
                             {/* Left Column: Image & Basic Info */}
                             <div className="pm-form-left">
-                            <div 
+                            <StoredBackground
                                 className="pm-image-upload"
-                                style={formData.image_url ? { backgroundImage: `url(${formData.image_url})` } : {}}
+                                value={formData.image_url}
                                 onClick={() => fileRef.current?.click()}
                             >
                                 {uploading ? 'UPLOADING...' : (!formData.image_url && 'UPLOAD PHOTO')}
-                            </div>
+                            </StoredBackground>
                             <input 
                                 type="file" 
                                 ref={fileRef} 
@@ -371,16 +370,16 @@ function PersonnelViewer({ person, onClose, onEdit }) {
                             
                             {/* Left Column: Image & Basic Info */}
                             <div className="pm-form-left">
-                            <div 
+                            <StoredBackground
                                 className="pm-image-upload"
+                                value={person.image_url}
                                 style={{ 
-                                    backgroundImage: person.image_url ? `url(${person.image_url})` : 'none',
                                     cursor: 'default',
                                     border: '2px solid var(--lcars-orange)'
                                 }}
                             >
                                 {!person.image_url && <span>NO IMAGE</span>}
-                            </div>
+                            </StoredBackground>
 
                             <div className="bio-input-group">
                                 <label className="bio-label">NAME</label>

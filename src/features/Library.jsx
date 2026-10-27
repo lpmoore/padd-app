@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
+import { confirmAction, notify } from '../lib/notify';
 import { alertUploadErrors, openStoredImage, removeImagesByUrl, uploadImages } from '../lib/storage';
 import LCARSButton from '../components/LCARSButton';
 import './Library.css';
@@ -104,7 +105,7 @@ const Library = () => {
 
 
     const handleSeedData = async () => {
-        if (!confirm('Populate database with default library data?')) return;
+        if (!(await confirmAction('Populate database with default library data?', { title: 'DEMO DATA' }))) return;
         setLoading(true);
         const user = (await supabase.auth.getUser()).data.user;
         
@@ -118,7 +119,7 @@ const Library = () => {
         }));
 
         const { error } = await supabase.from('library_items').insert(rows);
-        if (error) alert('Seed failed: ' + error.message);
+        if (error) notify('Seed failed: ' + error.message, { type: 'error' });
         else {
             await refreshCategories();
             fetchItemsForCategory(activeCategory);
@@ -188,7 +189,7 @@ const Library = () => {
         }
 
         if (error) {
-            alert('Error saving: ' + error.message);
+            notify('Error saving: ' + error.message, { type: 'error' });
         } else {
             // Only now that the record no longer references them, delete removed files
             await removeImagesByUrl(stagedRemovals);
@@ -207,14 +208,14 @@ const Library = () => {
 
     const handleDelete = async () => {
         if (!selectedItem) return;
-        if (window.confirm(`Delete record: ${selectedItem.title}?`)) {
+        if (await confirmAction(`Delete record: ${selectedItem.title}?`, { title: 'DELETE RECORD', confirmLabel: 'DELETE', danger: true })) {
             const { error } = await supabase
                 .from('library_items')
                 .delete()
                 .eq('id', selectedItem.id);
             
             if (error) {
-                alert('Error deleting: ' + error.message);
+                notify('Error deleting: ' + error.message, { type: 'error' });
             } else {
                 await removeImagesByUrl(selectedItem.images || []);
                 setSelectedItem(null);
@@ -273,8 +274,9 @@ const Library = () => {
 
     // Saved images are staged and only deleted from storage once the edit is saved.
     // Images uploaded during this edit aren't saved anywhere, so they're deleted now.
-    const handleDeleteSelectedImages = () => {
-        if (!window.confirm(`Remove ${imagesToDelete.length} selected image(s)? Takes effect when you save.`)) return;
+    const handleDeleteSelectedImages = async () => {
+        const confirmed = await confirmAction(`Remove ${imagesToDelete.length} selected image(s)? Takes effect when you save.`, { title: 'REMOVE IMAGES', confirmLabel: 'REMOVE', danger: true });
+        if (!confirmed) return;
 
         const remainingImages = (editFormData.images || []).filter(img => !imagesToDelete.includes(img));
         const unsaved = imagesToDelete.filter(img => editUploads.includes(img));
