@@ -33,7 +33,9 @@ Branch: `fix/security-and-cleanup`
   - [x] Log + Library: removing an image uploaded during the current edit now deletes it immediately (before, it waited for save/cancel). Saved images still wait for save so cancel can restore them. _2026-10-25_
   - [ ] Run the orphan report once to clear out pre-fix leftovers
   - [ ] Optional: Admin button that deletes the current user's orphans via an RPC + Storage API
-- [ ] **Decide: public vs private images.** `task-images` bucket is public; anyone with a URL can view. Option: private bucket + `createSignedUrl` (requires storing paths instead of URLs).
+- [x] **Private images** (approved 2026-10-27): records store storage paths; images show through batched, cached 1-hour signed links (`getImageUrl`, `useImageUrl`, `<StoredBackground>`/`<StoredImg>`); cache cleared on sign-out; old public URLs still render. `0002_private_images.sql` closes the bucket and rewrites old URLs to paths (tested on legacy-shaped data). Fixes R1 once run. _2026-10-27, branch `feat/private-images`_
+  - [ ] **You:** after the app deploys, run `0002_private_images.sql`, then spot-check images in all four tabs
+  - [ ] **Decide:** block pasted/dragged external image URLs (R7)? Then `img-src` can drop `https:`
 - [x] **Schema in repo**: `supabase/migrations/0001_baseline.sql` (tables, indexes, canonical RLS, storage policies), `supabase/verify_live.sql`, and RLS tests (`npm run test:db`) run against a scratch Postgres. Replaces the three old root-level SQL files; the orphan report moved to `supabase/reports/`. Fixes R5. _2026-10-27, branch `feat/db-migrations`_
   - [ ] **You:** run `supabase/verify_live.sql` in the Supabase SQL editor and send me the result (I'll reconcile column types before you run the migration)
   - [ ] **You:** run `supabase/migrations/0001_baseline.sql` once reconciled, then check the app (tasks, subtasks, assignments, uploads)

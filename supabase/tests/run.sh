@@ -28,3 +28,5 @@ for migration in "$here"/../migrations/*.sql; do
 done
 echo "== running RLS tests"
 psql_run -f "$here/rls_test.sql" 2>&1 | grep -E "ok |FAIL|PASSED|ERROR" 
+echo "== testing 0002 on legacy-shaped data"
+(cd "$here/../.." && psql_run -f supabase/tests/migration_0002_test.sql 2>&1 | grep -E "PASSED|ERROR|Assert|assert" || { echo "0002 migration test FAILED" >&2; exit 1; })

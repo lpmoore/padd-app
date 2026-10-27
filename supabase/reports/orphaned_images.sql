@@ -31,10 +31,15 @@ WITH referenced_urls AS (
     FROM public.personnel WHERE image_url IS NOT NULL
 ),
 referenced_paths AS (
-    -- Public URL: .../storage/v1/object/public/task-images/<path>
-    SELECT split_part(url, '/task-images/', 2) AS name
+    -- Older records: .../storage/v1/object/public/task-images/<path>
+    SELECT split_part(split_part(url, '/task-images/', 2), '?', 1) AS name
     FROM referenced_urls
     WHERE url LIKE '%/task-images/%'
+    UNION
+    -- Records saved since images went private (0002): the bare path
+    SELECT url
+    FROM referenced_urls
+    WHERE url !~ '^(https?|data|blob):'
 )
 SELECT
     o.name,
