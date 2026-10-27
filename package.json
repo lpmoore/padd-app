@@ -11,7 +11,8 @@
     "chat:local": "node scripts/chat-local.js",
     "chat": "npm run chat:local --",
     "test": "TZ=America/Los_Angeles vitest run",
-    "test:watch": "TZ=America/Los_Angeles vitest"
+    "test:watch": "TZ=America/Los_Angeles vitest",
+    "test:db": "bash supabase/tests/run.sh"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

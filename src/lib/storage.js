@@ -8,7 +8,7 @@ export const isSupportedImage = (file) => IMAGE_TYPE_PATTERN.test(file.type);
 /**
  * Uploads an image into the current user's folder of the shared bucket.
  * Paths are always `<user_id>/<folder>/<file>` so storage RLS can scope
- * access to the owner (see supabase_rls_policies.sql).
+ * access to the owner (see supabase/migrations/0001_baseline.sql).
  *
  * Throws on unsupported file types, when no user is signed in, or on
  * upload failure.
