@@ -10,7 +10,7 @@ Severity: **HIGH** = could expose user data or cause legal trouble; **MED** = re
 
 ## **OPEN RISKS THAT NEED YOUR ATTENTION**
 
-- **R1 (HIGH): Images are publicly readable.** The `task-images` bucket is public, so anyone with an image URL can view it, and URLs are stored in the database. *Plan: private bucket + signed URLs + a one-time migration (approved 2026-10-27).*
+- **R1 (HIGH): Images are publicly readable — until you run `0002_private_images.sql`.** The code for private images is in the PR (storage paths + signed links that expire after 1 hour), but the bucket stays public until you merge, deploy the app, and THEN run the migration. **Until then every existing image URL still works for anyone who has it.**
 - **R2 (HIGH): No age gate, terms, reporting or moderation.** Fine for a single-user organizer. **Not acceptable before any public feed, friends feed or messaging ships.** Needs: age confirmation at signup (and handling for under-13s, e.g. COPPA in the US), terms/privacy acceptance, report/block tools, content-safety scanning for uploads, and a legal review of your obligations as a platform. *No social feature will be released before these land.*
 - **R4 (HIGH, unverified): The live database may not match the repo.** Policies are applied by hand, so the live database can drift from the code. The public anon key is only safe if RLS is airtight. *Done in the repo: a tested baseline migration (`supabase/migrations/0001_baseline.sql`) and `supabase/verify_live.sql`. **Still needs you: run `verify_live.sql` in the Supabase SQL editor and send me the result**, then run the migration.
 
@@ -18,7 +18,7 @@ Severity: **HIGH** = could expose user data or cause legal trouble; **MED** = re
 
 | ID | Sev | Status | Risk | Mitigation / next step |
 |----|-----|--------|------|------------------------|
-| R1 | HIGH | Open, approved to fix | Public image bucket | Private bucket, store paths not URLs, signed URLs, migrate existing records |
+| R1 | HIGH | Fix ready in PR; open until `0002` is run | Public image bucket | Private bucket, store paths not URLs, signed URLs, migrate existing records |
 | R2 | HIGH | Open, blocks social features | No age gate, ToS, moderation, reporting, upload scanning | Build before any public/friends feed or messaging; legal review |
 | R4 | HIGH | Mitigation ready, needs you | Live DB policies may drift from repo | `0001_baseline.sql` (tested on a real Postgres, incl. upgrading from the old policies) + `verify_live.sql`; re-run the check periodically |
 | R5 | MED | Fix ready, closes when you run `0001_baseline.sql` | `task_personnel` INSERT policy checked the task's owner but not that `personnel_id` belongs to the same user (confirmed on the old policies in a test). Also: a task could be filed under another user's task. UUIDs are unguessable and reads are protected, so exploitation was hard, but it matters once cross-user features exist | Both ends must be yours, enforced in the migration and covered by `supabase/tests/rls_test.sql` |

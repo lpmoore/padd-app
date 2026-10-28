@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import { confirmAction, notifyError } from '../lib/notify';
-import { alertUploadErrors, removeImagesByUrl, uploadImages } from '../lib/storage';
+import { alertUploadErrors, openStoredImage, removeImagesByUrl, uploadImages } from '../lib/storage';
 import LCARSButton from '../components/LCARSButton';
 import './Library.css';
+import { StoredBackground } from '../components/StoredImage';
 
 // Keep static data for seeding purposes
 const INITIAL_DATA = [
@@ -443,7 +444,7 @@ const Library = () => {
                         {selectedItem.images && selectedItem.images.length > 0 && (
                             <div className="library-gallery">
                                 {selectedItem.images.map((img, idx) => (
-                                    <div key={idx} className="library-image-view" style={{backgroundImage:`url(${img})`}} onClick={() => window.open(img, '_blank', 'noopener,noreferrer')}></div>
+                                    <StoredBackground key={idx} className="library-image-view" value={img} onClick={() => openStoredImage(img)} />
                                 ))}
                             </div>
                         )}
@@ -572,11 +573,11 @@ const Library = () => {
                             </div>
                             <div className="note-visuals-grid">
                                 {(editFormData.images || []).map((img, idx) => (
-                                    <div 
+                                    <StoredBackground 
                                         key={idx} 
                                         className="note-visual-thumb" 
+                                        value={img}
                                         style={{
-                                            backgroundImage: `url(${img})`,
                                             border: imagesToDelete.includes(img) ? '3px solid var(--lcars-red)' : 'none',
                                             opacity: imagesToDelete.includes(img) ? 0.5 : 1,
                                             cursor: 'pointer'
@@ -588,7 +589,7 @@ const Library = () => {
                                                 X
                                             </div>
                                         )}
-                                    </div>
+                                    </StoredBackground>
                                 ))}
                                 <div className="note-visual-add" onClick={() => fileInputRef.current?.click()}>+</div>
                             </div>

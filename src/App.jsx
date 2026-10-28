@@ -11,7 +11,7 @@ import Log from './features/Log';
 import TaskDossier from './features/TaskDossier';
 import Tasks from './features/Tasks';
 import { formatDateForStorage } from './utils/dateUtils';
-import { removeImagesByUrl } from './lib/storage';
+import { clearImageUrlCache, removeImagesByUrl } from './lib/storage';
 import { notifyError } from './lib/notify';
 
 const INITIAL_NAV_ITEMS = [
@@ -66,7 +66,9 @@ function App() {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      // Signed image links belong to the user who requested them
+      if (event === 'SIGNED_OUT') clearImageUrlCache();
       setSession(session);
     });
 

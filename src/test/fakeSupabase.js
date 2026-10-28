@@ -27,9 +27,22 @@ export const createFakeSupabase = (resolve) => {
     return builder;
   });
 
+  // Signing works out of the box so components that show stored images render
+  const storage = {
+    from: vi.fn(() => ({
+      createSignedUrls: vi.fn(async (paths) => ({
+        data: paths.map((path) => ({ path, signedUrl: `https://signed.test/${path}?token=t`, error: null })),
+        error: null,
+      })),
+      upload: vi.fn().mockResolvedValue({ error: null }),
+      remove: vi.fn().mockResolvedValue({ data: [], error: null }),
+    })),
+  };
+
   return {
     queries,
     from,
+    storage,
     auth: {
       getSession: vi.fn().mockResolvedValue({ data: { session: { user: { id: 'user-1' } } } }),
       getUser: vi.fn().mockResolvedValue({ data: { user: { id: 'user-1' } } }),
