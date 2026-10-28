@@ -3,7 +3,7 @@ import '@fontsource/antonio/latin-700.css';
 import './index.css';
 
 import App from './App.jsx';
-import LCARSDialogHost from './components/LCARSDialogHost';
+import NotificationHost from './components/NotificationHost';
 import { SettingsProvider } from './contexts/SettingsContext';
 import { SoundProvider } from './contexts/SoundContext';
 import { StrictMode } from 'react';
@@ -14,7 +14,7 @@ createRoot(document.getElementById('root')).render(
     <SoundProvider>
       <SettingsProvider>
         <App />
-        <LCARSDialogHost />
+        <NotificationHost />
       </SettingsProvider>
     </SoundProvider>
   </StrictMode>,

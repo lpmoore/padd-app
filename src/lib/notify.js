@@ -29,6 +29,9 @@ export const notify = (message, { type = 'info', title } = {}) => {
   else nativeWindow().alert(title ? `${title}\n\n${message}` : message);
 };
 
+/** Shorthand for an error toast. */
+export const notifyError = (title, message) => notify(message, { type: 'error', title });
+
 /**
  * Asks the user to confirm an action. Resolves true (confirmed) or false
  * (cancelled, Escape, or clicking outside).

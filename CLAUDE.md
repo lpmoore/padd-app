@@ -29,7 +29,7 @@ Copy `.env.example` to `.env` and set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANO
 
 - `src/App.jsx`: session handling, tab routing (no router), and all task CRUD + realtime subscription. Tasks are fetched flat and built into a tree (`parent_id` → `subtasks`).
 - `src/features/`: one component (+ CSS) per tab: `Tasks`/`TaskItem`/`TaskDossier`, `Calendar`, `Log`, `Library`, `Admin` (→ `admin/PersonnelManager`, `Security`, `Settings`), `Auth`.
-- `src/components/`: LCARS primitives (`LCARSLayout`, `LCARSButton`, `LCARSDatePicker`, `LCARSDialogHost`).
+- `src/components/`: LCARS primitives (`LCARSLayout`, `LCARSButton`, `LCARSDatePicker`, `NotificationHost`).
 - `src/contexts/`: providers in `*Context.jsx`; the context object + hook live in `*ContextValue.js` (keeps Fast Refresh happy). `useSettings()` → `isStardateEnabled`; `useSoundSettings()` → sound toggle.
 - `src/lib/supabase.js`: client (null when env vars are missing). `src/lib/storage.js`: **all image uploads go through `uploadImage(file, folder)`**, and removed images are deleted with `removeImagesByUrl(urls)` (only after the record no longer references them; it alerts on failure).
 - `src/utils/dateUtils.js`: date conversions. Store UTC ISO (`formatDateForStorage`), edit as local `YYYY-MM-DDTHH:mm` (`formatDateForInput`), display with `formatDateForDisplay` / `formatLogDate` (Stardate-aware).
@@ -40,7 +40,6 @@ Copy `.env.example` to `.env` and set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANO
 - **Security**: every table has RLS scoped to `auth.uid() = user_id`; always set `user_id` on insert. Storage paths must start with the user's ID (`uploadImage` handles this); storage RLS enforces it.
 - Feature components fetch their own data from Supabase, except tasks, which are owned by `App.jsx` and passed down.
 - Declare fetch helpers (wrapped in `useCallback` when used in effects) **before** the effects that call them; the React Hooks lint rules flag the reverse.
-- **No `alert()` / `confirm()`**: use `notify` / `notifyError` (toasts) and `await confirmAction(...)` (modal) from `src/lib/dialogs.js`. They work from plain modules too; `LCARSDialogHost` (mounted in `main.jsx`) renders them. Pass `danger: true` for destructive confirms.
 - Styling is plain CSS per component using LCARS color variables (`--lcars-orange`, `--lcars-teal`, …) from `src/index.css`. UI text is UPPERCASE LCARS style.
 - **Never call `alert()` / `confirm()`.** Use `notify(message, { type: 'error' | 'success' | 'info', title })` and `await confirmAction(message, { title, confirmLabel, danger })` from `src/lib/notify.js`; `NotificationHost` (mounted in `main.jsx`) renders them. With no host mounted (unit tests) they fall back to the native dialogs. Use `danger: true` for destructive confirmations.
 - Dates displayed to the user should respect the Stardate setting.
