@@ -36,7 +36,10 @@ Branch: `fix/security-and-cleanup`
 - [x] **Legacy table policies**: `library_items` had three dashboard policies (`Enable read/insert/update …`) that let any signed-in account read and edit every user's records. Dropped them, plus owner-scoped duplicates on `notes`, `personnel`, `task_personnel`; `supabase_schema_personnel.sql` no longer creates duplicates. _2026-10-27, branch `fix/rls-legacy-policies`_
   - [x] Ran the drops in the Supabase SQL editor; counts now 4/4/4/4 and `task_personnel` 3. Only one account has ever existed, so nothing was exposed. _2026-10-27_
 - [ ] **Decide: public vs private images.** `task-images` bucket is public; anyone with a URL can view. Option: private bucket + `createSignedUrl` (requires storing paths instead of URLs).
-- [ ] **Schema in repo**: no SQL for `tasks`, `notes`, `library_items`. Consolidate into `supabase/migrations/`. `supabase_schema_personnel.sql` and `supabase_rls_policies.sql` overlap on `task_personnel` policies.
+- [x] **Schema in repo**: `supabase/migrations/0001_baseline.sql` (tables, indexes, canonical RLS, storage policies), `supabase/verify_live.sql`, and RLS tests (`npm run test:db`) run against a scratch Postgres. Replaces the three old root-level SQL files; the orphan report moved to `supabase/reports/`. Fixes R5. _2026-10-27, branch `feat/db-migrations`_
+  - [ ] **You:** run `supabase/verify_live.sql` in the Supabase SQL editor and send me the result (I'll reconcile column types before you run the migration)
+  - [ ] **You:** run `supabase/migrations/0001_baseline.sql` once reconciled, then check the app (tasks, subtasks, assignments, uploads)
+  - [ ] Run the RLS tests in CI (with the dependency/CI PR, R11)
 - [x] **Stardate integration**: all displayed dates go through `formatDateForDisplay(value, useStardateEnabled())`. _2026-10-22, branch `feat/stardate-integration`_
   - [x] Captain's Log
   - [x] Tasks header (removed the double date parse)

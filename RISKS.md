@@ -12,7 +12,7 @@ Severity: **HIGH** = could expose user data or cause legal trouble; **MED** = re
 
 - **R1 (HIGH): Images are publicly readable.** The `task-images` bucket is public, so anyone with an image URL can view it, and URLs are stored in the database. *Plan: private bucket + signed URLs + a one-time migration (approved 2026-10-27).*
 - **R2 (HIGH): No age gate, terms, reporting or moderation.** Fine for a single-user organizer. **Not acceptable before any public feed, friends feed or messaging ships.** Needs: age confirmation at signup (and handling for under-13s, e.g. COPPA in the US), terms/privacy acceptance, report/block tools, content-safety scanning for uploads, and a legal review of your obligations as a platform. *No social feature will be released before these land.*
-- **R4 (HIGH, unverified): The live database may not match the repo.** RLS policies are in `supabase_rls_policies.sql`, but they are applied by hand, and `CREATE TABLE` statements for `tasks`, `notes` and `library_items` are not in the repo. The public anon key is only safe if RLS is airtight. *Plan: migrations folder + a verification query you can run (see below).*
+- **R4 (HIGH, unverified): The live database may not match the repo.** Policies are applied by hand, so the live database can drift from the code. The public anon key is only safe if RLS is airtight. *Done in the repo: a tested baseline migration (`supabase/migrations/0001_baseline.sql`) and `supabase/verify_live.sql`. **Still needs you: run `verify_live.sql` in the Supabase SQL editor and send me the result**, then run the migration.
 
 ## Register
 
@@ -20,8 +20,8 @@ Severity: **HIGH** = could expose user data or cause legal trouble; **MED** = re
 |----|-----|--------|------|------------------------|
 | R1 | HIGH | Open, approved to fix | Public image bucket | Private bucket, store paths not URLs, signed URLs, migrate existing records |
 | R2 | HIGH | Open, blocks social features | No age gate, ToS, moderation, reporting, upload scanning | Build before any public/friends feed or messaging; legal review |
-| R4 | HIGH | Open, unverified | Live DB policies may drift from repo; schema missing | `supabase/migrations/`, verification query, periodic re-check |
-| R5 | MED | Open | `task_personnel` INSERT policy checks the task's owner but not that `personnel_id` belongs to the same user. UUIDs are unguessable and reads are protected, so exploitation is hard today, but it becomes serious once cross-user linking exists | Add `personnel_id IN (SELECT id FROM personnel WHERE user_id = auth.uid())` to the policy, in the migrations PR |
+| R4 | HIGH | Mitigation ready, needs you | Live DB policies may drift from repo | `0001_baseline.sql` (tested on a real Postgres, incl. upgrading from the old policies) + `verify_live.sql`; re-run the check periodically |
+| R5 | MED | Fix ready, closes when you run `0001_baseline.sql` | `task_personnel` INSERT policy checked the task's owner but not that `personnel_id` belongs to the same user (confirmed on the old policies in a test). Also: a task could be filed under another user's task. UUIDs are unguessable and reads are protected, so exploitation was hard, but it matters once cross-user features exist | Both ends must be yours, enforced in the migration and covered by `supabase/tests/rls_test.sql` |
 | R6 | MED | Open, unverified | Open email/password signup using Supabase defaults: password strength, email confirmation, rate limiting and CAPTCHA settings not confirmed; no MFA | Check Auth settings; require a longer minimum; add MFA (TOTP) |
 | R7 | MED | Open (CSP allows any https image until fixed) | Dragged-in images from other sites are saved as external URLs (or `data:` URLs). External URLs can track viewers and can disappear; they also bypass storage controls | Re-upload dropped images to our storage, or reject external URLs |
 | R8 | MED | Open | Private documents are not end-to-end encrypted, so the database/storage operator (and anyone who compromises the project) could read them | Add client-side encryption (WebCrypto) for documents marked "vault"; accept that server-side search won't see their contents |
@@ -31,20 +31,9 @@ Severity: **HIGH** = could expose user data or cause legal trouble; **MED** = re
 | R12 | LOW | Open | No audit log of sensitive actions (login, password change, sharing) | Add once sharing exists |
 | R13 | LOW | Mitigated | `scripts/debug-db.cjs` writes to the live DB with the configured credentials | Header warning added 2026-10-22; consider deleting it |
 
-## Verification query for R4 (run in the Supabase SQL editor)
+## Checking the live database (R4)
 
-Lists every table in `public` and whether RLS is on, plus how many policies it has. Any row with `rls_enabled = false` or `policies = 0` is a hole.
-
-```sql
-select c.relname as table_name,
-       c.relrowsecurity as rls_enabled,
-       (select count(*) from pg_policies p
-         where p.schemaname = 'public' and p.tablename = c.relname) as policies
-from pg_class c
-join pg_namespace n on n.oid = c.relnamespace
-where n.nspname = 'public' and c.relkind = 'r'
-order by c.relname;
-```
+Run `supabase/verify_live.sql` in the Supabase SQL editor and send the single result cell to Claude. It has no row data. The first thing to look at is `tables`: any entry with `rls_enabled: false` is a hole. The RLS tests (`npm run test:db`) prove the migration's policies on a scratch Postgres, but only this snapshot shows what the live database actually has.
 
 ## Closed risks
 

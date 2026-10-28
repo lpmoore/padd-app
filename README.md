@@ -28,10 +28,10 @@ npm run dev
 
 1. Create a Supabase project and copy its URL and anon key into `.env`.
 2. Create a public storage bucket named `task-images`.
-3. In the SQL editor, run `supabase_schema_personnel.sql` and then `supabase_rls_policies.sql`.
+3. In the SQL editor, run `supabase/migrations/0001_baseline.sql` (creates the tables, row-level security and storage policies; safe to re-run). Optionally run `supabase/verify_live.sql` afterwards to check the result.
    These are **not** applied automatically; re-run the relevant section whenever the files change.
 
-> The `tasks`, `notes` and `library_items` table definitions aren't in the repo yet (tracked in [PLAN.md](PLAN.md)).
+To test the database rules locally, see `supabase/tests/run.sh` (`npm run test:db`, needs `psql` and a scratch Postgres database).
 
 ## Scripts
 
