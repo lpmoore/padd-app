@@ -11,7 +11,9 @@ import Log from './features/Log';
 import TaskDossier from './features/TaskDossier';
 import Tasks from './features/Tasks';
 import { formatDateForStorage } from './utils/dateUtils';
+import { notifyError } from './lib/dialogs';
 import { removeImagesByUrl } from './lib/storage';
+import { notify } from './lib/notify';
 
 const INITIAL_NAV_ITEMS = [
   { id: 'CALENDAR', label: 'CALENDAR', color: 'var(--lcars-teal)' },
@@ -242,7 +244,7 @@ function App() {
     const { error } = await supabase.from('tasks').delete().eq('id', id);
     if (error) {
       console.error('Error deleting task:', error);
-      alert('Error deleting task: ' + error.message);
+      notifyError('DELETE FAILED', `Could not delete task: ${error.message}`);
     } else {
       fetchTasks();
       removeImagesByUrl(images);
