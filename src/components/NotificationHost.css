@@ -1,0 +1,139 @@
+/* LCARS-style toasts and confirmation dialogs (see NotificationHost.jsx) */
+
+.notify-toasts {
+  position: fixed;
+  right: 12px;
+  bottom: max(12px, env(safe-area-inset-bottom));
+  z-index: 4000; /* Above the dossier (2000-2100) and lightbox (3000) */
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: min(420px, calc(100vw - 24px));
+  pointer-events: none; /* only the toasts themselves take clicks */
+}
+
+.notify-toast {
+  --notify-color: var(--lcars-orange);
+  display: flex;
+  align-items: stretch;
+  background: #000;
+  border: 2px solid var(--notify-color);
+  border-radius: 22px 8px 8px 22px;
+  overflow: hidden;
+  pointer-events: auto;
+  font-family: var(--font-main);
+  animation: notify-in 0.18s ease-out;
+}
+
+.notify-toast.error { --notify-color: var(--lcars-red); }
+.notify-toast.success { --notify-color: var(--lcars-cyan); }
+
+.notify-toast-cap {
+  flex: 0 0 22px;
+  background: var(--notify-color);
+}
+
+.notify-toast-body {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 10px;
+}
+
+.notify-toast-title {
+  color: var(--notify-color);
+  font-weight: bold;
+  letter-spacing: 0.08em;
+  font-size: 0.95rem;
+}
+
+.notify-toast-message {
+  color: var(--lcars-ice-blue);
+  font-size: 1rem;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.notify-toast-close {
+  background: none;
+  border: none;
+  color: var(--notify-color);
+  font-size: 1.6rem;
+  padding: 0 12px;
+  cursor: pointer;
+}
+
+.notify-toast-close:hover { filter: brightness(1.3); }
+
+.notify-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 4100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.75);
+}
+
+.notify-dialog {
+  --notify-color: var(--lcars-orange);
+  width: min(480px, 100%);
+  background: #000;
+  border: 2px solid var(--notify-color);
+  border-radius: 28px 10px 28px 10px;
+  padding: 18px 22px;
+  font-family: var(--font-main);
+}
+
+.notify-dialog.danger { --notify-color: var(--lcars-red); }
+
+.notify-dialog-title {
+  color: var(--notify-color);
+  font-weight: bold;
+  font-size: 1.3rem;
+  letter-spacing: 0.08em;
+}
+
+.notify-dialog-message {
+  color: var(--lcars-ice-blue);
+  font-size: 1.15rem;
+  margin: 10px 0 18px;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.notify-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.notify-btn {
+  min-height: 44px; /* comfortable touch target */
+  padding: 0 20px;
+  border: none;
+  border-radius: 22px;
+  font-family: var(--font-main);
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #000;
+  cursor: pointer;
+}
+
+.notify-btn.cancel { background: var(--lcars-tan); }
+.notify-btn.confirm { background: var(--notify-color); }
+.notify-btn:hover { filter: brightness(1.2); }
+.notify-btn:focus-visible,
+.notify-toast-close:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
+
+@keyframes notify-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .notify-toast { animation: none; }
+}

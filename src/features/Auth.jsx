@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabase';
+import { notify } from '../lib/notify';
 import LCARSButton from '../components/LCARSButton';
 
 const Auth = () => {
@@ -16,13 +17,19 @@ const Auth = () => {
             if (mode === 'SIGNUP') {
                 const { error } = await supabase.auth.signUp({ email, password });
                 if (error) throw error;
-                alert('Success! Check your email for the confirmation link.');
+                notify('Check your email for the confirmation link.', {
+                    title: 'REGISTRATION RECEIVED',
+                    type: 'success',
+                });
             } else {
                 const { error } = await supabase.auth.signInWithPassword({ email, password });
                 if (error) throw error;
             }
         } catch (error) {
-            alert(error.error_description || error.message);
+            notify(error.error_description || error.message, {
+                title: 'ACCESS DENIED',
+                type: 'error',
+            });
         } finally {
             setLoading(false);
         }

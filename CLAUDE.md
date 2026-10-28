@@ -16,7 +16,7 @@ PADD is a Star Trek LCARS-themed personal organizer: tasks (nested, drag-and-dro
 - `npm run build`: production build
 - `npm run chat`: `scripts/chat-local.js` helper
 
-Tests live next to the code (`*.test.js`) and cover pure helpers (`src/utils/`, `src/lib/storage.js`). There are no component tests yet. Verify with tests + lint + build, and run the app for UI changes.
+Tests live next to the code. Pure helpers (`src/utils/`, `src/lib/storage.js`) are `*.test.js` and run in Node. Component tests are `*.test.jsx`, start with `// @vitest-environment jsdom`, and use Testing Library; mock `../lib/supabase` with `createFakeSupabase` from `src/test/fakeSupabase.js` and mock `../hooks/useLCARSSound` (the real hook needs a provider). Current coverage: TaskDossier autosave/images and Library edit/cancel/save/delete. Verify with tests + lint + build, and run the app for UI changes.
 
 **Build gotcha:** without Supabase env vars, `supabase` is `null` and Vite tree-shakes nearly the whole app away, so `npm run build` "passes" without compiling most code. To verify a real build, pass placeholders:
 `VITE_SUPABASE_URL=https://placeholder.supabase.co VITE_SUPABASE_ANON_KEY=placeholder npx vite build --outDir <tmp dir>` (expect a ~470 KB JS bundle, not ~200 KB).
@@ -29,7 +29,7 @@ Copy `.env.example` to `.env` and set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANO
 
 - `src/App.jsx`: session handling, tab routing (no router), and all task CRUD + realtime subscription. Tasks are fetched flat and built into a tree (`parent_id` → `subtasks`).
 - `src/features/`: one component (+ CSS) per tab: `Tasks`/`TaskItem`/`TaskDossier`, `Calendar`, `Log`, `Library`, `Admin` (→ `admin/PersonnelManager`, `Security`, `Settings`), `Auth`.
-- `src/components/`: LCARS primitives (`LCARSLayout`, `LCARSButton`, `LCARSDatePicker`).
+- `src/components/`: LCARS primitives (`LCARSLayout`, `LCARSButton`, `LCARSDatePicker`, `LCARSDialogHost`).
 - `src/contexts/`: providers in `*Context.jsx`; the context object + hook live in `*ContextValue.js` (keeps Fast Refresh happy). `useSettings()` → `isStardateEnabled`; `useSoundSettings()` → sound toggle.
 - `src/lib/supabase.js`: client (null when env vars are missing). `src/lib/storage.js`: **all image uploads go through `uploadImage(file, folder)`**, and removed images are deleted with `removeImagesByUrl(urls)` (only after the record no longer references them; it alerts on failure).
 - `src/utils/dateUtils.js`: date conversions. Store UTC ISO (`formatDateForStorage`), edit as local `YYYY-MM-DDTHH:mm` (`formatDateForInput`), display with `formatDateForDisplay` / `formatLogDate` (Stardate-aware).
@@ -40,6 +40,8 @@ Copy `.env.example` to `.env` and set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANO
 - **Security**: every table has RLS scoped to `auth.uid() = user_id`; always set `user_id` on insert. Storage paths must start with the user's ID (`uploadImage` handles this); storage RLS enforces it.
 - Feature components fetch their own data from Supabase, except tasks, which are owned by `App.jsx` and passed down.
 - Declare fetch helpers (wrapped in `useCallback` when used in effects) **before** the effects that call them; the React Hooks lint rules flag the reverse.
+- **No `alert()` / `confirm()`**: use `notify` / `notifyError` (toasts) and `await confirmAction(...)` (modal) from `src/lib/dialogs.js`. They work from plain modules too; `LCARSDialogHost` (mounted in `main.jsx`) renders them. Pass `danger: true` for destructive confirms.
 - Styling is plain CSS per component using LCARS color variables (`--lcars-orange`, `--lcars-teal`, …) from `src/index.css`. UI text is UPPERCASE LCARS style.
+- **Never call `alert()` / `confirm()`.** Use `notify(message, { type: 'error' | 'success' | 'info', title })` and `await confirmAction(message, { title, confirmLabel, danger })` from `src/lib/notify.js`; `NotificationHost` (mounted in `main.jsx`) renders them. With no host mounted (unit tests) they fall back to the native dialogs. Use `danger: true` for destructive confirmations.
 - Dates displayed to the user should respect the Stardate setting.
 - Match the surrounding file's formatting (older files use 4-space indents, newer ones 2-space/Prettier style).
