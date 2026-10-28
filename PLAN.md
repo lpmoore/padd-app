@@ -16,7 +16,7 @@ Branch: `fix/security-and-cleanup`
 
 ## 📋 Next — Known issues & cleanup
 
-- [ ] **Risk register** (`RISKS.md`): created 2026-10-27. Open High risks: public images (R1), no age gate/moderation before social features (R2), no security headers (R3), live DB unverified vs repo (R4).
+- [ ] **Risk register** (`RISKS.md`): created 2026-10-27. Open High risks: no age gate/moderation before social features (R2), live DB unverified vs repo (R4). Closed: R1 private images, R3 security headers.
   - [ ] Run the R4 verification query in the Supabase SQL editor and report the result
   - [x] Add Netlify security headers + CSP (R3), self-host the font, cache hashed assets forever, `noopener` on `window.open`, fix zod audit finding. Perf: render-blocking Google Fonts stylesheet replaced by self-hosted Antonio; hashed assets cached 1 year. Build: JS 476.71 kB / 140.58 kB gzip, CSS 34.70 kB. _2026-10-27, branch `feat/security-headers`_
     - [ ] Confirm headers on the Netlify deploy preview (`curl -I` or browser dev tools), and that no CSP errors appear in the console while using every tab
@@ -36,7 +36,7 @@ Branch: `fix/security-and-cleanup`
 - [x] **Legacy table policies**: `library_items` had three dashboard policies (`Enable read/insert/update …`) that let any signed-in account read and edit every user's records. Dropped them, plus owner-scoped duplicates on `notes`, `personnel`, `task_personnel`; `supabase_schema_personnel.sql` no longer creates duplicates. _2026-10-27, branch `fix/rls-legacy-policies`_
   - [x] Ran the drops in the Supabase SQL editor; counts now 4/4/4/4 and `task_personnel` 3. Only one account has ever existed, so nothing was exposed. _2026-10-27_
 - [x] **Private images** (approved 2026-10-27): records store storage paths; images show through batched, cached 1-hour signed links (`getImageUrl`, `useImageUrl`, `<StoredBackground>`/`<StoredImg>`); cache cleared on sign-out; old public URLs still render. `0002_private_images.sql` closes the bucket and rewrites old URLs to paths (tested on legacy-shaped data). Fixes R1 once run. _2026-10-27, branch `feat/private-images`_
-  - [ ] **You:** after the app deploys, run `0002_private_images.sql`, then spot-check images in all four tabs
+  - [x] Ran `0002_private_images.sql` on the live project; no public URLs remain and images show in all four tabs. R1 closed. _2026-10-28_
   - [ ] **Decide:** block pasted/dragged external image URLs (R7)? Then `img-src` can drop `https:`
 - [x] **Schema in repo**: `supabase/migrations/0001_baseline.sql` (tables, indexes, canonical RLS, storage policies), `supabase/verify_live.sql`, and RLS tests (`npm run test:db`) run against a scratch Postgres. Replaces the three old root-level SQL files; the orphan report moved to `supabase/reports/`. Fixes R5. _2026-10-27, branch `feat/db-migrations`_
   - [ ] **You:** run `supabase/verify_live.sql` in the Supabase SQL editor and send me the result (I'll reconcile column types before you run the migration)
