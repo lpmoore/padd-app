@@ -1,3 +1,8 @@
+-- !!! DO NOT RUN IN THE SUPABASE SQL EDITOR !!!
+-- Test script for a scratch local Postgres only (npm run test:db, see run.sh).
+-- It uses psql commands (\i) and fake data. The real migrations are in
+-- supabase/migrations/.
+
 -- =====================================================================
 -- TEST SHIM: the small slice of Supabase that the migrations and tests rely
 -- on (auth.users, auth.uid(), storage.buckets/objects, storage.foldername,
