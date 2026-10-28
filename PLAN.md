@@ -41,7 +41,9 @@ Branch: `fix/security-and-cleanup`
 - [x] **Replace `alert()` / `confirm()`** (21 call sites) with LCARS toasts + confirm modal (`src/lib/dialogs.js`, `LCARSDialogHost`). Errors persist until dismissed and play the error sound; destructive confirms are red and focus CANCEL; Escape cancels. Log delete failures now show an error (previously console only). _2026-10-25, branch `feat/lcars-dialogs`_
 - [ ] **Confirm before deleting a task?** The trash icon deletes immediately, and now also deletes subtasks and images.
 - [x] **Tests**: Vitest added; 20 tests for `stardate.js`, `dateUtils.js`, `storage.js`. Found and fixed a DST bug: the first hour after midnight showed the previous day's Stardate. _2026-10-22, branch `chore/tests-and-housekeeping`_
-- [ ] **Component tests**: none yet (Testing Library + jsdom) — start with Dossier autosave and Library edit/cancel flows.
+- [x] **Component tests**: Testing Library + jsdom added; 10 tests for Dossier autosave/image cleanup and 10 for Library edit/cancel/save/delete image handling. _2026-10-27, branch `test/component-tests`_
+  - [ ] Next component tests: Log and Personnel image flows, Tasks delete cascade
+  - [ ] Once icon buttons / image thumbnails get accessible labels (see Accessibility), switch the thumbnail queries from CSS classes to roles
 - [ ] **Stardate accuracy** (optional): current formula isn't TNG-canon (2364 ≈ 41000).
 - [ ] **Accessibility**: labels on icon buttons, keyboard support for date picker / dossier.
 - [x] **Housekeeping**: real README; `debug_db.cjs` → `scripts/debug-db.cjs` with a warning header; removed dead `RootDroppable`, no-op drag handlers, and hidden "HOLD SHIFT TO NEST" label in `Tasks.jsx`. _2026-10-22_
@@ -68,6 +70,10 @@ Roughly ordered by value for effort.
 9. [ ] **Voice commands**: Web Speech API dictation for Logs and Tasks.
 10. [ ] **Offline mode (PWA)** with background sync.
 11. [ ] **Real-time collaboration** across crew members.
+
+## 📏 Performance baselines
+
+Real build (with placeholder env vars, see CLAUDE.md): **476.66 kB JS / 140.56 kB gzip, 34.34 kB CSS** (2026-10-27, before any optimization work). Keep new PRs at or below this unless a feature justifies it, and note the size change in the PR.
 
 ## ✅ Done
 
