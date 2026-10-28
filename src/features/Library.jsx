@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
-import { confirmAction, notify } from '../lib/notify';
+import { confirmAction, notifyError } from '../lib/notify';
 import { alertUploadErrors, removeImagesByUrl, uploadImages } from '../lib/storage';
-import { confirmAction, notifyError } from '../lib/dialogs';
 import LCARSButton from '../components/LCARSButton';
 import './Library.css';
 

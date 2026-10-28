@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '../../lib/supabase';
 import { imagesNoLongerUsed, removeImagesByUrl, uploadImage } from '../../lib/storage';
-import { confirmAction, notifyError } from '../../lib/dialogs';
 import LCARSButton from '../../components/LCARSButton';
 import './PersonnelManager.css';
-import { confirmAction, notify } from '../../lib/notify';
+import { confirmAction, notifyError } from '../../lib/notify';
 
 const INITIAL_CREW = [
     { name: 'BECKETT MARINER', rank: 'ENSIGN', birthplace: 'Earth', education: 'Starfleet Academy', expertise: 'Command / Ops', bio: 'Extremely capable but insubordinate. Daughter of Captain Freeman.' },

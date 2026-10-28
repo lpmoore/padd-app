@@ -1,4 +1,4 @@
-import { notifyError } from './dialogs';
+import { notifyError } from './notify';
 import { supabase } from './supabase';
 
 export const IMAGE_BUCKET = 'task-images';

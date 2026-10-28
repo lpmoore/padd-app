@@ -18,7 +18,6 @@ import {
 } from '@dnd-kit/sortable';
 
 import LCARSButton from '../components/LCARSButton';
-import { confirmAction } from '../lib/dialogs';
 import LCARSDatePicker from '../components/LCARSDatePicker'; // Custom Picker
 import TaskItem from './TaskItem';
 import { formatDateForDisplay } from '../utils/dateUtils';
