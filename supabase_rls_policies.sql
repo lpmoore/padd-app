@@ -32,6 +32,13 @@ USING (auth.uid() = user_id);
 
 
 -- 2. Policies for 'notes' (Captain's Log)
+-- Older duplicates (owner-scoped, so harmless, but policies are OR'd and
+-- extras make it hard to see what's enforced)
+DROP POLICY IF EXISTS "Users can view their own notes" ON public.notes;
+DROP POLICY IF EXISTS "Users can create their own notes" ON public.notes;
+DROP POLICY IF EXISTS "Users can update their own notes" ON public.notes;
+DROP POLICY IF EXISTS "Users can delete their own notes" ON public.notes;
+
 DROP POLICY IF EXISTS "Users can select own notes" ON public.notes;
 CREATE POLICY "Users can select own notes" 
 ON public.notes FOR SELECT 
@@ -58,6 +65,12 @@ USING (auth.uid() = user_id);
 
 
 -- 3. Policies for 'library_items'
+-- Older dashboard policies that only checked for a signed-in user, letting any
+-- account read and edit everyone's records. Policies are OR'd, so they must go.
+DROP POLICY IF EXISTS "Enable read for authenticated users" ON public.library_items;
+DROP POLICY IF EXISTS "Enable insert for authenticated users" ON public.library_items;
+DROP POLICY IF EXISTS "Enable update for users" ON public.library_items;
+
 DROP POLICY IF EXISTS "Users can select own library items" ON public.library_items;
 CREATE POLICY "Users can select own library items" 
 ON public.library_items FOR SELECT 
@@ -84,6 +97,12 @@ USING (auth.uid() = user_id);
 
 
 -- 4. Policies for 'personnel'
+-- Older duplicates from the first version of supabase_schema_personnel.sql
+DROP POLICY IF EXISTS "Users can view their own personnel" ON public.personnel;
+DROP POLICY IF EXISTS "Users can insert their own personnel" ON public.personnel;
+DROP POLICY IF EXISTS "Users can update their own personnel" ON public.personnel;
+DROP POLICY IF EXISTS "Users can delete their own personnel" ON public.personnel;
+
 DROP POLICY IF EXISTS "Users can select own personnel" ON public.personnel;
 CREATE POLICY "Users can select own personnel" 
 ON public.personnel FOR SELECT 
@@ -110,6 +129,9 @@ USING (auth.uid() = user_id);
 
 
 -- 5. Policies for 'task_personnel' (Join Table)
+-- Older catch-all duplicate from supabase_schema_personnel.sql
+DROP POLICY IF EXISTS "Users can manage assignments for their tasks" ON public.task_personnel;
+
 DROP POLICY IF EXISTS "Users can select task assignments for their tasks" ON public.task_personnel;
 CREATE POLICY "Users can select task assignments for their tasks" 
 ON public.task_personnel FOR SELECT 

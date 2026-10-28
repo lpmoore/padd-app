@@ -15,22 +15,7 @@ create table public.personnel (
 -- Enable RLS
 alter table public.personnel enable row level security;
 
--- Policies for Personnel
-create policy "Users can view their own personnel"
-  on public.personnel for select
-  using (auth.uid() = user_id);
-
-create policy "Users can insert their own personnel"
-  on public.personnel for insert
-  with check (auth.uid() = user_id);
-
-create policy "Users can update their own personnel"
-  on public.personnel for update
-  using (auth.uid() = user_id);
-
-create policy "Users can delete their own personnel"
-  on public.personnel for delete
-  using (auth.uid() = user_id);
+-- Policies: see supabase_rls_policies.sql (section 4)
 
 -- Create Task Assignments (Junction) Table
 create table public.task_personnel (
@@ -44,17 +29,7 @@ create table public.task_personnel (
 -- Enable RLS
 alter table public.task_personnel enable row level security;
 
--- Policies for Task Personnel
--- Note: complex check but simple approach: trust if you can see the task
-create policy "Users can manage assignments for their tasks"
-  on public.task_personnel for all
-  using (
-    exists (
-      select 1 from public.tasks
-      where id = task_personnel.task_id
-      and user_id = auth.uid()
-    )
-  );
+-- Policies: see supabase_rls_policies.sql (section 5)
 
 -- STORAGE BUCKET POLICY for 'personnel-images' (if we separate, but we can reuse task-images or make a new one)
 -- Let's stick to 'task-images' or create 'personnel-images'.
