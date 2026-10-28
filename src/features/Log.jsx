@@ -11,6 +11,7 @@ import {
   removeImagesByUrl,
   uploadImages,
 } from '../lib/storage';
+import { confirmAction, notifyError } from '../lib/dialogs';
 import { useSettings } from '../contexts/settingsContextValue';
 
 const pickRandomIndex = (length) => Math.floor(Math.random() * length);
@@ -147,7 +148,7 @@ const Log = () => {
 
       if (error) {
         console.error('Error creating log:', error);
-        alert('Failed to record log entry.');
+        notifyError('SAVE FAILED', `Could not record log entry: ${error.message}`);
       } else {
         setLogs([data, ...logs]);
         cleanUpAfterSave();
@@ -161,7 +162,7 @@ const Log = () => {
 
       if (error) {
         console.error('Error updating log:', error);
-        alert('Failed to update log entry.');
+        notifyError('SAVE FAILED', `Could not update log entry: ${error.message}`);
       } else {
         setLogs(
           logs.map((l) => (l.id === editingId ? { ...l, ...logData } : l)),
@@ -173,13 +174,19 @@ const Log = () => {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm('Are you sure you want to purge this log entry?')) return;
+    const log = logs.find((l) => l.id === id);
+    const confirmed = await confirmAction(
+      `Purge log entry "${log?.title || 'UNKNOWN'}"? This cannot be undone.`,
+      { title: 'PURGE LOG ENTRY', confirmLabel: 'PURGE', danger: true },
+    );
+    if (!confirmed) return;
 
     const { error } = await supabase.from('notes').delete().eq('id', id);
     if (error) {
       console.error('Error deleting log:', error);
+      notifyError('PURGE FAILED', `Could not purge log entry: ${error.message}`);
     } else {
-      removeImagesByUrl(logs.find((l) => l.id === id)?.images || []);
+      removeImagesByUrl(log?.images || []);
       setLogs(logs.filter((l) => l.id !== id));
     }
   };
