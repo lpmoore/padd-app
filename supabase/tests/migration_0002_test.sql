@@ -1,3 +1,8 @@
+-- !!! DO NOT RUN IN THE SUPABASE SQL EDITOR !!!
+-- Test script for a scratch local Postgres only (npm run test:db, see run.sh).
+-- It uses psql commands (\i) and fake data. The real migrations are in
+-- supabase/migrations/.
+
 -- Checks 0002_private_images.sql on data shaped like the live legacy state:
 -- a public bucket and records holding full public URLs. Runs in a
 -- transaction that is rolled back.

@@ -1,3 +1,8 @@
+-- !!! DO NOT RUN IN THE SUPABASE SQL EDITOR !!!
+-- Test script for a scratch local Postgres only (npm run test:db, see run.sh).
+-- It uses psql commands (\i) and fake data. The real migrations are in
+-- supabase/migrations/.
+
 -- =====================================================================
 -- Row-level security tests. Run via supabase/tests/run.sh on a SCRATCH
 -- database (never on your live project). Everything happens inside one
