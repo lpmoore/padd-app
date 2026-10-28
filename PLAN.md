@@ -29,7 +29,7 @@ Branch: `fix/security-and-cleanup`
   - [ ] Run the orphan report once to clear out pre-fix leftovers
   - [ ] Optional: Admin button that deletes the current user's orphans via an RPC + Storage API
 - [x] **Legacy table policies**: `library_items` had three dashboard policies (`Enable read/insert/update …`) that let any signed-in account read and edit every user's records. Dropped them, plus owner-scoped duplicates on `notes`, `personnel`, `task_personnel`; `supabase_schema_personnel.sql` no longer creates duplicates. _2026-10-27, branch `fix/rls-legacy-policies`_
-  - [ ] Run sections 2–5 of `supabase_rls_policies.sql` in the Supabase SQL editor
+  - [x] Ran the drops in the Supabase SQL editor; counts now 4/4/4/4 and `task_personnel` 3. Only one account has ever existed, so nothing was exposed. _2026-10-27_
 - [ ] **Decide: public vs private images.** `task-images` bucket is public; anyone with a URL can view. Option: private bucket + `createSignedUrl` (requires storing paths instead of URLs).
 - [ ] **Schema in repo**: no SQL for `tasks`, `notes`, `library_items`. Consolidate into `supabase/migrations/`. `supabase_schema_personnel.sql` and `supabase_rls_policies.sql` overlap on `task_personnel` policies.
 - [x] **Stardate integration**: all displayed dates go through `formatDateForDisplay(value, useStardateEnabled())`. _2026-10-22, branch `feat/stardate-integration`_
