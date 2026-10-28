@@ -1,2 +1,35 @@
 [build.environment]
   SECRETS_SCAN_OMIT_KEYS = "VITE_SUPABASE_ANON_KEY,VITE_SUPABASE_URL"
+
+# Security headers for every page. See RISKS.md (R3).
+#
+# CSP notes:
+# - Scripts come only from this site. Styles allow 'unsafe-inline' because the
+#   components use inline style attributes; scripts stay strict.
+# - connect-src allows the Supabase project (REST, auth, realtime websocket).
+#   If you ever move to a custom Supabase domain, add it here.
+# - img-src allows any https: image because users can drop images from other
+#   sites into records (RISKS.md R7). Tighten to 'self' + Supabase once that
+#   is changed.
+# - Permissions-Policy turns off camera/mic/location. Loosen it when a feature
+#   (e.g. video messages) actually needs one.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co; media-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests"
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "DENY"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
+    Strict-Transport-Security = "max-age=31536000"
+
+# Speed: Vite fingerprints everything in /assets, so it can be cached forever.
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/sounds/*"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
