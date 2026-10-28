@@ -3,6 +3,7 @@ import { act, fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createFakeSupabase } from '../test/fakeSupabase';
+import NotificationHost from '../components/NotificationHost';
 import Library from './Library';
 
 const mocks = vi.hoisted(() => ({
@@ -68,9 +69,10 @@ const uploadDuringEdit = async (container, urls = [UPLOADED]) => {
 };
 
 /** Selects the thumbnail at `index` and confirms removal, as a user would */
-const removeThumb = (container, index) => {
+const removeThumb = async (container, index) => {
   fireEvent.click(thumbs(container)[index]);
-  fireEvent.click(screen.getByText(/REMOVE SELECTED/));
+  // Confirming goes through an async dialog (or the native fallback), so wait for it
+  await act(async () => { fireEvent.click(screen.getByText(/REMOVE SELECTED/)); });
 };
 
 describe('Library edit / cancel / save image handling', () => {
@@ -126,7 +128,7 @@ describe('Library edit / cancel / save image handling', () => {
   it('does not touch storage for a saved image removed during an edit that is then cancelled', async () => {
     const { container } = await renderLibrary();
     await startEditing();
-    removeThumb(container, 0);
+    await removeThumb(container, 0);
     expect(thumbs(container)).toHaveLength(1);
     expect(mocks.removeImagesByUrl).not.toHaveBeenCalledWith([SAVED_A]);
 
@@ -141,7 +143,7 @@ describe('Library edit / cancel / save image handling', () => {
   it('restores saved images after cancelling and editing again', async () => {
     const { container } = await renderLibrary();
     await startEditing();
-    removeThumb(container, 0);
+    await removeThumb(container, 0);
     fireEvent.click(screen.getByText('CANCEL'));
 
     await startEditing();
@@ -151,7 +153,7 @@ describe('Library edit / cancel / save image handling', () => {
   it('deletes a removed saved image only after the record saves successfully', async () => {
     const { container } = await renderLibrary();
     await startEditing();
-    removeThumb(container, 0);
+    await removeThumb(container, 0);
     expect(mocks.removeImagesByUrl).not.toHaveBeenCalledWith([SAVED_A]);
 
     await act(async () => { fireEvent.click(screen.getByText('SAVE')); });
@@ -165,7 +167,7 @@ describe('Library edit / cancel / save image handling', () => {
     updateResult = { error: { message: 'boom' } };
     const { container } = await renderLibrary();
     await startEditing();
-    removeThumb(container, 0);
+    await removeThumb(container, 0);
 
     await act(async () => { fireEvent.click(screen.getByText('SAVE')); });
 
@@ -181,7 +183,7 @@ describe('Library edit / cancel / save image handling', () => {
     await startEditing();
     await uploadDuringEdit(container);
 
-    removeThumb(container, 2);
+    await removeThumb(container, 2);
 
     expect(mocks.removeImagesByUrl).toHaveBeenCalledWith([UPLOADED]);
     expect(thumbs(container)).toHaveLength(2);
@@ -216,5 +218,53 @@ describe('Library edit / cancel / save image handling', () => {
 
     expect(window.alert).toHaveBeenCalledWith('Error deleting: nope');
     expect(mocks.removeImagesByUrl).not.toHaveBeenCalled();
+  });
+
+  describe('with the in-app toast and dialog host mounted', () => {
+    const renderWithHost = async () => {
+      const utils = render(<><Library /><NotificationHost /></>);
+      await screen.findByRole('heading', { name: 'USS TEST' });
+      await screen.findByText('EDIT');
+      return utils;
+    };
+
+    it('shows an error toast instead of a browser alert when saving fails', async () => {
+      updateResult = { error: { message: 'boom' } };
+      await renderWithHost();
+      await startEditing();
+
+      await act(async () => { fireEvent.click(screen.getByText('SAVE')); });
+
+      expect(await screen.findByRole('alert')).toHaveTextContent('Error saving: boom');
+      expect(window.alert).not.toHaveBeenCalled();
+    });
+
+    it('asks in an in-app dialog before deleting, and does nothing when cancelled', async () => {
+      await renderWithHost();
+
+      fireEvent.click(screen.getByText('DELETE'));
+      const dialog = await screen.findByRole('alertdialog');
+      expect(dialog).toHaveTextContent('Delete record: USS TEST?');
+      expect(window.confirm).not.toHaveBeenCalled();
+
+      await act(async () => { fireEvent.click(screen.getByText('CANCEL')); });
+
+      expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+      expect(fake.queries.some((q) => q.op === 'delete')).toBe(false);
+      expect(mocks.removeImagesByUrl).not.toHaveBeenCalled();
+    });
+
+    it('deletes the record and its images once the dialog is confirmed', async () => {
+      await renderWithHost();
+
+      fireEvent.click(screen.getByText('DELETE'));
+      await screen.findByRole('alertdialog');
+      await act(async () => {
+        fireEvent.click(screen.getAllByText('DELETE').find((el) => el.closest('[role=alertdialog]')));
+      });
+
+      expect(fake.queries.some((q) => q.op === 'delete' && q.table === 'library_items')).toBe(true);
+      expect(mocks.removeImagesByUrl).toHaveBeenCalledWith([SAVED_A, SAVED_B]);
+    });
   });
 });

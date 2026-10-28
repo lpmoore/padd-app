@@ -24,6 +24,7 @@ import TaskItem from './TaskItem';
 import { formatDateForDisplay } from '../utils/dateUtils';
 import useLCARSSound from '../hooks/useLCARSSound';
 import { useStardateEnabled } from '../contexts/settingsContextValue';
+import { confirmAction } from '../lib/notify';
 
 const INITIAL_TASKS = [
   {

@@ -13,6 +13,7 @@ import {
 } from '../lib/storage';
 import { confirmAction, notifyError } from '../lib/dialogs';
 import { useSettings } from '../contexts/settingsContextValue';
+import { confirmAction, notify } from '../lib/notify';
 
 const pickRandomIndex = (length) => Math.floor(Math.random() * length);
 

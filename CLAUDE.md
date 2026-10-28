@@ -42,5 +42,6 @@ Copy `.env.example` to `.env` and set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANO
 - Declare fetch helpers (wrapped in `useCallback` when used in effects) **before** the effects that call them; the React Hooks lint rules flag the reverse.
 - **No `alert()` / `confirm()`**: use `notify` / `notifyError` (toasts) and `await confirmAction(...)` (modal) from `src/lib/dialogs.js`. They work from plain modules too; `LCARSDialogHost` (mounted in `main.jsx`) renders them. Pass `danger: true` for destructive confirms.
 - Styling is plain CSS per component using LCARS color variables (`--lcars-orange`, `--lcars-teal`, …) from `src/index.css`. UI text is UPPERCASE LCARS style.
+- **Never call `alert()` / `confirm()`.** Use `notify(message, { type: 'error' | 'success' | 'info', title })` and `await confirmAction(message, { title, confirmLabel, danger })` from `src/lib/notify.js`; `NotificationHost` (mounted in `main.jsx`) renders them. With no host mounted (unit tests) they fall back to the native dialogs. Use `danger: true` for destructive confirmations.
 - Dates displayed to the user should respect the Stardate setting.
 - Match the surrounding file's formatting (older files use 4-space indents, newer ones 2-space/Prettier style).

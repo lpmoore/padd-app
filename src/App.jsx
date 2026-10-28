@@ -13,6 +13,7 @@ import Tasks from './features/Tasks';
 import { formatDateForStorage } from './utils/dateUtils';
 import { notifyError } from './lib/dialogs';
 import { removeImagesByUrl } from './lib/storage';
+import { notify } from './lib/notify';
 
 const INITIAL_NAV_ITEMS = [
   { id: 'CALENDAR', label: 'CALENDAR', color: 'var(--lcars-teal)' },

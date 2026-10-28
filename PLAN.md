@@ -44,8 +44,8 @@ Branch: `fix/security-and-cleanup`
   - [x] Calendar month header + day detail header (no longer mislabelled "STARDATE")
   - [ ] Optional: date picker popup month title and Calendar task times still use Earth format
 - [ ] **Subtask dates**: marked "needs regression fix" previously; verify.
-- [x] **Replace `alert()` / `confirm()`** (21 call sites) with LCARS toasts + confirm modal (`src/lib/dialogs.js`, `LCARSDialogHost`). Errors persist until dismissed and play the error sound; destructive confirms are red and focus CANCEL; Escape cancels. Log delete failures now show an error (previously console only). _2026-10-25, branch `feat/lcars-dialogs`_
-- [ ] **Confirm before deleting a task?** The trash icon deletes immediately, and now also deletes subtasks and images.
+- [x] **Replace `alert()` / `confirm()`** (23 call sites) with an LCARS toast/dialog: `notify()` / `confirmAction()` from `src/lib/notify.js`, rendered by `NotificationHost`. _2026-10-27, branch `feat/lcars-toast-dialog`_
+  - [x] Visual check in headless Chromium at desktop (1280x800) and phone (390x844) widths: dialog (focus starts on CANCEL for delete), error toast, no page errors. _2026-10-27_
 - [x] **Tests**: Vitest added; 20 tests for `stardate.js`, `dateUtils.js`, `storage.js`. Found and fixed a DST bug: the first hour after midnight showed the previous day's Stardate. _2026-10-22, branch `chore/tests-and-housekeeping`_
 - [x] **Component tests**: Testing Library + jsdom added; 10 tests for Dossier autosave/image cleanup and 10 for Library edit/cancel/save/delete image handling. _2026-10-27, branch `test/component-tests`_
   - [ ] Next component tests: Log and Personnel image flows, Tasks delete cascade
@@ -79,7 +79,7 @@ Roughly ordered by value for effort.
 
 ## 📏 Performance baselines
 
-Real build (with placeholder env vars, see CLAUDE.md): **476.66 kB JS / 140.56 kB gzip, 34.34 kB CSS** (2026-10-27, before any optimization work). Keep new PRs at or below this unless a feature justifies it, and note the size change in the PR.
+Real build (with placeholder env vars, see CLAUDE.md): **476.66 kB JS / 140.56 kB gzip, 34.34 kB CSS** (2026-10-27, before any optimization work). After the toast/dialog PR: 480.34 kB JS / 141.69 kB gzip, 36.67 kB CSS. Keep new PRs at or below this unless a feature justifies it, and note the size change in the PR.
 
 ## ✅ Done
 
