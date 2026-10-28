@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
-import { confirmAction, notify } from '../lib/notify';
+import { confirmAction, notifyError } from '../lib/notify';
 import { alertUploadErrors, openStoredImage, removeImagesByUrl, uploadImages } from '../lib/storage';
 import LCARSButton from '../components/LCARSButton';
 import './Library.css';
@@ -105,7 +105,11 @@ const Library = () => {
 
 
     const handleSeedData = async () => {
-        if (!(await confirmAction('Populate database with default library data?', { title: 'DEMO DATA' }))) return;
+        const confirmed = await confirmAction('Populate the Library with default reference data?', {
+            title: 'INITIALIZE LIBRARY',
+            confirmLabel: 'INITIALIZE',
+        });
+        if (!confirmed) return;
         setLoading(true);
         const user = (await supabase.auth.getUser()).data.user;
         
@@ -119,7 +123,7 @@ const Library = () => {
         }));
 
         const { error } = await supabase.from('library_items').insert(rows);
-        if (error) notify('Seed failed: ' + error.message, { type: 'error' });
+        if (error) notifyError('SEED FAILED', error.message);
         else {
             await refreshCategories();
             fetchItemsForCategory(activeCategory);
@@ -189,7 +193,7 @@ const Library = () => {
         }
 
         if (error) {
-            notify('Error saving: ' + error.message, { type: 'error' });
+            notifyError('SAVE FAILED', `Could not save record: ${error.message}`);
         } else {
             // Only now that the record no longer references them, delete removed files
             await removeImagesByUrl(stagedRemovals);
@@ -208,14 +212,18 @@ const Library = () => {
 
     const handleDelete = async () => {
         if (!selectedItem) return;
-        if (await confirmAction(`Delete record: ${selectedItem.title}?`, { title: 'DELETE RECORD', confirmLabel: 'DELETE', danger: true })) {
+        const confirmed = await confirmAction(
+            `Delete record "${selectedItem.title}" and its images? This cannot be undone.`,
+            { title: 'DELETE RECORD', confirmLabel: 'DELETE', danger: true },
+        );
+        if (confirmed) {
             const { error } = await supabase
                 .from('library_items')
                 .delete()
                 .eq('id', selectedItem.id);
             
             if (error) {
-                notify('Error deleting: ' + error.message, { type: 'error' });
+                notifyError('DELETE FAILED', `Could not delete record: ${error.message}`);
             } else {
                 await removeImagesByUrl(selectedItem.images || []);
                 setSelectedItem(null);
@@ -275,7 +283,10 @@ const Library = () => {
     // Saved images are staged and only deleted from storage once the edit is saved.
     // Images uploaded during this edit aren't saved anywhere, so they're deleted now.
     const handleDeleteSelectedImages = async () => {
-        const confirmed = await confirmAction(`Remove ${imagesToDelete.length} selected image(s)? Takes effect when you save.`, { title: 'REMOVE IMAGES', confirmLabel: 'REMOVE', danger: true });
+        const confirmed = await confirmAction(
+            `Remove ${imagesToDelete.length} selected image(s)? Previously saved images are deleted when you save.`,
+            { title: 'REMOVE IMAGES', confirmLabel: 'REMOVE', danger: true },
+        );
         if (!confirmed) return;
 
         const remainingImages = (editFormData.images || []).filter(img => !imagesToDelete.includes(img));

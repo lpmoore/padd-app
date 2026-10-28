@@ -171,7 +171,7 @@ describe('Library edit / cancel / save image handling', () => {
 
     await act(async () => { fireEvent.click(screen.getByText('SAVE')); });
 
-    expect(window.alert).toHaveBeenCalledWith('Error saving: boom');
+    expect(window.alert).toHaveBeenCalledWith(expect.stringContaining('Could not save record: boom'));
     const deleted = mocks.removeImagesByUrl.mock.calls.flatMap(([urls]) => urls);
     expect(deleted).not.toContain(SAVED_A);
     // Still editing, so the user can retry
@@ -216,7 +216,7 @@ describe('Library edit / cancel / save image handling', () => {
 
     await act(async () => { fireEvent.click(screen.getByText('DELETE')); });
 
-    expect(window.alert).toHaveBeenCalledWith('Error deleting: nope');
+    expect(window.alert).toHaveBeenCalledWith(expect.stringContaining('Could not delete record: nope'));
     expect(mocks.removeImagesByUrl).not.toHaveBeenCalled();
   });
 
@@ -235,7 +235,7 @@ describe('Library edit / cancel / save image handling', () => {
 
       await act(async () => { fireEvent.click(screen.getByText('SAVE')); });
 
-      expect(await screen.findByRole('alert')).toHaveTextContent('Error saving: boom');
+      expect(await screen.findByRole('alert')).toHaveTextContent('Could not save record: boom');
       expect(window.alert).not.toHaveBeenCalled();
     });
 
@@ -244,7 +244,7 @@ describe('Library edit / cancel / save image handling', () => {
 
       fireEvent.click(screen.getByText('DELETE'));
       const dialog = await screen.findByRole('alertdialog');
-      expect(dialog).toHaveTextContent('Delete record: USS TEST?');
+      expect(dialog).toHaveTextContent('Delete record "USS TEST" and its images?');
       expect(window.confirm).not.toHaveBeenCalled();
 
       await act(async () => { fireEvent.click(screen.getByText('CANCEL')); });

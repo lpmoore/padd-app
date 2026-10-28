@@ -12,7 +12,7 @@ import TaskDossier from './features/TaskDossier';
 import Tasks from './features/Tasks';
 import { formatDateForStorage } from './utils/dateUtils';
 import { clearImageUrlCache, removeImagesByUrl } from './lib/storage';
-import { notify } from './lib/notify';
+import { notifyError } from './lib/notify';
 
 const INITIAL_NAV_ITEMS = [
   { id: 'CALENDAR', label: 'CALENDAR', color: 'var(--lcars-teal)' },
@@ -245,7 +245,7 @@ function App() {
     const { error } = await supabase.from('tasks').delete().eq('id', id);
     if (error) {
       console.error('Error deleting task:', error);
-      notify('Error deleting task: ' + error.message, { type: 'error' });
+      notifyError('DELETE FAILED', `Could not delete task: ${error.message}`);
     } else {
       fetchTasks();
       removeImagesByUrl(images);

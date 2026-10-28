@@ -3,7 +3,7 @@ import { supabase } from '../../lib/supabase';
 import { imagesNoLongerUsed, removeImagesByUrl, uploadImage } from '../../lib/storage';
 import LCARSButton from '../../components/LCARSButton';
 import './PersonnelManager.css';
-import { confirmAction, notify } from '../../lib/notify';
+import { confirmAction, notifyError } from '../../lib/notify';
 import { StoredBackground } from '../../components/StoredImage';
 
 const INITIAL_CREW = [
@@ -57,7 +57,7 @@ const PersonnelManager = () => {
         }
 
         if (error) {
-            notify('Error saving personnel record: ' + error.message, { type: 'error' });
+            notifyError('SAVE FAILED', `Could not save personnel record: ${error.message}`);
             return false;
         } else {
             fetchPersonnel();
@@ -73,12 +73,17 @@ const PersonnelManager = () => {
     };
 
     const handleDelete = async (id) => {
-        if (!(await confirmAction('DELETE PERSONNEL RECORD?', { title: 'DELETE RECORD', confirmLabel: 'DELETE', danger: true }))) return;
-        
+        const person = personnel.find(p => p.id === id);
+        const confirmed = await confirmAction(
+            `Delete personnel record "${person?.name || 'UNKNOWN'}"? This cannot be undone.`,
+            { title: 'DELETE PERSONNEL RECORD', confirmLabel: 'DELETE', danger: true },
+        );
+        if (!confirmed) return;
+
         const savedPhoto = personnel.find(p => p.id === id)?.image_url;
         const { error } = await supabase.from('personnel').delete().eq('id', id);
         if (error) {
-            notify('Error deleting: ' + error.message, { type: 'error' });
+            notifyError('DELETE FAILED', `Could not delete personnel record: ${error.message}`);
         } else {
             if (savedPhoto) removeImagesByUrl([savedPhoto]);
             fetchPersonnel();
@@ -86,14 +91,18 @@ const PersonnelManager = () => {
     };
 
     const handleSeedPersonnel = async () => {
-        if (!(await confirmAction('INITIALIZE CREW MANIFEST WITH DEMO DATA?', { title: 'DEMO DATA' }))) return;
+        const confirmed = await confirmAction('Initialize the crew manifest with demo personnel?', {
+            title: 'INITIALIZE CREW MANIFEST',
+            confirmLabel: 'INITIALIZE',
+        });
+        if (!confirmed) return;
         setLoading(true);
         const user = (await supabase.auth.getUser()).data.user;
         
         const rows = INITIAL_CREW.map(p => ({ ...p, user_id: user.id }));
         const { error } = await supabase.from('personnel').insert(rows);
         
-        if (error) notify('Seed failed: ' + error.message, { type: 'error' });
+        if (error) notifyError('SEED FAILED', error.message);
         else fetchPersonnel();
         setLoading(false);
     };
@@ -220,7 +229,7 @@ function PersonnelEditor({ person, onSave, onCancel, onDelete }) {
             uploads.current.push(path);
             handleChange('image_url', path);
         } catch (error) {
-            notify('Upload failed: ' + error.message, { type: 'error' });
+            notifyError('IMAGE UPLOAD FAILED', error.message);
         }
         setUploading(false);
     };
