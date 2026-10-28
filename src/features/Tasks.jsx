@@ -18,6 +18,7 @@ import {
 } from '@dnd-kit/sortable';
 
 import LCARSButton from '../components/LCARSButton';
+import { confirmAction } from '../lib/dialogs';
 import LCARSDatePicker from '../components/LCARSDatePicker'; // Custom Picker
 import TaskItem from './TaskItem';
 import { formatDateForDisplay } from '../utils/dateUtils';
@@ -144,7 +145,11 @@ const Tasks = ({
 
   // Custom Seed Function for Demo
   const handleSeedTasks = async () => {
-    if (!(await confirmAction('INITIALIZE TASK PROTOCOLS WITH DEMO DATA?', { title: 'DEMO DATA' }))) return;
+    const confirmed = await confirmAction('Initialize task protocols with demo tasks?', {
+      title: 'INITIALIZE TASK PROTOCOLS',
+      confirmLabel: 'INITIALIZE',
+    });
+    if (!confirmed) return;
     INITIAL_TASKS.forEach((t) => {
       onAddTask(t.title, null, t.date);
     });

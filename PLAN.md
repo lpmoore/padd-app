@@ -16,6 +16,10 @@ Branch: `fix/security-and-cleanup`
 
 ## 📋 Next — Known issues & cleanup
 
+- [ ] **Risk register** (`RISKS.md`): created 2026-10-27. Open High risks: public images (R1), no age gate/moderation before social features (R2), no security headers (R3), live DB unverified vs repo (R4).
+  - [ ] Run the R4 verification query in the Supabase SQL editor and report the result
+  - [ ] Add Netlify security headers + CSP (R3)
+
 - [x] **Delete image files when they're removed** (previously only Library did). _2026-10-24, branch `fix/storage-image-cleanup`_
   - [x] Tasks: removed images deleted after autosave succeeds; deleting a task deletes its and its subtasks' images; uploads finishing after the dossier closes are discarded
   - [x] Captain's Log: removed images deleted on save, uploads discarded on cancel, entry delete removes its images
@@ -28,6 +32,8 @@ Branch: `fix/security-and-cleanup`
   - [x] Log + Library: removing an image uploaded during the current edit now deletes it immediately (before, it waited for save/cancel). Saved images still wait for save so cancel can restore them. _2026-10-25_
   - [ ] Run the orphan report once to clear out pre-fix leftovers
   - [ ] Optional: Admin button that deletes the current user's orphans via an RPC + Storage API
+- [x] **Legacy table policies**: `library_items` had three dashboard policies (`Enable read/insert/update …`) that let any signed-in account read and edit every user's records. Dropped them, plus owner-scoped duplicates on `notes`, `personnel`, `task_personnel`; `supabase_schema_personnel.sql` no longer creates duplicates. _2026-10-27, branch `fix/rls-legacy-policies`_
+  - [x] Ran the drops in the Supabase SQL editor; counts now 4/4/4/4 and `task_personnel` 3. Only one account has ever existed, so nothing was exposed. _2026-10-27_
 - [ ] **Decide: public vs private images.** `task-images` bucket is public; anyone with a URL can view. Option: private bucket + `createSignedUrl` (requires storing paths instead of URLs).
 - [ ] **Schema in repo**: no SQL for `tasks`, `notes`, `library_items`. Consolidate into `supabase/migrations/`. `supabase_schema_personnel.sql` and `supabase_rls_policies.sql` overlap on `task_personnel` policies.
 - [x] **Stardate integration**: all displayed dates go through `formatDateForDisplay(value, useStardateEnabled())`. _2026-10-22, branch `feat/stardate-integration`_
