@@ -2,7 +2,7 @@
 
 Tracks every known security, privacy, legal and reliability risk. **Update this file in every PR that adds, changes or closes a risk**, and call out any new or still-open High risk in the PR description in bold.
 
-Last reviewed: 2026-10-27 (initial register, from a read of the repo; the live Supabase and Netlify settings have not been inspected, so items marked *unverified* need your eyes on the dashboards).
+Last reviewed: 2026-10-28 (R1 closed; initial register 2026-10-27, from a read of the repo; the live Supabase and Netlify settings have not been inspected, so items marked *unverified* need your eyes on the dashboards).
 
 Severity: **HIGH** = could expose user data or cause legal trouble; **MED** = real weakness, limited blast radius today; **LOW** = hygiene.
 
@@ -10,7 +10,6 @@ Severity: **HIGH** = could expose user data or cause legal trouble; **MED** = re
 
 ## **OPEN RISKS THAT NEED YOUR ATTENTION**
 
-- **R1 (HIGH): Images are publicly readable — until you run `0002_private_images.sql`.** The code for private images is in the PR (storage paths + signed links that expire after 1 hour), but the bucket stays public until you merge, deploy the app, and THEN run the migration. **Until then every existing image URL still works for anyone who has it.**
 - **R2 (HIGH): No age gate, terms, reporting or moderation.** Fine for a single-user organizer. **Not acceptable before any public feed, friends feed or messaging ships.** Needs: age confirmation at signup (and handling for under-13s, e.g. COPPA in the US), terms/privacy acceptance, report/block tools, content-safety scanning for uploads, and a legal review of your obligations as a platform. *No social feature will be released before these land.*
 - **R4 (HIGH, unverified): The live database may not match the repo.** Policies are applied by hand, so the live database can drift from the code. The public anon key is only safe if RLS is airtight. *Done in the repo: a tested baseline migration (`supabase/migrations/0001_baseline.sql`) and `supabase/verify_live.sql`. **Still needs you: run `verify_live.sql` in the Supabase SQL editor and send me the result**, then run the migration.
 
@@ -18,7 +17,6 @@ Severity: **HIGH** = could expose user data or cause legal trouble; **MED** = re
 
 | ID | Sev | Status | Risk | Mitigation / next step |
 |----|-----|--------|------|------------------------|
-| R1 | HIGH | Fix ready in PR; open until `0002` is run | Public image bucket | Private bucket, store paths not URLs, signed URLs, migrate existing records |
 | R2 | HIGH | Open, blocks social features | No age gate, ToS, moderation, reporting, upload scanning | Build before any public/friends feed or messaging; legal review |
 | R4 | HIGH | Mitigation ready, needs you | Live DB policies may drift from repo | `0001_baseline.sql` (tested on a real Postgres, incl. upgrading from the old policies) + `verify_live.sql`; re-run the check periodically |
 | R5 | MED | Fix ready, closes when you run `0001_baseline.sql` | `task_personnel` INSERT policy checked the task's owner but not that `personnel_id` belongs to the same user (confirmed on the old policies in a test). Also: a task could be filed under another user's task. UUIDs are unguessable and reads are protected, so exploitation was hard, but it matters once cross-user features exist | Both ends must be yours, enforced in the migration and covered by `supabase/tests/rls_test.sql` |
@@ -39,7 +37,8 @@ Run `supabase/verify_live.sql` in the Supabase SQL editor and send the single re
 
 | ID | Closed | What was done |
 |----|--------|---------------|
-| R3 | 2026-10-27 (PR: `feat/security-headers`; **confirm on the Netlify deploy preview**) | `netlify.toml` now sends a CSP (scripts same-origin only, connections limited to this site and `*.supabase.co`), `X-Frame-Options: DENY`, `frame-ancestors 'none'`, `nosniff`, referrer policy, permissions policy and HSTS. Tested in headless Chromium against the production build: no violations, and an injected inline script was blocked. The Google Fonts stylesheet was replaced by a self-hosted font so the CSP needn't trust Google. |
+| R1 | 2026-10-28 (PR #16) | Bucket `task-images` is private; records store storage paths and the app shows images through 1-hour signed links. `0002_private_images.sql` run on the live project: the public endpoint now returns `Bucket not found`, no `/object/public/` URLs remain in `tasks`, `notes`, `library_items` or `personnel`, and images display in all four tabs. |
+| R3 | 2026-10-27 (PR #14; headers confirmed on the live site 2026-10-28) | `netlify.toml` now sends a CSP (scripts same-origin only, connections limited to this site and `*.supabase.co`), `X-Frame-Options: DENY`, `frame-ancestors 'none'`, `nosniff`, referrer policy, permissions policy and HSTS. Tested in headless Chromium against the production build: no violations, and an injected inline script was blocked. The Google Fonts stylesheet was replaced by a self-hosted font so the CSP needn't trust Google. |
 | R14 | 2026-10-27 | `npm audit` flagged `zod` (high, memory exhaustion). It is only reachable through the ESLint plugin (dev tooling, never shipped to users). Fixed with `npm audit fix`; audit is at 0. |
 
 Residual notes for R3: `style-src` still allows `'unsafe-inline'` (the components use inline style attributes), and `img-src` allows any `https:` image until R7 is fixed. A custom Supabase domain would need adding to `connect-src`.
